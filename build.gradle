@@ -56,6 +56,7 @@ dependencies{
     compileOnly useLatest ? "Anuken:MindustryBuilds:latest" : "Anuken:Mindustry:$mindustryVersion"
 
     annotationProcessor "Anuken:jabel:v1.0.0"
+
 }
 
 tasks.register('jarAndroid'){
@@ -80,7 +81,7 @@ tasks.register('jarAndroid'){
 }
 
 jar{
-    archiveFileName = "${project.name}Desktop.jar"
+    archiveFileName = "${project.name}.jar"
 
     from{
         configurations.runtimeClasspath.collect{ it.isDirectory() ? it : zipTree(it) }
