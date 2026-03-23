@@ -24,18 +24,18 @@ public class MeldFx {
                 Tmp.v2.set(Tmp.v1).lerp(pos.getX(), pos.getY(), s);
 
                 Draw.alpha(a);
-                Draww.drawChain(Core.atlas.find(Meld.prefix("chain")), Tmp.v1.x, Tmp.v1.y, Tmp.v2.x, Tmp.v2.y, 0);
+                Draww.drawChain(Core.atlas.find(Meld.prefix("chain")), Tmp.v1.x, Tmp.v1.y, Tmp.v2.x, Tmp.v2.y, 0.5f, 1, 0);
             }
         }){{
             followParent = false;
         }},
 
-        anchored = new Effect(120, e -> {
+        anchored = new Effect(45, e -> {
             Draw.color(Color.red);
 
             for(int i = 0; i < 3; i++){
                 final int j = i;
-                e.scaled(i * 30 + 15, e1 -> {
+                e.scaled(i * 15 + 5, e1 -> {
                     Draw.alpha(e1.foutpow());
                     Lines.stroke(1 + 2 * j * e1.finpow());
                     Lines.circle(e.x, e.y, 7 + 3 * j + 24 * Interp.pow5Out.apply(e1.fin()));

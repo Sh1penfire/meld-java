@@ -84,7 +84,8 @@ public class SonarSpire extends Block {
             Draw.z(Layer.effect);
             Draw.color(Pal.accent);
 
-            Draww.drawChain(chain, x, y, Core.input.mouseWorldX(), Core.input.mouseWorldY(), 0);
+            //I literally slapped this in
+            //Draww.drawChain(chain, x, y, Core.input.mouseWorldX(), Core.input.mouseWorldY(), 0);
 
             Draw.z(Layer.buildBeam);
             Draw.color(Pal.accent);

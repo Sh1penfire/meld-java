@@ -41,7 +41,7 @@ public class Meld extends Mod{
 
         Seq<String> packages = Seq.with(
                 "meld",
-                "meld.meld.content"
+                "meld.content"
         );
 
         packages.each(name -> {

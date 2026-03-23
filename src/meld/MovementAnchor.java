@@ -29,7 +29,6 @@ public class MovementAnchor extends Block {
     public MovementAnchor(String name) {
         super(name);
         update = true;
-        range = 20 * Vars.tilesize;
         reload = 90;
         status = MeldContent.anchored;
         statusDuration = 240;
