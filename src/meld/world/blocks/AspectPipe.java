@@ -1,12 +1,12 @@
-package meld;
+package meld.world.blocks;
 
 import arc.math.Mathf;
-import arc.util.Log;
+import arc.math.geom.Geometry;
 import meld.content.MeldContent;
 import mindustry.Vars;
-import mindustry.content.Fx;
 import mindustry.gen.Building;
 import mindustry.type.Liquid;
+import mindustry.world.Block;
 import mindustry.world.Tile;
 import mindustry.world.blocks.liquid.Conduit;
 import mindustry.world.blocks.liquid.LiquidRouter;
@@ -16,7 +16,33 @@ public class AspectPipe extends Conduit {
         super(name);
     }
 
+    @Override
+    public boolean blends(Tile tile, int rotation, int otherx, int othery, int otherrot, Block otherblock) {
+        return super.blends(tile, rotation, otherx, othery, otherrot, otherblock) || (otherblock.hasLiquids && !(otherblock instanceof Conduit || otherblock instanceof LiquidRouter));
+    }
+
     public class AspectPipeBuild extends ConduitBuild{
+
+        public void updateTile() {
+            this.smoothLiquid = Mathf.lerpDelta(this.smoothLiquid, this.liquids.currentAmount() / liquidCapacity, 0.05F);
+            if (this.liquids.currentAmount() > 1.0E-4F && this.timer(timerFlow, 1.0F)) {
+                this.moveLiquidForward(leaks, this.liquids.current());
+                this.noSleep();
+
+                //Attempt to push liquids to the sides
+                for(int i = 0; i < 2; i++){
+                    //get the tile above and below the current pipe, accounting for rotation
+                    Tile t = Vars.world.tile(tile.x + Geometry.d4(1 + i * 2 + rotation).x, tile.y + Geometry.d4(1 + i * 2 + rotation).y);
+
+                    if(t == null || t.build == null || !t.build.block.hasLiquids || t.build.liquids == null || t.build.block.consumers.length == 0) continue;
+                    moveLiquid(t.build, liquids.current());
+                }
+
+            } else {
+                this.sleep();
+            }
+
+        }
 
         //oh my god please just AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA.
         @Override

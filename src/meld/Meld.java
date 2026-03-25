@@ -6,11 +6,13 @@ import arc.math.geom.Geometry;
 import arc.math.geom.Point2;
 import arc.struct.IntSeq;
 import arc.struct.Seq;
-import meld.content.MeldContent;
-import meld.content.MeldEnvironment;
+import arc.util.Time;
+import meld.content.*;
 import mindustry.Vars;
 import mindustry.content.Blocks;
+import mindustry.content.Fx;
 import mindustry.game.EventType.*;
+import mindustry.gen.Call;
 import mindustry.mod.*;
 import mindustry.world.Block;
 import mindustry.world.Tile;
@@ -54,31 +56,46 @@ public class Meld extends Mod{
         });
     }
 
+    public static float delay, delayTime;
+
     @Override
     public void loadContent(){
+        MeldStatusEffects.load();
+        MeldUnits.load();
+        MeldItems.load();
         MeldContent.load();
         MeldEnvironment.load();
 
 
+        delayTime = 5;
         Events.run(Trigger.update, () -> {
-            if (!Vars.state.isGame() || Vars.state.isPaused()) return;
+            if (!Vars.state.isGame() || Vars.state.isPaused() || Vars.state.isEditor()) return;
+            if(delay < delayTime){
+                delay += Time.delta;
+                return;
+            }
+            delay %= delayTime;
             step();
         });
     }
 
 
     public static final IntSeq activeBuffer = IntSeq.with();
+    public static int[] toMelt;
 
     //NOT optimized, it just works
     public static void step(){
 
-        Block activeOverlay = Blocks.oreCopper, stable = MeldEnvironment.meldCrystal, unstable = MeldEnvironment.meldCrystalScattered, melted = MeldEnvironment.meldSwampland;
+        Floor activeOverlay = (Floor) Blocks.pebbles, stable = MeldEnvironment.meldCrystal, unstable = MeldEnvironment.meldCrystalScattered, melted = MeldEnvironment.meldSwampland;
 
         int width = Vars.world.width();
         int height = Vars.world.height();
 
         int s = Vars.world.width() * Vars.world.height();
 
+
+
+        activeBuffer.clear();
 
         for(int i = 0; i < s; i++){
 
@@ -99,19 +116,24 @@ public class Meld extends Mod{
                 Tile t = Vars.world.tile(current.x + o.x, current.y + o.y);
                 if(t == null) continue;
 
-                if(current.overlay() == activeOverlay && (t.floor() == unstable || current.floor() == t.floor())){
+                if(current.overlay() == activeOverlay && (t.floor() == unstable || (current.floor() == stable && t.floor() == stable))){
                     activeBuffer.add(t.pos());
                 }
             };
 
-            current.setFloor((Floor) melted);
             current.setOverlay(Blocks.air);
+            if(current.build != null) current.build.kill();
         };
 
-        activeBuffer.each(t -> {
-            Vars.world.tile(t).setOverlay(activeOverlay);
-        });
-        activeBuffer.clear();
+
+        //Melt the previous active buffer
+        Call.setTileFloors(melted, toMelt);
+        Call.setTileOverlays(Blocks.air, toMelt);
+
+        toMelt = activeBuffer.toArray();
+
+        //Set the new list of blocks
+        Call.setTileOverlays(activeOverlay, toMelt);
     }
 
 }

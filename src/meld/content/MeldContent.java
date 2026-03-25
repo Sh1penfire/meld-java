@@ -2,34 +2,39 @@ package meld.content;
 
 import arc.graphics.Color;
 import arc.math.Interp;
-import arc.math.Mathf;
-import meld.AspectPipe;
-import meld.MovementAnchor;
-import meld.SonarSpire;
+import meld.*;
+import meld.world.blocks.*;
 import mindustry.Vars;
 import mindustry.content.Fx;
-import mindustry.content.UnitTypes;
+import mindustry.content.StatusEffects;
+import mindustry.entities.bullet.ArtilleryBulletType;
 import mindustry.entities.bullet.BasicBulletType;
+import mindustry.entities.bullet.FlakBulletType;
+import mindustry.entities.effect.MultiEffect;
+import mindustry.entities.effect.ParticleEffect;
+import mindustry.entities.part.HaloPart;
 import mindustry.entities.part.RegionPart;
+import mindustry.entities.part.ShapePart;
+import mindustry.entities.pattern.ShootAlternate;
 import mindustry.entities.pattern.ShootSpread;
-import mindustry.entities.units.StatusEntry;
-import mindustry.game.FogControl;
-import mindustry.gen.Unit;
+import mindustry.gen.Sounds;
+import mindustry.graphics.Layer;
 import mindustry.type.*;
 import mindustry.world.Block;
 import mindustry.world.blocks.defense.Wall;
+import mindustry.world.blocks.defense.turrets.ItemTurret;
 import mindustry.world.blocks.defense.turrets.LiquidTurret;
 import mindustry.world.blocks.distribution.*;
 import mindustry.world.blocks.liquid.Conduit;
-import mindustry.world.blocks.liquid.LiquidBridge;
 import mindustry.world.blocks.liquid.LiquidJunction;
 import mindustry.world.blocks.liquid.LiquidRouter;
 import mindustry.world.blocks.production.AttributeCrafter;
 import mindustry.world.blocks.production.BeamDrill;
 import mindustry.world.blocks.production.GenericCrafter;
 import mindustry.world.blocks.storage.CoreBlock;
+import mindustry.world.blocks.units.UnitFactory;
 import mindustry.world.consumers.ConsumeLiquid;
-import mindustry.world.draw.DrawTurret;
+import mindustry.world.draw.*;
 import mindustry.world.meta.Attribute;
 
 import static mindustry.type.ItemStack.with;
@@ -38,36 +43,25 @@ public class MeldContent {
 
     public static Attribute aetherAttr;
 
-    public static Item debris, carbolith, silver, resonarum;
-
     //Items that meld mostly uses
     public static Item stonyParticulate, larvalPlating;
 
-    public static Liquid aether, aspect;
+    public static Liquid aether, aspect, meld;
 
     //Strata blocks first
     public static Block chute, chuteRouter, chuteBridge, chuteJunction, chuteOverflow;
 
     public static Block sonarSpire, movementAnchor, nullifier;
 
-    public static Block coreRaft, aetherAccumulator, elementalBlaster, earthboundInfuser;
+    public static Block coreRaft, aetherAccumulator, elementalBlaster, earthboundInfuser, sharkFactory;
 
     public static Block channelNode, channelFace, aspectOutlet, aspectPipe;
 
     public static Block sunder, molotov, vivisection;
 
     //Meld blocks
-    public static Block pipeline, pipelineRouter, pipelineCrossing, pipelineBridge, meldCannon, meldCultivator, meldNode, meldSuppressor, meldSynapse;
+    public static Block pipeline, pipelineRouter, pipelineCrossing, pipelineBridge, meldCannon, meldMortar, meldCultivator, meldNode, meldSuppressor, meldSynapse;
     public static Block crystalBarrier, crystalBarrierLarge, carbonicBarrier, carbonicBarrierLarge;
-
-    public static UnitType
-            //Player units
-            bulbhead, shark,
-
-            //Meld units
-            melee, armored, artillery;
-
-    public static StatusEffect rally, anchored;
 
     public static float outletRate = 100f/60f;
 
@@ -75,46 +69,9 @@ public class MeldContent {
         return new Item(name);
     }
 
-    public static Liquid liquid(String name){
-        return new Liquid(name);
-    }
-    public static Liquid gas(String name){
-        return new Liquid(name){{
-            gas = true;
-        }};
-    }
-
     public static void load(){
 
         aetherAttr = Attribute.add("aether");
-
-        rally = new StatusEffect("rally"){{
-            speedMultiplier = 1.25f;
-            reloadMultiplier = 2;
-
-        }};
-
-        anchored = new StatusEffect("anchored"){
-
-            @Override
-            public void update(Unit unit, StatusEntry entry) {
-
-                unit.speedMultiplier /= speedMultiplier;
-                //Start the falloff after 90 secconds, continue falloff for the remaining 150 secconds
-                unit.speedMultiplier *= Mathf.lerp(
-                        1, speedMultiplier,
-
-                        Interp.pow2.apply(
-                                Mathf.clamp(Math.min(entry.time + 90, 150)/(150))
-                        )
-                );
-            }
-            {
-
-            speedMultiplier = 0.3f;
-            dragMultiplier = 2;
-        }};
-
 
         aether = new Liquid("aether"){{
             gas = true;
@@ -128,41 +85,53 @@ public class MeldContent {
             color = Color.valueOf("cbdbfc");
         }};
 
-        debris = item("debris");
-        carbolith = item("carbolith");
-        silver = item("silver");
-        resonarum = item("resonarum");
+        meld = new Liquid("meld"){{
+            gas = true;
+            color = Color.valueOf("e4aad5");
+        }};
+
         stonyParticulate = item("stony-particulate");
         larvalPlating = item("larval-plating");
 
         channelFace = new LiquidJunction("channel-face"){{
             requirements(Category.liquid, with(
-                    debris, 2
+                    MeldItems.debris, 2
             ));
             health = 120;
             solid = false;
+            placeableLiquid = true;
         }};
 
         channelNode = new LiquidRouter("channel-node"){{
             requirements(Category.liquid, with(
-                    debris, 5
+                    MeldItems.debris, 5
             ));
             health = 120;
 
             liquidCapacity = 100;
             solid = false;
+            placeableLiquid = true;
         }};
 
         aspectOutlet = new GenericCrafter("aspect-outlet"){{
             requirements(Category.liquid, with(
-                    debris, 7
+                    MeldItems.debris, 7
             ));
 
             health = 200;
 
+            placeableLiquid = true;
+
             liquidOutputDirections = new int[]{0};
             rotate = true;
             quickRotate = true;
+
+            drawer = new DrawMulti(
+                    new DrawRegion("-bottom"),
+                    new DrawLiquidTile(),
+                    new DrawRegion(),
+                    new DrawSideRegion()
+            );
 
             consume(new ConsumeLiquid(
                     aether, outletRate/10f
@@ -173,31 +142,281 @@ public class MeldContent {
 
         aspectPipe = new AspectPipe("aspect-pipe"){{
             requirements(Category.liquid, with(
-                    debris, 2,
-                    silver, 1
+                    MeldItems.debris, 2,
+                    MeldItems.silver, 2
             ));
+            leaks = false;
+            health = 120;
+
+            placeableLiquid = true;
+
             liquidCapacity = 80;
             size = 1;
-            health = 320;
-
+            botColor = Color.white;
         }};
 
-        coreRaft = new CoreBlock("core-raft"){{
+        sunder = new ItemTurret("sunder"){{
+            requirements(Category.turret, with(
+                    MeldItems.debris, 45,
+                    MeldItems.carbolith, 60
+            ));
+            size = 2;
+            health = 840;
+            range = 200;
+            fogRadiusMultiplier = 0.25f;
+
+            reload = 30;
+            shootEffect = Fx.shootBig;
+            shootWarmupSpeed = 0.09f;
+            minWarmup = 0.7f;
+
+            recoil = 0.25f;
+            velocityRnd = 0.2f;
+            inaccuracy = 8;
+            shootCone = 5;
+            shootY = 7;
+
+            rotate = false;
+            quickRotate = false;
+
+            drawer = new DrawTurret(){{
+                parts.addAll(
+                        new RegionPart("-plate"){{
+                            progress = PartProgress.warmup;
+                            mirror = true;
+                            under = false;
+                            moveX = 1;
+                            moveY = -1.55f;
+                            moveRot = -15;
+                        }},
+                        new RegionPart("-barrel"){{
+                            progress = PartProgress.warmup;
+                            y = -1.5f;
+                            moveY = 1;
+                            mirror = false;
+                            under = true;
+
+                            moves.addAll(new PartMove(){{
+                                progress = PartProgress.recoil;
+                                y = -2.25f;
+                            }});
+                        }}
+                );
+            }};
+
+            shoot = new ShootAlternate() {{
+                spread = 4;
+                shots = 2;
+            }};
+
+            ammoTypes.put(
+                    MeldItems.debris,
+                    new FlakBulletType(){{
+                        collidesGround = true;
+
+                        scaleLife = true;
+
+                        speed = 6;
+                        damage = 2;
+                        lifetime = 30;
+                        width = 3;
+                        height = 8;
+                        splashDamage = 10;
+                        splashDamageRadius = 24;
+
+                        knockback = 1;
+
+                        despawnEffect = Fx.none;
+                        hitEffect = new MultiEffect(
+                                new ParticleEffect(){{
+                                    lifetime = 13;
+                                    particles = 3;
+                                    length = 15;
+                                    sizeFrom = 3;
+                                    sizeTo = 0;
+                                    sizeInterp = Interp.pow2In;
+                                    colorFrom = colorTo = MeldPal.shockwaveGray;
+                                }},
+                                new ParticleEffect(){{
+                                    lifetime = 9;
+                                    line = true;
+                                    particles = 2;
+                                    length = 24;
+                                    lenFrom = 4;
+                                    lenTo = 0;
+                                    strokeFrom = strokeTo = 2;
+
+                                    interp = Interp.pow2Out;
+                                    sizeInterp = Interp.pow2In;
+                                    colorFrom = colorTo = MeldPal.sparkOrange;
+                                }}
+                        );
+
+                        fragOnAbsorb = false;
+                        shrinkY = 0.2f;
+                        fragRandomSpread = 25;
+
+                        fragBullets = 5;
+                        fragBullet = new BasicBulletType(){{
+                            lightRadius = 0;
+                            speed = 8;
+                            lifetime = 20;
+
+                            shrinkY = 1;
+                            shrinkX = 1;
+                            shrinkInterp = Interp.pow5In;
+
+                            sticky = true;
+                            stickyExtraLifetime = 60;
+                            pierce = true;
+                            pierceCap = 2;
+                            damage = 3;
+                            splashDamage = 1;
+                            splashDamageRadius = 2;
+
+                            width = 3;
+                            height = 8;
+
+                            collidesGround = true;
+                            hitEffect = despawnEffect = Fx.none;
+                        }};
+                    }}
+            );
+        }};
+
+        molotov = new ItemTurret("molotov"){{
+            requirements(Category.turret, with(
+                    MeldItems.carbolith, 40,
+                    MeldItems.silver, 70
+            ));
+
+            size = 2;
+            health = 840;
+
+            liquidCapacity = 50;
+
+            range = 272;
+            fogRadiusMultiplier = 0.25f;
+
+            reload = 120;
+            shootSound = Sounds.explosion;
+
+            rotate = false;
+            quickRotate = false;
+            ammoPerShot = 4;
+
+            targetAir = false;
+            recoil = 1.5f;
+            inaccuracy = 2;
+            shootCone = 5;
+
+            ammoTypes.put(
+                    MeldItems.silver,
+                    new ArtilleryBulletType(){{
+                        speed = 7;
+                        damage = 1;
+                        lifetime = 38;
+                        width = 12;
+                        height = 17;
+                        status = MeldStatusEffects.aspectBurn;
+                        statusDuration = 300;
+                        frontColor = Color.white;
+                        backColor = Color.valueOf("cbdbfc");
+
+                        splashDamage = 25;
+                        splashDamageRadius = 24;
+
+                        collidesTiles = false;
+                        makeFire = true;
+                        hitShake = 2.5f;
+
+                        fragOnAbsorb = false;
+                        trailColor = Color.valueOf("cbdbfc");
+                        ammoMultiplier = 1;
+                        fragBullets = 24;
+                        fragVelocityMin = 0.8f;
+                        fragVelocityMax = 1;
+                        fragLifeMin = 0.6f;
+
+                        fragRandomSpread = 360;
+
+                        fragBullet = new BasicBulletType(){{
+                            lightRadius = 0;
+                            speed = 4.5f;
+                            drag = 0.04f;
+                            damage = 2;
+                            lifetime = 20;
+                            pierce = true;
+                            pierceCap = 2;
+                            pierceArmor = true;
+                            absorbable = false;
+
+
+                            width = 9;
+                            height = 13;
+                            shrinkX = 1;
+                            shrinkY = 1;
+                            status = StatusEffects.burning;
+                            statusDuration = 120;
+                            frontColor = Color.white;
+                            backColor = Color.valueOf("cbdbfc");
+                            splashDamage = 5;
+                            splashDamageRadius = 8;
+                            makeFire = true;
+                            collidesAir = false;
+                            despawnHit = false;
+                            hitEffect = despawnEffect = Fx.none;
+
+                            knockback = 0.35f;
+                            impact = true;
+
+                            fragRandomSpread = 0;
+                            fragBullets = 1;
+                            fragBullet = new BasicBulletType(){{
+                                width = height = 2;
+                                speed = 6;
+                                lifetime = 8;
+
+                                shrinkX = shrinkY = 1;
+                                shrinkInterp = Interp.pow2In;
+
+                                damage = 1;
+                                pierce = true;
+                                sticky = true;
+                                stickyExtraLifetime = 60;
+
+                                frontColor = Color.white;
+                                backColor = Color.valueOf("cbdbfc");
+
+                                hitEffect = despawnEffect = Fx.none;
+                            }};
+                        }};
+                    }}
+            );
+
+            consume(new ConsumeLiquid(aspect, outletRate));
+        }};
+
+        coreRaft = new CoreRaft("core-raft"){
+            {
             requirements(Category.effect, with(
-                    debris, 600,
-                    carbolith, 350
+                    MeldItems.debris, 600,
+                    MeldItems.carbolith, 350
             ));
             size = 3;
-
             health = 4000;
 
-            unitType = UnitTypes.oxynoe;
+            itemCapacity = 900;
+
+            unitCapModifier = 6;
+
+            unitType = MeldUnits.bulbhead;
             solid = false;
         }};
 
         aetherAccumulator = new AttributeCrafter("aether-accumulator"){{
             requirements(Category.production, with(
-                    debris, 40
+                    MeldItems.debris, 40
             ));
             size = 3;
 
@@ -215,23 +434,35 @@ public class MeldContent {
 
         elementalBlaster = new BeamDrill("elemental-blaster"){{
             requirements(Category.production, with(
-                    debris, 40
+                    MeldItems.debris, 40
             ));
             size = 3;
+            health = 420;
+            placeableLiquid = true;
 
             drillTime = 90;
+            tier = 2;
 
-            health = 420;
+            liquidCapacity = outletRate * 60 * 4;
+
+            optionalBoostIntensity = 2;
 
             consume(new ConsumeLiquid(
                     aspect, outletRate
             ));
+
+            consume(new ConsumeLiquid(
+                    meld, 1
+            ){{
+                optional = true;
+                booster = true;
+            }});
         }};
 
         earthboundInfuser = new AttributeCrafter("earthbound-infuser"){{
             requirements(Category.crafting, with(
-                    debris, 40,
-                    silver, 60
+                    MeldItems.debris, 40,
+                    MeldItems.silver, 60
             ));
             size = 3;
 
@@ -240,7 +471,7 @@ public class MeldContent {
             minEfficiency = 9;
             boostScale = 1f/9f;
             displayEfficiencyScale = 9;
-            craftTime = 60/5;
+            craftTime = 60/5f;
 
             consume(
                 new ConsumeLiquid(
@@ -248,14 +479,23 @@ public class MeldContent {
                 )
             );
 
-            consumeItem(debris, 1);
-            outputItem = new ItemStack(carbolith, 1);
+            consumeItem(MeldItems.debris, 1);
+            outputItem = new ItemStack(MeldItems.carbolith, 1);
+        }};
+
+        sharkFactory = new UnitFactory("shark-factory"){{
+            requirements(Category.units, with(MeldItems.debris, 500, MeldItems.carbolith, 350, MeldItems.silver, 450));
+            size = 5;
+            health = 2500;
+
+            consume(new ConsumeLiquid(aspect, outletRate * 12));
+            plans.addAll(new UnitPlan(MeldUnits.shark, 60 * 5, with(MeldItems.carbolith, 80, MeldItems.silver, 120)));
         }};
 
         sonarSpire = new SonarSpire("sonar-spire"){{
             requirements(Category.effect, with(
-                    debris, 60,
-                    silver, 80
+                    MeldItems.debris, 60,
+                    MeldItems.silver, 80
             ));
             size = 2;
             health = 300;
@@ -271,71 +511,82 @@ public class MeldContent {
 
         movementAnchor = new MovementAnchor("movement-anchor"){{
             requirements(Category.effect, with(
-                    debris, 80,
-                    carbolith, 120
+                    MeldItems.debris, 80,
+                    MeldItems.carbolith, 120
             ));
             size = 3;
             health = 1200;
-            range = 25 * Vars.tilesize;
+            range = 22 * Vars.tilesize;
 
             consume(
                     new ConsumeLiquid(
-                            aspect, 2 * outletRate
+                            aspect, 3 * outletRate
                     )
             );
         }};
 
         nullifier = new Nullifier("nullifier"){{
-            requirements(Category.effect, with(debris, 60));
+            requirements(Category.effect, with(MeldItems.debris, 60));
             size = 5;
             health = 300;
         }};
 
         chute = new Duct("chute"){{
-            requirements(Category.distribution, with(debris, 1));
+            requirements(Category.distribution, with(MeldItems.debris, 1));
             health = 90;
             speed = 4f;
-            bridgeReplacement = chuteBridge;
-            junctionReplacement = chuteJunction;
         }};
 
         chuteRouter = new DuctRouter("chute-router"){{
-            requirements(Category.distribution, with(debris, 4));
+            requirements(Category.distribution, with(MeldItems.debris, 4));
             health = 90;
             speed = 4f;
             solid = false;
         }};
 
         chuteBridge = new DuctBridge("chute-bridge"){{
-            requirements(Category.distribution, with(debris, 6));
+            requirements(Category.distribution, with(MeldItems.debris, 8));
+            range = 5;
             health = 90;
             speed = 4f;
             solid = false;
+            ((Duct) chute).bridgeReplacement = this;
         }};
 
         chuteOverflow = new OverflowDuct("chute-overflow"){{
-            requirements(Category.distribution, with(debris, 6));
+            requirements(Category.distribution, with(MeldItems.debris, 6));
             health = 90;
             speed = 4f;
             solid = false;
         }};
 
         chuteJunction = new DuctJunction("chute-crossing"){{
-            requirements(Category.distribution, with(debris, 7));
+            requirements(Category.distribution, with(MeldItems.debris, 7));
             health = 90;
             speed = 4f;
             solid = false;
+            ((Duct) chute).junctionReplacement = this;
         }};
 
         //Meld blocks
         meldNode = new MeldNode("meld-node"){{
+            health = 4000;
             size = 3;
         }};
 
         meldSuppressor = new MeldNode("meld-suppressor"){{
+            health = 2500;
+            armor = 50;
+
             size = 3;
         }};
+
+        //Not as unkillable as it used to be but still strong asf
         meldSynapse = new CoreBlock("meld-synapse"){{
+            health = 400000;
+            armor = 5000;
+
+            priority = BuildingPriority.synapse;
             size = 5;
         }};
 
@@ -362,6 +613,7 @@ public class MeldContent {
 
         pipeline = new Conduit("pipeline"){{
             requirements(Category.liquid, with(larvalPlating, 1));
+            underBullets = false;
             liquidCapacity = 100;
             liquidPressure = 4;
         }};
@@ -380,7 +632,7 @@ public class MeldContent {
 
         }};
 
-        pipelineBridge = new LiquidBridge("pipeline-overpass"){{
+        pipelineBridge = new DirectionLiquidBridge("pipeline-overpass"){{
             requirements(Category.liquid, with(larvalPlating, 12));
             liquidCapacity = 100;
             liquidPressure = 4;
@@ -388,20 +640,40 @@ public class MeldContent {
         }};
 
         meldCultivator = new AttributeCrafter("meld-cultivator"){{
+            requirements(Category.production, with(
+                    larvalPlating, 120
+            ));
 
+            size = 3;
+
+            attribute = Attribute.steam;
+            baseEfficiency = 0;
+            minEfficiency = 9;
+            boostScale = 1f/9f;
+            displayEfficiencyScale = 9;
+
+            outputLiquid = new LiquidStack(meld, 3);
         }};
 
         meldCannon = new LiquidTurret("meld-cannon"){{
             requirements(Category.turret, with(stonyParticulate, 60));
             size = 3;
-            reload = 15;
-            range = 6 * 48;
+            reload = 60;
+            range = 5 * 46;
             minWarmup = 0.6f;
+            warmupMaintainTime = 60;
 
             health = 2000;
 
+            cooldownTime = 360;
+
+            shoot = new ShootSpread(){{
+                shots = 3;
+                shotDelay = 5;
+            }};
+
             drawer = new DrawTurret(){{
-                parts.add(
+                parts.addAll(
                         new RegionPart("-plunge"){{
                             progress = PartProgress.recoil;
                             mirror = false;
@@ -417,6 +689,67 @@ public class MeldContent {
                                     y = -2;
                                   }}
                             );
+
+                            children.addAll(
+                                    //Iris
+                                    new HaloPart(){{
+                                        progress = PartProgress.warmup.curve(Interp.pow2In);
+                                        tri = true;
+
+                                        haloRadius = 5;
+                                        radius = 8;
+                                        radiusTo = 0;
+                                        triLength = 4;
+                                        triLengthTo = 0;
+                                        shapes = 4;
+
+                                        color = MeldPal.flamePink.cpy().a(0);
+                                        colorTo = MeldPal.flamePink;
+
+                                        haloRotateSpeed = 2;
+                                        layer = Layer.effect;
+                                    }},
+
+                                    //Pupil
+                                    new ShapePart(){{
+                                        progress = PartProgress.warmup;
+                                        hollow = true;
+                                        circle = true;
+                                        x = 0;
+                                        y = -3;
+
+                                        radius = 0;
+                                        radiusTo = 1;
+                                        moveY = 2;
+                                        layer = Layer.effect;
+
+                                        color = MeldPal.flamePink;
+                                    }},
+                                    //Eepy eye
+                                    new RegionPart(){{
+                                        name = Meld.prefix("square");
+                                        progress = PartProgress.warmup;
+                                        growProgress = PartProgress.heat.inv().compress(0.5f, 1).curve(Interp.pow2In);
+                                        mirror = false;
+                                        growX = 1f;
+
+                                        x = 0;
+                                        y = -3;
+
+                                        xScl = 0.25f;
+                                        yScl = 0.25f;
+
+                                        layer = Layer.effect;
+
+                                        color = MeldPal.flamePink;
+                                        colorTo = MeldPal.flamePink.cpy().a(0);
+
+                                        moves.add(new PartMove(){{
+                                            progress = PartProgress.warmup;
+                                            y = 2;
+                                        }});
+                                    }}
+                            );
                         }},
                         new RegionPart(){{
                             progress = PartProgress.warmup;
@@ -431,15 +764,54 @@ public class MeldContent {
             }};
 
             ammoTypes.put(
-                    aether,
+                    meld,
                     new BasicBulletType(){{
-                        speed = 6;
+                        speed = 5;
+
+                        sprite = "shell";
+                        width = 8;
+                        height = 10;
 
                         lifetime = 48;
 
                         damage = 15;
                         splashDamage = 25;
                         splashDamageRadius = 16;
+
+                        status = MeldStatusEffects.interference;
+                        statusDuration = 90;
+
+                        knockback = 3;
+
+                        despawnEffect = hitEffect = Fx.explosion;
+                    }}
+            );
+
+            consume(new ConsumeLiquid(meld, 1));
+        }};
+
+        meldMortar = new LiquidTurret("meld-mortar"){{
+            requirements(Category.turret, with(stonyParticulate, 60));
+            size = 3;
+            reload = 120;
+            range = 240;
+
+            health = 2000;
+
+            drawer = new DrawTurret(){{
+                parts.addAll();
+            }};
+
+            ammoTypes.put(
+                    meld,
+                    new BasicBulletType(){{
+                        speed = 2;
+
+                        lifetime = 120;
+
+                        damage = 15;
+                        splashDamage = 120;
+                        splashDamageRadius = 36;
 
                         knockback = 2;
 
@@ -451,6 +823,8 @@ public class MeldContent {
                         despawnEffect = hitEffect = Fx.explosion;
                     }}
             );
+
+            consume(new ConsumeLiquid(meld, 1));
         }};
     }
 }

@@ -15,7 +15,7 @@ public class MeldNode extends CoreBlock {
             super.killed();
             //Spawn melting overlays on all tiles touching the edges of this block
             eachEdge(t -> {
-                t.setOverlay(Blocks.oreCopper);
+                t.setOverlay(Blocks.pebbles);
             });
         }
     }

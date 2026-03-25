@@ -1,11 +1,11 @@
-package meld;
+package meld.world.blocks;
 
 import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.Lines;
 import arc.struct.Seq;
 import arc.util.Time;
-import meld.content.MeldContent;
-import mindustry.Vars;
+import meld.content.MeldFx;
+import meld.content.MeldStatusEffects;
 import mindustry.entities.Units;
 import mindustry.gen.Building;
 import mindustry.gen.Unit;
@@ -26,13 +26,16 @@ public class MovementAnchor extends Block {
     //Priority given to units who already have the status effect
     public float stackPriority = -1000;
 
+    public final int timerPulse;
+
     public MovementAnchor(String name) {
         super(name);
         update = true;
         reload = 90;
-        status = MeldContent.anchored;
+        status = MeldStatusEffects.anchored;
         statusDuration = 240;
         targets = 2;
+        this.timerPulse = this.timers++;
     }
 
 
@@ -48,26 +51,41 @@ public class MovementAnchor extends Block {
         public float reloadTime;
         private final Seq<Unit> targetList = new Seq<Unit>();
 
+
         @Override
         public void updateTile() {
             super.updateTile();
-            reloadTime += Time.delta;
-            if(reloadTime >= reload){
-                targetList.clear();
-                Units.nearbyEnemies(team, x, y, range, u -> {
-                    targetList.add(u);
-                });
-                //Target fast units, then nearby units, and avoid targeting units already slowed
-                targetList.sort(u -> 1 - dst(u)/range + u.type.speed + (u.hasEffect(status) ? u.getDuration(status)/statusDuration * stackPriority : 0));
-                for(int i = 0; i < targets; i++){
-                    if(targetList.isEmpty()) continue;
-                    Unit u = targetList.pop();
-                    u.apply(status, statusDuration);
-                    MeldFx.chain.at(x, y, 0, u);
-                    MeldFx.anchored.at(u.x, u.y, 0, u);
-                }
-                reloadTime %= reload;
+            reloadTime += Time.delta * efficiency;
+            if(reloadTime >= reload && timer.get(timerPulse, 5)){
+                pulse();
             }
+        }
+
+        @Override
+        public boolean shouldConsume() {
+            return reloadTime < reload;
+        }
+
+        public void pulse(){
+            targetList.clear();
+            Units.nearbyEnemies(team, x, y, range, u -> {
+                if(u.getDuration(status) <= statusDuration - 90) targetList.add(u);
+            });
+            if(targetList.isEmpty()) return;
+
+            //Target fast units, then nearby units, and avoid targeting units already slowed
+            targetList.sort(u -> 1 - dst(u)/range + u.type.speed + (u.hasEffect(status) ? u.getDuration(status)/statusDuration * stackPriority : 0));
+
+            int hit = 0;
+            for(int i = 0; i < targets; i++){
+                if(targetList.isEmpty()) continue;
+                Unit u = targetList.pop();
+                u.apply(status, statusDuration);
+                MeldFx.chain.at(x, y, 0, u);
+                MeldFx.anchored.at(u.x, u.y, 0, u);
+                hit++;
+            }
+            reloadTime -= reload/targets * hit;
         }
 
         @Override

@@ -1,17 +1,15 @@
-package meld.content;
+package meld.world.blocks;
 
 import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.Lines;
 import arc.struct.Seq;
 import arc.util.Time;
-import mindustry.Vars;
 import mindustry.entities.Units;
 import mindustry.gen.Building;
 import mindustry.graphics.Drawf;
 import mindustry.graphics.Layer;
 import mindustry.graphics.Pal;
 import mindustry.world.Block;
-import mindustry.world.blocks.storage.CoreBlock;
 import mindustry.world.meta.BlockFlag;
 
 import static mindustry.Vars.tilesize;

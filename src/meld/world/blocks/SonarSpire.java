@@ -1,14 +1,12 @@
-package meld;
+package meld.world.blocks;
 
 import arc.Core;
 import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.Lines;
 import arc.graphics.g2d.TextureRegion;
-import arc.math.Angles;
-import arc.util.Time;
-import meld.content.MeldContent;
+import meld.Meld;
+import meld.content.MeldStatusEffects;
 import mindustry.Vars;
-import mindustry.content.Blocks;
 import mindustry.entities.Units;
 import mindustry.gen.Building;
 import mindustry.graphics.Drawf;
@@ -62,7 +60,7 @@ public class SonarSpire extends Block {
             }
 
             Units.nearby(team, x, y, fogRadius() * tilesize, (other) -> {
-                other.apply(MeldContent.rally, duration);
+                other.apply(MeldStatusEffects.rally, duration);
             });
         }
 
