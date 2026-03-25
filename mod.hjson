@@ -14,7 +14,7 @@ main: "meld.Meld"
 description: "Meld"
 
 #the mod version
-version: pre-alpha dev build
+version: gameplay test 1
 
 #the minimum game build required to run this mod
 minGameVersion: 154
