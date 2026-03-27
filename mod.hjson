@@ -14,7 +14,7 @@ main: "meld.Meld"
 description: "Meld Java.\n\n[[]accent]Only has custom game content! (play the info map to understand)[[]]\n\nIncompatable with hjson meld"
 
 #the mod version
-version: gameplay test 1
+version: gameplay test 1.01
 
 #the minimum game build required to run this mod
 minGameVersion: 154
