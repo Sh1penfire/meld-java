@@ -7,10 +7,35 @@ import mindustry.gen.Unit;
 import mindustry.type.StatusEffect;
 
 public class MeldStatusEffects {
-    public static StatusEffect rally, anchored, aspectBurn, sentry, spurting, newborn, interference, drenched;
+    public static StatusEffect amplified, rally, anchored, aspectBurn, sentry, spurting, newborn, interference, drenched, stunned;
 
 
     public static void load(){
+
+        stunned = new StatusEffect("stunned"){{
+            speedMultiplier = 0.1f;
+            reloadMultiplier = 0.5f;
+        }};
+
+        amplified = new StatusEffect("amplified"){
+        @Override
+        public void update(Unit unit, StatusEntry entry) {
+
+            unit.speedMultiplier /= speedMultiplier;
+            //Start the falloff at 60 secconds remaining, gets MUCH quicker with time
+            unit.speedMultiplier *= Mathf.lerp(
+                    1, speedMultiplier,
+
+                    Interp.pow5.apply(
+                            Mathf.clamp(Math.min(entry.time, 3600)/(3600))
+                    )
+            );
+        }
+        {
+            healthMultiplier = 2;
+            speedMultiplier = 1.5f;
+            reloadMultiplier = 2;
+        }};
 
         rally = new StatusEffect("rally"){
             @Override

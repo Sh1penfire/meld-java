@@ -4,7 +4,9 @@ import mindustry.type.Item;
 
 public class MeldItems {
     public static Item
-    debris, carbolith, silver, resonarum;
+    debris, carbolith, silver, resonarum,
+
+            meldShard;
 
     public static void load(){
 

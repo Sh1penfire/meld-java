@@ -8,6 +8,7 @@ import mindustry.type.Category;
 import mindustry.type.ItemStack;
 import mindustry.world.Block;
 import mindustry.world.blocks.environment.*;
+import mindustry.world.meta.Attribute;
 import mindustry.world.meta.BuildVisibility;
 
 public class MeldEnvironment {
@@ -17,25 +18,28 @@ public class MeldEnvironment {
 
     //Marsh
     meldWall, meldCrystalWall,
+    metalMeshWall, metalMeshWallMeld, metalAetherWall,
     //Badlands
     pillowWall, sandstoneWall,
     //Barrens
-    carbonicWall
+    carbonicWall, earthenWall
     //Storm Planes
 
     ;
 
     public static Floor
-    //Marsh
-            metalWeave, meldPlates, meldHadaland, meldTrenchland, meldSwampland, meldCrystalScattered, meldCrystal, meldCrystalHard,
+            metalWeave, metalWeaveHole, metalWeaveGlow,
     //Badlands
             sandMeld, softSand, sandstone,
     //Barrens
             bedrock, bedrockMeld,
             slate, slateMeld,
             runicSlate, runicSlateMeld,
-            literallyCarbonStoneFromMindustryButSlightlyDifferent, carbonicPlates,
-            resonantStone;
+            literallyCarbonStoneFromMindustryButSlightlyDifferent, carbonicPlates, carbonicVent,
+            earthenStone, mixtureStone,
+            resonantStone,
+    //Marsh
+    meldPlates, meldHadaland, meldTrenchland, meldSwampland, meldCrystalScattered, meldCrystal, meldCrystalHard;
 
     public static Block aetherGrowth, metalWeaveAether;
 
@@ -120,8 +124,22 @@ public class MeldEnvironment {
             lightRadius = 45;
         }};
 
-        metalWeave = new Floor("metal-weave", 3);
+        //Barrens
+        bedrock = new Floor("bedrock", 3);
+        slate = new Floor("slate", 0);
+        literallyCarbonStoneFromMindustryButSlightlyDifferent = new Floor("carbonic-stone", 4);
+        earthenStone = new Floor("earthen-stone", 4);
+        carbonicPlates = new Floor("carbonic-plates", 3);
+        earthenStone = new Floor("mixture-stone", 3);
 
+        metalWeave = new Floor("metal-weave", 3);
+        metalWeaveHole= new Floor("metal-weave-hole", 0);
+        metalWeaveGlow = new Floor("metal-weave-glow", 0){{
+            lightRadius = 16;
+            lightColor = Color.orange.cpy().a(0.35f);
+        }};
+
+        metalWeaveHole.blendGroup = metalWeaveGlow.blendGroup = metalWeave;
 
         meldHadaland = new Floor("meld-hadaland", 3){{
             isLiquid = true;
@@ -186,10 +204,11 @@ public class MeldEnvironment {
         meldCrystalHard = new Floor("meld-hard-crystal-floor", 3){{
         }};
 
-        bedrock = new Floor("bedrock", 3);
-        slate = new Floor("slate", 0);
-        literallyCarbonStoneFromMindustryButSlightlyDifferent = new Floor("carbonic-stone", 4);
-        carbonicPlates = new Floor("carbonic-plates", 3);
+        carbonicVent = new SteamVent("carbonic-vent"){{
+            variants = 0;
+            blendGroup = parent = carbonicPlates;
+            attributes.set(Attribute.steam, 1);
+        }};
 
         runicSlate = new SteamVent("runic-slate"){{
             variants = 0;
@@ -211,6 +230,9 @@ public class MeldEnvironment {
         carbonicWall = new StaticWall("carbonic-wall"){{
             variants = 2;
         }};
+        earthenWall = new StaticWall("earthen-wall"){{
+            variants = 2;
+        }};
 
         softSand = new Floor("soft-sand", 3);
         sandstone = new Floor("hard-sand", 3);
@@ -222,6 +244,19 @@ public class MeldEnvironment {
         meldCrystalWall = new StaticWall("meld-crystal-wall"){{
             variants = 3;
         }};
+
+        metalMeshWall = new StaticWall("metal-mesh-wall"){{
+            variants = 3;
+        }};
+
+        metalMeshWallMeld = new StaticWall("metal-mesh-wall-meld"){{
+            variants = 3;
+        }};
+
+        metalAetherWall = new StaticWall("metal-aether-wall"){{
+            variants = 3;
+        }};
+
 
         pillowWall = new StaticWall("pillow-wall"){{
             variants = 2;

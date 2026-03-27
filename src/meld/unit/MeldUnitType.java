@@ -7,12 +7,15 @@ import arc.math.Angles;
 import arc.math.Mathf;
 import arc.util.Time;
 import arc.util.Tmp;
+import meld.content.MeldPal;
 import mindustry.gen.Unit;
 import mindustry.type.UnitType;
 
 public class MeldUnitType extends UnitType {
     public MeldUnitType(String name) {
         super(name);
+        outlineColor = Color.clear;
+        healColor = MeldPal.flamePinkDark;
     }
 
     //Ported from Frostscape

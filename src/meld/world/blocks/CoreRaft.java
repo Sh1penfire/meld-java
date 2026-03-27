@@ -2,6 +2,7 @@ package meld.world.blocks;
 
 import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.Lines;
+import arc.math.Interp;
 import arc.util.Nullable;
 import arc.util.Time;
 import meld.content.MeldStatusEffects;
@@ -110,7 +111,7 @@ public class CoreRaft extends CoreBlock {
             for (int i = 0; i < 1; i++) {
                 float prog = ((Time.time + 200 * i) % 600) / 600;
                 Lines.stroke(4 * (1 - prog));
-                Lines.circle(x, y, fogRadius * Vars.tilesize * prog);
+                Lines.circle(x, y, fogRadius * Vars.tilesize * Interp.pow10Out.apply(prog));
             }
 
             Draw.z(layer);

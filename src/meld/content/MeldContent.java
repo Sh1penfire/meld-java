@@ -3,13 +3,14 @@ package meld.content;
 import arc.graphics.Color;
 import arc.math.Interp;
 import meld.*;
+import meld.entity.bullet.OutflowBulletType;
+import meld.entity.bullet.TransitionBulletType;
 import meld.world.blocks.*;
 import mindustry.Vars;
 import mindustry.content.Fx;
 import mindustry.content.StatusEffects;
-import mindustry.entities.bullet.ArtilleryBulletType;
-import mindustry.entities.bullet.BasicBulletType;
-import mindustry.entities.bullet.FlakBulletType;
+import mindustry.entities.TargetPriority;
+import mindustry.entities.bullet.*;
 import mindustry.entities.effect.MultiEffect;
 import mindustry.entities.effect.ParticleEffect;
 import mindustry.entities.part.HaloPart;
@@ -21,6 +22,7 @@ import mindustry.gen.Sounds;
 import mindustry.graphics.Layer;
 import mindustry.type.*;
 import mindustry.world.Block;
+import mindustry.world.blocks.defense.ForceProjector;
 import mindustry.world.blocks.defense.Wall;
 import mindustry.world.blocks.defense.turrets.ItemTurret;
 import mindustry.world.blocks.defense.turrets.LiquidTurret;
@@ -60,8 +62,14 @@ public class MeldContent {
     public static Block sunder, molotov, vivisection;
 
     //Meld blocks
-    public static Block pipeline, pipelineRouter, pipelineCrossing, pipelineBridge, meldCannon, meldMortar, meldCultivator, meldNode, meldSuppressor, meldSynapse;
-    public static Block crystalBarrier, crystalBarrierLarge, carbonicBarrier, carbonicBarrierLarge;
+    public static Block pipeline, pipelineRouter, pipelineCrossing, pipelineBridge,
+            meldCannon, meldMortar,
+            jillaCoffer, craigCoffer, braigCoffer,
+            meldCultivator, meldNode, meldSuppressor, meldSynapse,
+            meldAmplifier, meldCapsule;
+    public static Block crystalBarrier, crystalBarrierLarge,
+            carbonicBarrier, carbonicBarrierLarge
+            ;
 
     public static float outletRate = 100f/60f;
 
@@ -312,24 +320,40 @@ public class MeldContent {
 
             ammoTypes.put(
                     MeldItems.silver,
-                    new ArtilleryBulletType(){{
+                    new OutflowBulletType(){{
+                        //HHJKGHJGJK.
+                        collidesTiles = false;
+                        collides = false;
+                        collidesAir = false;
+                        scaleLife = true;
+                        hitShake = 1.0F;
+                        hitSound = Sounds.explosionArtillery;
+                        hitEffect = Fx.flakExplosion;
+                        shootEffect = Fx.shootBig;
+                        shrinkX = 0.25f;
+                        shrinkY = 0.8f;
+                        shrinkInterp = Interp.slope;
+                        trailEffect = Fx.artilleryTrail;
+                        trailChance = 0.35f;
+
                         speed = 7;
                         damage = 1;
-                        lifetime = 38;
-                        width = 12;
-                        height = 17;
+                        lifetime = 46;
+                        width = 18;
+                        height = 24;
                         status = MeldStatusEffects.aspectBurn;
                         statusDuration = 300;
                         frontColor = Color.white;
                         backColor = Color.valueOf("cbdbfc");
 
-                        splashDamage = 25;
-                        splashDamageRadius = 24;
+                        splashDamage = 4;
+                        splashDamageRadius = 8;
 
                         collidesTiles = false;
                         makeFire = true;
                         hitShake = 2.5f;
 
+                        despawnHit = true;
                         fragOnAbsorb = false;
                         trailColor = Color.valueOf("cbdbfc");
                         ammoMultiplier = 1;
@@ -339,6 +363,45 @@ public class MeldContent {
                         fragLifeMin = 0.6f;
 
                         fragRandomSpread = 360;
+
+                        outflowBullet = new ExplosionBulletType(){{
+                                hitEffect = despawnEffect = Fx.none;
+                                damage = splashDamage = 0;
+                                fragBullets = 3;
+                                fragRandomSpread = 15;
+                                fragLifeMin = 0.5f;
+                                killShooter = false;
+
+                                fragBullet = new BasicBulletType() {{
+                                    lightRadius = 0;
+                                    speed = 8.5f;
+                                    drag = 0.03f;
+                                    damage = 2;
+                                    lifetime = 25;
+                                    pierce = true;
+                                    pierceCap = 4;
+                                    removeAfterPierce = true;
+                                    pierceArmor = true;
+                                    absorbable = false;
+
+
+                                    width = 7;
+                                    height = 16;
+                                    shrinkX = 1;
+                                    shrinkY = 1;
+                                    frontColor = Color.white;
+                                    backColor = Color.valueOf("cbdbfc");
+                                    splashDamage = 3;
+                                    splashDamageRadius = 8;
+                                    makeFire = true;
+                                    collidesAir = false;
+                                    despawnHit = false;
+                                    hitEffect = despawnEffect = Fx.none;
+
+                                    knockback = 0.35f;
+                                    impact = true;
+                                }};
+                        }};
 
                         fragBullet = new BasicBulletType(){{
                             lightRadius = 0;
@@ -489,7 +552,7 @@ public class MeldContent {
             health = 2500;
 
             consume(new ConsumeLiquid(aspect, outletRate * 12));
-            plans.addAll(new UnitPlan(MeldUnits.shark, 60 * 5, with(MeldItems.carbolith, 80, MeldItems.silver, 120)));
+            plans.addAll(new UnitPlan(MeldUnits.shark, 60 * 5, with(MeldItems.silver, 80, MeldItems.carbolith, 60)));
         }};
 
         sonarSpire = new SonarSpire("sonar-spire"){{
@@ -499,6 +562,14 @@ public class MeldContent {
             ));
             size = 2;
             health = 300;
+
+            priority = BuildingPriority.radar;
+
+            pulseDuration = 360;
+            graceDuration = 480;
+            shrinkSpeed = 16/60f;
+
+            range = 220;
 
             liquidCapacity = 8 * outletRate * 60;
 
@@ -526,7 +597,12 @@ public class MeldContent {
         }};
 
         nullifier = new Nullifier("nullifier"){{
-            requirements(Category.effect, with(MeldItems.debris, 60));
+            requirements(Category.effect, with(
+                    MeldItems.debris, 350,
+                    MeldItems.carbolith, 450,
+                    MeldItems.silver, 350,
+                    MeldItems.resonarum, 450
+            ));
             size = 5;
             health = 300;
         }};
@@ -590,6 +666,33 @@ public class MeldContent {
             size = 5;
         }};
 
+        meldAmplifier = new SonarSpire("meld-amplifier"){{
+            requirements(Category.effect, with(larvalPlating, 2000));
+            size = 5;
+            health = 400000;
+            armor = 5000;
+            liquidCapacity = 300;
+
+            statusDuration = 60 * 60;
+
+            range = 300;
+
+            status = MeldStatusEffects.amplified;
+            ringColor = MeldPal.flamePink;
+
+            consume(new ConsumeLiquid(meld, 1));
+        }};
+
+        meldCapsule = new ForceProjector("meld-capsule"){{
+            requirements(Category.effect, with(larvalPlating, 350));
+            size = 3;
+            health = 1500;
+            armor = 5;
+            liquidCapacity = 120;
+
+            consume(new ConsumeLiquid(meld, 1));
+        }};
+
         carbonicBarrier = new Wall("stone-blocker"){{
             requirements(Category.defense, with(stonyParticulate, 15));
             health = 400;
@@ -609,6 +712,17 @@ public class MeldContent {
             customShadow = true;
             squareSprite = false;
             floating = true;
+        }};
+
+        crystalBarrier = new CrystalBarrier("blocker"){{
+            health = 5000;
+            requirements(Category.defense, with(MeldItems.meldShard, 50));
+        }};
+
+        crystalBarrierLarge = new CrystalBarrier("blocker-large"){{
+            health = 20000;
+            requirements(Category.defense, with(MeldItems.meldShard, 50));
+            size = 2;
         }};
 
         pipeline = new Conduit("pipeline"){{
@@ -658,7 +772,7 @@ public class MeldContent {
         meldCannon = new LiquidTurret("meld-cannon"){{
             requirements(Category.turret, with(stonyParticulate, 60));
             size = 3;
-            reload = 60;
+            reload = 20;
             range = 5 * 46;
             minWarmup = 0.6f;
             warmupMaintainTime = 60;
@@ -667,9 +781,18 @@ public class MeldContent {
 
             cooldownTime = 360;
 
-            shoot = new ShootSpread(){{
-                shots = 3;
-                shotDelay = 5;
+            destroyBulletSameTeam = true;
+            destroyBullet = new ExplosionBulletType(){{
+                hitEffect = despawnEffect = Fx.none;
+                fragBullets = 5;
+                fragBullet = new BulletType(){{
+                    spawnUnit = MeldUnits.blob;
+                }};
+                spawnBullets.add(
+                        new TransitionBulletType(){{
+                            spawnUnit = MeldUnits.cannonOverseer;
+                        }}
+                );
             }};
 
             drawer = new DrawTurret(){{
@@ -768,9 +891,9 @@ public class MeldContent {
                     new BasicBulletType(){{
                         speed = 5;
 
-                        sprite = "shell";
-                        width = 8;
-                        height = 10;
+                        sprite = Meld.prefix("glob");
+                        width = 12;
+                        height = 16;
 
                         lifetime = 48;
 
@@ -825,6 +948,113 @@ public class MeldContent {
             );
 
             consume(new ConsumeLiquid(meld, 1));
+        }};
+
+        jillaCoffer = new Wall("jilla-coffer"){{
+            size = 2;
+            health = 400;
+            destroyBulletSameTeam = true;
+            destroyBullet = new ExplosionBulletType(){{
+                hitEffect = despawnEffect = Fx.none;
+                fragBullets = 3;
+                fragBullet = new BulletType(){{
+                    spawnUnit = MeldUnits.jilla;
+                }};
+            }};
+        }};
+
+        craigCoffer = new LiquidTurret("craig-coffer"){{
+            size = 2;
+            health = 400;
+            destroyBulletSameTeam = true;
+            destroyBullet = new ExplosionBulletType(){{
+                hitEffect = despawnEffect = Fx.none;
+                fragBullets = 3;
+                fragBullet = new BulletType(){{
+                    spawnUnit = MeldUnits.craig;
+                }};
+            }};
+
+            loopSound = Sounds.none;
+            //shootSound = Sounds.pew;
+
+            reload = 5;
+            recoil = 1.5f;
+            rotateSpeed = 6;
+            range = 80;
+            shootY = 5;
+            shootEffect = Fx.shootSmall;
+
+            ammoTypes.put(
+                    meld,
+                    new BasicBulletType(){{
+                        sprite = Meld.prefix("glob");
+                        speed = 4;
+                        lifetime = 20;
+                        width = 6;
+                        height = 9;
+                        damage = 5;
+                        knockback = 1.5f;
+                        hitEffect = despawnEffect = Fx.none;
+                        impact = true;
+                    }}
+            );
+        }};
+
+        braigCoffer = new LiquidTurret("braig-coffer"){{
+            size = 3;
+            health = 1200;
+            destroyBulletSameTeam = true;
+            destroyBullet = new ExplosionBulletType(){{
+                hitEffect = despawnEffect = Fx.none;
+                fragBullets = 2;
+                fragBullet = new BulletType(){{
+                    spawnUnit = MeldUnits.braig;
+                }};
+            }};
+
+            loopSound = Sounds.none;
+            //shootSound = Sounds.pew;
+
+            reload = 300;
+            recoil = 3;
+            rotateSpeed = 5;
+            range = 220;
+            shootY = 5;
+            shootEffect = Fx.shootSmall;
+
+            moveWhileCharging = false;
+            predictTarget = false;
+
+            shoot = new ShootSpread(){{
+                firstShotDelay = 35;
+                shotDelay = 5;
+                shots = 8;
+                spread = 0;
+            }};
+
+            ammoTypes.put(
+                    meld,
+                    new BasicBulletType(){{
+                        sprite = Meld.prefix("clump");
+                        speed = 4;
+                        lifetime = 55;
+                        width = 5;
+                        height = 14;
+
+                        pierce = true;
+                        pierceCap = 2;
+
+                        damage = 10;
+                        splashDamageRadius = 25;
+
+                        knockback = 4f;
+
+                        hitEffect = despawnEffect = Fx.explosion;
+
+                        impact = true;
+                    }}
+            );
         }};
     }
 }

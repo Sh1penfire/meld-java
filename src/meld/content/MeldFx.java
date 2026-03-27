@@ -3,6 +3,7 @@ package meld.content;
 import arc.Core;
 import arc.graphics.Color;
 import arc.graphics.g2d.Draw;
+import arc.graphics.g2d.Fill;
 import arc.graphics.g2d.Lines;
 import arc.math.Interp;
 import arc.math.Mathf;
@@ -10,11 +11,14 @@ import arc.math.geom.Position;
 import arc.util.Tmp;
 import meld.Draww;
 import meld.Meld;
+import mindustry.Vars;
 import mindustry.entities.Effect;
 import mindustry.gen.Healthc;
 import mindustry.graphics.Layer;
 
 public class MeldFx {
+
+    public static float root2 = Mathf.sqrt(2);
 
     public static Effect
 
@@ -51,5 +55,9 @@ public class MeldFx {
             Draw.alpha(Interp.pow5Out.apply(e.fout()));
             float s = Interp.pow5Out.apply(e.fin());
             Draw.rect(Core.atlas.find(Meld.prefix("anchor")), e.x, e.y, 12 + s * 14, 12 + s * 14);
+        }),
+
+        barrierShield = new Effect(15, e -> {
+            Fill.light(e.x, e.y, 4, e.rotation * Vars.tilesize/root2, 45, Tmp.c2.set(e.color).a(0), Tmp.c1.set(e.color));
         });
 }

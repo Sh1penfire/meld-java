@@ -11,7 +11,7 @@ author: "You"
 main: "meld.Meld"
 
 #the mod description as seen in the mod dialog
-description: "Meld"
+description: "Meld Java.\n\n[[]accent]Only has custom game content! (play the info map to understand)[[]]"
 
 #the mod version
 version: gameplay test 1

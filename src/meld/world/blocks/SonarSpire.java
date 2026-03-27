@@ -1,95 +1,64 @@
 package meld.world.blocks;
 
-import arc.Core;
 import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.Lines;
-import arc.graphics.g2d.TextureRegion;
-import meld.Meld;
-import meld.content.MeldStatusEffects;
+import arc.math.Interp;
 import mindustry.Vars;
+import mindustry.content.StatusEffects;
 import mindustry.entities.Units;
-import mindustry.gen.Building;
-import mindustry.graphics.Drawf;
 import mindustry.graphics.Layer;
-import mindustry.graphics.Pal;
-import mindustry.world.Block;
+import mindustry.type.StatusEffect;
 
 import static mindustry.Vars.tilesize;
 
-public class SonarSpire extends Block {
+//A field pulsar with fow scouting
+public class SonarSpire extends FieldPulsar {
 
-    public float duration = 60;
-
-    public TextureRegion chain;
-
-    @Override
-    public void load() {
-        super.load();
-        chain = Core.atlas.find(Meld.name + "-chain");
-
-    }
+    public StatusEffect status;
+    public float statusDuration;
 
     public SonarSpire(String name) {
         super(name);
-        update = true;
-        fogRadius = 180/ Vars.tilesize;
-        liquidCapacity = 400;
-        clipSize = fogRadius * tilesize;
+        status = StatusEffects.none;
+        statusDuration = 60;
     }
 
-    @Override
-    public void drawPlace(int x, int y, int rotation, boolean valid){
-        super.drawPlace(x, y, rotation, valid);
-
-        Drawf.dashCircle(x * tilesize + offset, y * tilesize + offset, fogRadius * tilesize, Pal.accent);
-    }
-
-    public class SpireBuild extends Building{
-
-        public float lastRadius = 0f;
-
-        public void ping(){
-            consume();
-        }
-
+    public class SonarSpireBuild extends PulsarBuild {
         @Override
         public void updateTile() {
-            if(Math.abs(fogRadius() - lastRadius) >= 0.5f){
+            super.updateTile();
+
+            if(duration >= 0){
+                Units.nearby(team, x, y, smoothRadius, (other) -> {
+                    other.apply(status, statusDuration);
+                });
+            }
+
+            if (Math.abs(fogRadius() - lastRadius) >= 0.5f) {
                 Vars.fogControl.forceUpdate(team, this);
                 lastRadius = fogRadius();
             }
-
-            Units.nearby(team, x, y, fogRadius() * tilesize, (other) -> {
-                other.apply(MeldStatusEffects.rally, duration);
-            });
         }
-
         @Override
         public float fogRadius() {
-            return efficiency * fogRadius;
-        }
-
-        @Override
-        public void drawSelect(){
-            Drawf.dashCircle(x, y, fogRadius() * tilesize, Pal.accent);
+            return smoothRadius/ tilesize;
         }
 
         @Override
         public void draw() {
-
             super.draw();
+            float charge = duration/pulseDuration;
+            float chargeInv = 1 - charge;
 
-            Draw.z(Layer.effect);
-            Draw.color(Pal.accent);
+            Draw.z(Layer.floor + 0.1f);
+            Lines.stroke(2 + charge * 30);
+            Draw.alpha(Interp.pow10In.apply(charge));
 
-            //I literally slapped this in
-            //Draww.drawChain(chain, x, y, Core.input.mouseWorldX(), Core.input.mouseWorldY(), 0);
+            Lines.circle(x, y, Interp.pow10Out.apply(chargeInv) * smoothRadius);
 
-            Draw.z(Layer.buildBeam);
-            Draw.color(Pal.accent);
-            Lines.stroke(tilesize/2);
-            Lines.circle(x, y, fogRadius() * tilesize);
-
+            Draw.alpha(Interp.pow2In.apply(charge));
+            Lines.stroke(1 + charge * 3);
+            Lines.circle(x, y, chargeInv * smoothRadius);
         }
     }
 }

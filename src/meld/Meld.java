@@ -97,20 +97,15 @@ public class Meld extends Mod{
 
         activeBuffer.clear();
 
-        for(int i = 0; i < s; i++){
-
-            int j = i + width + 2;
-
-            int x = j % width;
-            int y = Mathf.floor(j/(float)height) % height;
+        Vars.world.tiles.each((x, y) -> {
 
             Tile current = Vars.world.tile(x, y);
 
-            if(current == null) continue;
+            if(current == null) return;
 
             //if(current.floor() == stable || current.floor() == unstable) Fx.fire.at(current.worldx(), current.worldy());
 
-            if(current.floor() == melted || current.overlay() != activeOverlay) continue;
+            if(current.floor() == melted || current.overlay() != activeOverlay) return;
 
             for(Point2 o: Geometry.d4){
                 Tile t = Vars.world.tile(current.x + o.x, current.y + o.y);
@@ -122,18 +117,14 @@ public class Meld extends Mod{
             };
 
             current.setOverlay(Blocks.air);
+            current.setFloor(melted);
+            Fx.smoke.at(x * Vars.tilesize, y * Vars.tilesize);
             if(current.build != null) current.build.kill();
-        };
+        });
 
-
-        //Melt the previous active buffer
-        Call.setTileFloors(melted, toMelt);
-        Call.setTileOverlays(Blocks.air, toMelt);
-
-        toMelt = activeBuffer.toArray();
-
-        //Set the new list of blocks
-        Call.setTileOverlays(activeOverlay, toMelt);
+        activeBuffer.each(i -> {
+            Vars.world.tile(i).setOverlay(activeOverlay);
+        });
     }
 
 }

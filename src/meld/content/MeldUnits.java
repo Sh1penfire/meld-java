@@ -1,11 +1,16 @@
 package meld.content;
 
+import arc.graphics.Blending;
 import arc.graphics.Color;
 import arc.graphics.g2d.Draw;
+import arc.graphics.g2d.Fill;
 import arc.graphics.g2d.Lines;
 import arc.math.Angles;
 import arc.math.Interp;
+import arc.math.Mathf;
+import arc.util.Tmp;
 import meld.*;
+import meld.entity.bullet.TransitionBulletType;
 import meld.unit.MeldUnitType;
 import meld.unit.abilities.DeathBirthAbility;
 import meld.unit.abilities.SlipstreamHullAbility;
@@ -13,6 +18,7 @@ import meld.unit.abilities.SolidSpeedAbility;
 import meld.unit.weapons.DeathWeapon;
 import meld.unit.weapons.ShadowVisualWeapon;
 import mindustry.Vars;
+import mindustry.ai.types.HugAI;
 import mindustry.content.Fx;
 import mindustry.content.StatusEffects;
 import mindustry.entities.Effect;
@@ -22,17 +28,12 @@ import mindustry.entities.bullet.*;
 import mindustry.entities.effect.MultiEffect;
 import mindustry.entities.effect.ParticleEffect;
 import mindustry.entities.effect.WaveEffect;
-import mindustry.entities.part.DrawPart;
-import mindustry.entities.part.HaloPart;
-import mindustry.entities.part.HoverPart;
-import mindustry.entities.part.ShapePart;
+import mindustry.entities.part.*;
 import mindustry.entities.pattern.ShootSpread;
-import mindustry.gen.ElevationMoveUnit;
-import mindustry.gen.LegsUnit;
-import mindustry.gen.Sounds;
-import mindustry.gen.TimedKillUnit;
+import mindustry.gen.*;
 import mindustry.graphics.Layer;
 import mindustry.graphics.Pal;
+import mindustry.type.StatusEffect;
 import mindustry.type.UnitType;
 import mindustry.type.Weapon;
 import mindustry.type.weapons.RepairBeamWeapon;
@@ -45,7 +46,9 @@ public class MeldUnits {
     bulbheadOverseer,
 
     //enemy units
-    shotgunEnemy, armoredEnemy, craig, braig;
+    cannonOverseer, blob,
+    afraig, craig, braig, globkin,
+    jilla, kathid;
 
     public static void load(){
         bulbheadOverseer = new UnitType("bulbhead-overseer"){{
@@ -391,9 +394,10 @@ public class MeldUnits {
 
         shark = new UnitType("shark"){{
             hovering = true;
+            outlineColor = Color.clear;
 
             speed = 2.5f;
-            health = 520;
+            health = 420;
             drag = 0.08f;
             accel = 0.1f;
 
@@ -487,6 +491,13 @@ public class MeldUnits {
                                 color = MeldPal.shark;
                             }};
                         }};
+
+                        parts.add(
+                                new RegionPart("-shadow"){{
+                                    mirror = false;
+                                    under = true;
+                                }}
+                        );
                     }},
                     new ShadowVisualWeapon(){{
                         shadowElevation = 0.1f;
@@ -504,7 +515,7 @@ public class MeldUnits {
                                 phase = 100;
                                 stroke = 2;
                                 circles = 3;
-                                layerOffset = -0.001f;
+                                layerOffset = -0.002f;
                                 minStroke = 0.5f;
                                 color = MeldPal.shark;
                             }},
@@ -518,9 +529,14 @@ public class MeldUnits {
                                 phase = 100;
                                 stroke = 2;
                                 circles = 3;
-                                layerOffset = -0.001f;
+                                layerOffset = -0.002f;
                                 minStroke = 0.5f;
                                 color = MeldPal.shark;
+                            }},
+                            new RegionPart(){{
+                                name = Meld.prefix("shark-shadow");
+                                mirror = false;
+                                under = true;
                             }}
                         );
                     }}
@@ -545,7 +561,235 @@ public class MeldUnits {
             constructor = ElevationMoveUnit::create;
         }};
 
-        shotgunEnemy = new UnitType("afraig"){{
+        cannonOverseer = new MeldUnitType("cannon-overseer"){{
+            float IR = 120;
+
+            health = 800;
+            lifetime = 360 * 6;
+            speed = 0;
+            flying = true;
+
+            isEnemy = false;
+            useUnitCap = false;
+            createWreck = false;
+            createScorch = false;
+            allowedInPayloads = false;
+            physics = false;
+            bounded = false;
+            hidden = true;
+            playerControllable = false;
+            canDrown = false;
+
+            hoverable = true;
+            hovering = true;
+
+            faceTarget = false;
+            targetable = true;
+            drawMinimap = false;
+
+            fogRadius = 10;
+            lightRadius = 80;
+            lightOpacity = 1;
+            deathSound = Sounds.none;
+            deathExplosionEffect = Fx.none;
+
+
+            engineSize = 0;
+            shadowElevation = 0;
+            drawCell = drawBody = false;
+            drawSoftShadow = false;
+
+            weapons.addAll(
+                    new RepairBeamWeapon(){{
+                        mirror = false;
+                        rotate = true;
+                        rotateSpeed = 9;
+                        x = 0;
+                        y = 0;
+                        shootY = 2.5f;
+                        beamWidth = 0.5f;
+
+                        repairSpeed = 2;
+                        targetInterval = 1;
+                        targetSwitchInterval = 1;
+
+                        reload = 20;
+                        targetUnits = true;
+                        targetBuildings = true;
+                        controllable = false;
+                        laserColor = healColor = MeldPal.blobPink;
+                        bullet = new BulletType(){{
+                            maxRange = IR;
+                        }};
+                    }}
+            );
+
+            parts.addAll(
+                    new ShapePart(){{
+                        x = y = 0;
+                        circle = true;
+                        radius = 4;
+                        radiusTo = 0;
+                        layer = Layer.effect;
+                        color = MeldPal.blobPink;
+                        colorTo = MeldPal.accentClear;
+                        progress = PartProgress.life.delay(0.8f).curve(Interp.pow5);
+                    }},
+                    new HaloPart(){{
+                        tri = true;
+                        haloRadius = 8;
+                        radius = 4;
+                        radiusTo = 0;
+                        triLength = 8;
+                        triLengthTo = 0;
+                        shapes = 3;
+                        color = MeldPal.blobPink;
+                        haloRotateSpeed = 2;
+                        layer = Layer.effect;
+                        progress = PartProgress.life.compress(0.5f, 0.8f).curve(Interp.pow5In);
+                    }},
+                    new HaloPart(){{
+                        tri = true;
+                        haloRadius = 14;
+                        radius = 4;
+                        radiusTo = 0;
+                        triLength = 6;
+                        triLengthTo = 0;
+                        shapes = 3;
+                        color = MeldPal.blobPink;
+                        haloRotateSpeed = 1;
+                        layer = Layer.effect;
+                        progress = PartProgress.life.delay(0.8f).curve(Interp.pow5In);
+                    }},
+                    //Sonar
+                    new ShapePart(){{
+                        x = y = 0;
+                        progress = PartProgress.life;
+                        circle = true;
+                        hollow = true;
+                        radius = 0;
+                        radiusTo = IR;
+                        stroke = 6;
+                        strokeTo = 0;
+                        layer = Layer.buildBeam;
+                        color = MeldPal.blobPink;
+                    }},
+
+                    new ShapePart(){{
+                        x = y = 0;
+                        progress = PartProgress.life.curve(Interp.pow10Out);
+                        circle = true;
+                        hollow = true;
+                        radius = 0;
+                        radiusTo = IR;
+                        stroke = 8;
+                        strokeTo = 0;
+                        layer = Layer.buildBeam;
+                        color = MeldPal.blobPink;
+                    }},
+
+                    new ShapePart(){{
+                        x = y = 0;
+                        progress = PartProgress.life.curve(Interp.pow10In);
+                        circle = true;
+                        hollow = true;
+                        radius = IR;
+                        radiusTo = IR;
+                        stroke = 4;
+                        strokeTo = 0;
+                        layer = Layer.buildBeam;
+                        color = MeldPal.blobPink;
+                    }}
+            );
+
+            abilities.addAll(
+                    new RegenAbility(){{
+                        amount = 0.5f;
+                    }},
+                    new StatusFieldAbility(MeldStatusEffects.rally, IR, 5, IR){{
+                        activeEffect = Fx.none;
+                    }}
+            );
+            constructor = TimedKillUnit::create;
+        }};
+
+        blob = new MeldUnitType("blob"){{
+            health = 200;
+            armor = -1;
+            segments = 0;
+
+            drag = 0.2f;
+            accel = 0.12f;
+            speed = 1.2f;
+            drownTimeMultiplier = 5;
+
+            drawCell = false;
+
+            weapons.add(
+                    new Weapon(){{
+                        x = y = 0;
+                        hitSize = 6;
+
+                        shootWarmupSpeed = 1/6f/60f;
+                        linearWarmup = true;
+                        minWarmup = 1;
+                        shootCone = 360;
+                        mirror = false;
+                        rotate = true;
+                        rotateSpeed = 0;
+
+                        bullet = new ExplosionBulletType(){{
+                            float radius = 48;
+                            splashDamageRadius = radius;
+
+                            splashDamage = 500;
+
+                            shootEffect = new MultiEffect(
+                                    new Effect(30, e -> {
+                                        Fill.light(e.x, e.y, 10, radius * e.fin(), Tmp.c1.set(MeldPal.flamePink).a(e.foutpowdown()), Tmp.c2.set(MeldPal.flamePink).a(0));
+
+                                        e.scaled(12, e1 -> {
+                                            Draw.color(Color.white);
+                                            Draw.alpha(0.8f * e1.fout());
+                                            Lines.stroke(1 + e1.fin() * 6.5f);
+                                            Lines.circle(e.x, e.y, e1.fin() * 48 + 14);
+                                        });
+                                    }),
+                                    new ParticleEffect(){{
+                                        length = 35;
+                                        particles = 3;
+                                        lifetime = 60;
+                                        sizeFrom = 5;
+                                        sizeTo = 0;
+
+                                        interp = Interp.pow2Out;
+                                        sizeInterp = Interp.pow5In;
+                                        colorFrom = MeldPal.flamePink;
+                                    }}
+                            );
+                        }};
+
+                        parts.add(
+                                new RegionPart(){{
+                                    name = Meld.prefix("blob-glow");
+                                    outline = false;
+                                    progress = PartProgress.warmup.curve(Interp.sine);
+                                    growProgress = PartProgress.warmup.compress(0.8f, 1).curve(Interp.pow5In);
+                                    growX = 1;
+                                    growY = 1;
+                                    blending = Blending.additive;
+                                    color = Color.clear;
+                                    colorTo = Color.white;
+                                }}
+                        );
+                    }}
+            );
+
+            constructor = CrawlUnit::create;
+        }};
+
+        afraig = new UnitType("afraig"){{
+            outlineColor = Color.clear;
             speed = 1.4f;
             health = 200;
             armor = 45;
@@ -620,7 +864,7 @@ public class MeldUnits {
                                         sizeTo = 12;
                                         strokeFrom = 1;
                                         strokeTo = 3;
-                                        colorFrom = MeldPal.blobPink.a(0.54f);
+                                        colorFrom = MeldPal.blobPink.cpy().a(0.54f);
                                         colorTo = Color.white.cpy().a(0);
                                     }},
                                     new WaveEffect(){{
@@ -640,6 +884,8 @@ public class MeldUnits {
         }};
 
         craig = new UnitType("craig"){{
+            outlineColor = Color.clear;
+
             speed = 0.9f;
             health = 320;
             drag = 0.12f;
@@ -691,6 +937,7 @@ public class MeldUnits {
         }};
 
         braig = new UnitType("braig"){{
+            outlineColor = Color.clear;
             speed = 0.8f;
 
             health = 950;
@@ -816,6 +1063,270 @@ public class MeldUnits {
 
             constructor = LegsUnit::create;
         }};
+
+        globkin = new UnitType("globkin"){{
+            outlineColor = Color.clear;
+            speed = 0.7f;
+
+            health = 2400;
+            armor = 8;
+
+            drag = 0.12f;
+            accel = 0.2f;
+
+            hitSize = 22;
+            rotateSpeed = 5.25f;
+            faceTarget = true;
+
+            drawCell = false;
+
+            legCount = 6;
+            legLength = 30;
+            legGroupSize = 2;
+            legLengthScl = 0.9f;
+            legBaseOffset = 12;
+
+            legMoveSpace = 1.2f;
+            allowLegStep = true;
+            legContinuousMove = true;
+            legPhysicsLayer = false;
+
+            Weapon backMount = braigWeapon(0.25f, -11);
+            backMount.shootStatus = StatusEffects.none;
+            weapons.add(
+                    backMount,
+                    new Weapon(""){{
+                        x = 16.25f;
+                        y = 4.25f;
+                        shootY = 11;
+                        reload = 160;
+                        shootCone = 15;
+
+                        rotate = true;
+                        rotateSpeed = 1.5f;
+                        rotationLimit = 60;
+                        recoil = 6.5f;
+
+                        mirror = true;
+                        alternate = false;
+                        parentizeEffects = false;
+
+                        shootStatus = MeldStatusEffects.stunned;
+
+                        shootStatusDuration = 45;
+
+                        layerOffset = -0.01f;
+                        predictTarget = false;
+                        shoot = new ShootSpread() {{
+                            firstShotDelay = 35;
+                        }};
+
+                        bullet = new TransitionBulletType() {{
+                            fragBullets = 6;
+                            fragRandomSpread = 45;
+                            recoil = 4.5f;
+                            rangeOverride = 160;
+
+                            fragBullet = new ArtilleryBulletType(){{
+                                width = 16;
+                                height = 19;
+
+                                damage = 0;
+                                collides = true;
+                                speed = 4.7f;
+                                lifetime = 52;
+                                knockback = 12;
+
+                                fragBullets = 1;
+                                fragBullet = new BulletType(){{
+                                    spawnUnit = MeldUnits.blob;
+                                }};
+                                keepVelocity = false;
+                            }};
+                        }};
+
+                        parts.addAll(
+                                new RegionPart(){{
+                                    name = Meld.prefix("globkin-gun-blob");
+                                    x = 0;
+                                    y = 42/4f;
+                                    growX = -0.5f;
+                                    growY = 0.25f;
+                                    moveY = -42/4f;
+                                    //lock the progress until after charge is done
+                                    growProgress = p -> Mathf.zero(PartProgress.charge.getClamp(p)) ? PartProgress.reload.curve(Interp.pow5).getClamp(p) : 0;
+                                    progress = p -> Mathf.zero(PartProgress.charge.getClamp(p)) ? PartProgress.reload.curve(Interp.pow2In).getClamp(p) : 0;
+
+                                    moves.addAll(
+                                            new PartMove(){{
+                                                gx = -0.25f;
+                                                gy = 0.5f;
+                                                progress = PartProgress.charge.curve(Interp.pow5In);
+                                            }},
+                                            new PartMove(){{
+                                                y = -25;
+                                                gx = -0.25f;
+                                                gy = 0.25f;
+                                                progress = PartProgress.charge.curve(Interp.pow10In);
+                                            }}
+                                    );
+
+                                }},
+                                new RegionPart(){{
+                                    name = Meld.prefix("globkin-gun");
+                                    moves.addAll(
+                                            new PartMove(){{
+                                                gx = -0.25f;
+                                                gy = 0.5f;
+                                                progress = PartProgress.charge.curve(Interp.pow5In);
+                                            }},
+                                            new PartMove(){{
+                                                gy = -0.25f;
+                                                //lock the progress until after charge is done
+                                                progress = p -> Mathf.zero(PartProgress.charge.getClamp(p)) ? PartProgress.reload.curve(Interp.pow2In).get(p) : 0;
+                                            }}
+                                    );
+                                }}
+                        );
+                    }}
+            );
+
+            constructor = LegsUnit::create;
+        }};
+
+        jilla = new UnitType("jilla"){{
+            outlineColor = Color.clear;
+            speed = 1.2f;
+
+            health = 200;
+
+            drag = 0.12f;
+            accel = 0.2f;
+            range = 40;
+
+            hitSize = 16;
+            rotateSpeed = 6;
+            faceTarget = true;
+
+            legPhysicsLayer = false;
+
+            segments = 3;
+            segmentMag = 0.5f;
+            drawCell = drawBody = false;
+
+            aiController = HugAI::new;
+
+            deathExplosionEffect = Fx.none;
+
+            weapons.add(
+                    new Weapon(){{
+                        x = y = 0;
+                        shootY = 8;
+                        shootCone = 180;
+                        reload = 60;
+                        mirror = alternate = false;
+                        continuous = alwaysContinuous = true;
+                        shootSound = Sounds.shootSublimate;
+
+                        bullet = new ContinuousFlameBulletType(){{
+                            damage = 8;
+                            flareLength = 0;
+                            length = 8;
+                            rangeOverride = 40;
+                            width = 1.5f;
+                            knockback = pierceCap = 1;
+
+                            colors = new Color[]{
+                                    Color.valueOf("f9e1f343"),
+                                    Color.valueOf("ee5de9a9"),
+                                    Color.valueOf("ef85e3e3"),
+                                    Color.valueOf("d22fee"),
+                                    Color.white
+                            };
+                        }};
+                    }}
+            );
+            immunities.addAll(MeldStatusEffects.aspectBurn);
+
+            constructor = CrawlUnit::create;
+        }};
+
+        kathid = new UnitType("kathid"){{
+            outlineColor = Color.clear;
+            shadowElevation = 0.1f;
+            speed = 0.7f;
+
+            health = 600;
+            armor = 50;
+            drownTimeMultiplier = 0.45f;
+
+            drag = 0.12f;
+            accel = 0.2f;
+
+            hitSize = 16;
+            rotateSpeed = 3.5f;
+
+            useEngineElevation = false;
+            faceTarget = true;
+
+            legCount = 4;
+            legLength = 15;
+            lockLegBase = true;
+            legContinuousMove = true;
+            legGroupSize = 2;
+
+            legMoveSpace = 3;
+            allowLegStep = true;
+            legPhysicsLayer = false;
+
+            deathExplosionEffect = Fx.none;
+
+            weapons.addAll(
+                    new Weapon(){{
+                        x = y = 0;
+                        shootY = 8.5f;
+                        mirror = alternate = false;
+                        controllable = alwaysContinuous = true;
+                        recoil = 0;
+                        shootCone = 10;
+
+                        shootStatus = MeldStatusEffects.sentry;
+                        shootStatusDuration = 5;
+                        shootSound = Sounds.shootSublimate;
+
+                        bullet = new ContinuousFlameBulletType(){{
+                            damage = 13;
+                            flareLength = 12;
+                            length = 85;
+                            width = 1.7f;
+                            knockback = 1;
+                            pierceCap = 2;
+
+                            colors = new Color[]{
+                                    Color.valueOf("f9e1f343"),
+                                    Color.valueOf("ee5de9a9"),
+                                    Color.valueOf("ef85e3e3"),
+                                    Color.valueOf("d22fee"),
+                                    Color.white
+                            };
+
+                            parts.addAll(
+                                    new RegionPart(){{
+                                        name = "kathid-crystal-heat";
+                                        progress = PartProgress.warmup;
+                                        color = Color.valueOf("11111100");
+                                        colorTo = Color.valueOf("111111");
+                                        blending = Blending.additive;
+                                        outline = false;
+                                    }}
+                            );
+                        }};
+                    }}
+            );
+            immunities.addAll(MeldStatusEffects.aspectBurn);
+
+            constructor = LegsUnit::create;
+        }};
     }
 
     public static Weapon craigWeapon(float wx, float wy){
@@ -844,7 +1355,7 @@ public class MeldUnits {
                 impact = true;
             }};
         }};
-    };
+    }
 
     //not quite sure why you'd want one of theese on another unit but it's there
     public static Weapon afraigWeapon(float wx, float wy){
@@ -951,7 +1462,8 @@ public class MeldUnits {
                 );
             }};
         }};
-    };
+    }
+
     public static Weapon braigWeapon(float wx, float wy){
         return new Weapon(Meld.prefix("braig-cannon")){{
             x = wx;
@@ -976,12 +1488,10 @@ public class MeldUnits {
 
             bullet = new BasicBulletType(){{
                 sprite = Meld.prefix("clump");
-                pierce = true;
-                pierceCap = 2;
                 speed = 4;
                 lifetime = 75;
-                width = 6;
-                height = 16;
+                width = 10;
+                height = 12;
                 damage = 10;
                 splashDamage = 25;
                 splashDamageRadius = 25;
@@ -991,5 +1501,5 @@ public class MeldUnits {
                 impact = true;
             }};
         }};
-    };
+    }
 }
