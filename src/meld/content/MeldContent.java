@@ -658,7 +658,7 @@ public class MeldContent {
         }};
 
         //Not as unkillable as it used to be but still strong asf
-        meldSynapse = new CoreBlock("meld-synapse"){{
+        meldSynapse = new MeldSynapse("meld-synapse"){{
             health = 400000;
             armor = 5000;
 
