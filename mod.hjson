@@ -5,13 +5,13 @@ displayName: "Meld (Java)"
 name: "meld"
 
 #your name
-author: "You"
+author: "Sh1p"
 
 #the fully qualified main class of the mod
 main: "meld.Meld"
 
 #the mod description as seen in the mod dialog
-description: "Meld Java.\n\n[[]accent]Only has custom game content! (play the info map to understand)[[]]"
+description: "Meld Java.\n\n[[]accent]Only has custom game content! (play the info map to understand)[[]]\n\nIncompatable with hjson meld"
 
 #the mod version
 version: gameplay test 1
