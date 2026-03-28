@@ -1,4 +1,4 @@
-package meld.unit;
+package meld.entities.unit.type;
 
 import arc.graphics.Color;
 import arc.graphics.g2d.Draw;
@@ -7,7 +7,7 @@ import arc.math.Angles;
 import arc.math.Mathf;
 import arc.util.Time;
 import arc.util.Tmp;
-import meld.content.MeldPal;
+import meld.graphics.MeldPal;
 import mindustry.gen.Unit;
 import mindustry.type.UnitType;
 

@@ -1,4 +1,4 @@
-package meld.entity.bullet;
+package meld.entities.bullet;
 
 import mindustry.content.Fx;
 import mindustry.entities.bullet.BulletType;

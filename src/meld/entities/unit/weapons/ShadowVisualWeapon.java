@@ -1,4 +1,4 @@
-package meld.unit.weapons;
+package meld.entities.unit.weapons;
 
 import arc.graphics.g2d.Draw;
 import arc.math.Mathf;

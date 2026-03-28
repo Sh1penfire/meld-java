@@ -1,4 +1,4 @@
-package meld;
+package meld.graphics.part;
 
 import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.Lines;

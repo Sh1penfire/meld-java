@@ -1,4 +1,4 @@
-package meld;
+package meld.world.meta;
 
 public class BuildingPriority {
     public static final float

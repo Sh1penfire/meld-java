@@ -1,4 +1,4 @@
-package meld.entity.bullet;
+package meld.entities.bullet;
 
 import arc.math.Angles;
 import arc.math.Mathf;

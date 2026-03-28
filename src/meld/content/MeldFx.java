@@ -9,7 +9,7 @@ import arc.math.Interp;
 import arc.math.Mathf;
 import arc.math.geom.Position;
 import arc.util.Tmp;
-import meld.Draww;
+import meld.graphics.Draww;
 import meld.Meld;
 import mindustry.Vars;
 import mindustry.entities.Effect;

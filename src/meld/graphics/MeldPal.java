@@ -1,4 +1,4 @@
-package meld.content;
+package meld.graphics;
 
 import arc.graphics.Color;
 import mindustry.graphics.Pal;

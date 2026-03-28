@@ -1,4 +1,4 @@
-package meld.content;
+package meld.world.blocks;
 
 import mindustry.content.Blocks;
 import mindustry.world.blocks.storage.CoreBlock;
