@@ -1,4 +1,4 @@
-package meld.unit.abilities;
+package meld.entities.abilities;
 
 import mindustry.entities.abilities.Ability;
 import mindustry.gen.Unit;

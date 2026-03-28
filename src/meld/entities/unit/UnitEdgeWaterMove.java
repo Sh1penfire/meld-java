@@ -1,9 +1,6 @@
-package meld;
+package meld.type.unit;
 
-import arc.math.geom.Geometry;
-import arc.math.geom.Point2;
 import arc.util.Log;
-import mindustry.Vars;
 import mindustry.entities.EntityCollisions;
 import mindustry.gen.UnitWaterMove;
 import mindustry.world.Tile;

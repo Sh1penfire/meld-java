@@ -1,4 +1,4 @@
-package meld.unit.weapons;
+package meld.type.weapons;
 
 import mindustry.gen.Sounds;
 import mindustry.type.Weapon;
