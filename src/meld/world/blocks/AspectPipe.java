@@ -3,6 +3,7 @@ package meld.world.blocks;
 import arc.math.Mathf;
 import arc.math.geom.Geometry;
 import meld.content.MeldContent;
+import meld.content.MeldLiquids;
 import mindustry.Vars;
 import mindustry.gen.Building;
 import mindustry.type.Liquid;
@@ -73,9 +74,9 @@ public class AspectPipe extends Conduit {
                 }
 
                 //At the same time try dumping aspect
-                if(liquid == MeldContent.aether && this.canDumpLiquid(other, MeldContent.aspect)) {
+                if(liquid == MeldLiquids.aether && this.canDumpLiquid(other, MeldLiquids.aspect)) {
                     Liquid original = liquid;
-                    liquid = MeldContent.aspect;
+                    liquid = MeldLiquids.aspect;
                     float ofract = other.liquids.get(liquid) / other.block.liquidCapacity;
                     float fract = this.liquids.get(original) / this.block.liquidCapacity;
 
@@ -106,7 +107,7 @@ public class AspectPipe extends Conduit {
 
             if(translating){
                 Liquid original = liquid;
-                liquid = MeldContent.aspect;
+                liquid = MeldLiquids.aspect;
 
                 float flow = Math.min(next.block.liquidCapacity - next.liquids.get(liquid), amount);
                 if (next.acceptLiquid(this, liquid)) {

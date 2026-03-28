@@ -45,10 +45,6 @@ public class MeldContent {
 
     public static Attribute aetherAttr;
 
-    //Items that meld mostly uses
-    public static Item stonyParticulate, larvalPlating;
-
-    public static Liquid aether, aspect, meld;
 
     //Strata blocks first
     public static Block chute, chuteRouter, chuteBridge, chuteJunction, chuteOverflow;
@@ -80,26 +76,6 @@ public class MeldContent {
     public static void load(){
 
         aetherAttr = Attribute.add("aether");
-
-        aether = new Liquid("aether"){{
-            gas = true;
-            color = Color.valueOf("cb8650");
-        }};
-
-        aspect = new Liquid("aspect"){{
-            gas = true;
-            flammability = 1;
-            explosiveness = 2;
-            color = Color.valueOf("cbdbfc");
-        }};
-
-        meld = new Liquid("meld"){{
-            gas = true;
-            color = Color.valueOf("e4aad5");
-        }};
-
-        stonyParticulate = item("stony-particulate");
-        larvalPlating = item("larval-plating");
 
         channelFace = new LiquidJunction("channel-face"){{
             requirements(Category.liquid, with(
@@ -142,10 +118,10 @@ public class MeldContent {
             );
 
             consume(new ConsumeLiquid(
-                    aether, outletRate/10f
+                    MeldLiquids.aether, outletRate/10f
             ));
 
-            outputLiquid = new LiquidStack(aspect, outletRate);
+            outputLiquid = new LiquidStack(MeldLiquids.aspect, outletRate);
         }};
 
         aspectPipe = new AspectPipe("aspect-pipe"){{
@@ -457,7 +433,7 @@ public class MeldContent {
                     }}
             );
 
-            consume(new ConsumeLiquid(aspect, outletRate));
+            consume(new ConsumeLiquid(MeldLiquids.aspect, outletRate));
         }};
 
         coreRaft = new CoreRaft("core-raft"){
@@ -492,7 +468,7 @@ public class MeldContent {
             boostScale = 1/9f;
             liquidCapacity = 300;
 
-            outputLiquid = new LiquidStack(aether, 1);
+            outputLiquid = new LiquidStack(MeldLiquids.aether, 1);
         }};
 
         elementalBlaster = new BeamDrill("elemental-blaster"){{
@@ -511,11 +487,11 @@ public class MeldContent {
             optionalBoostIntensity = 2;
 
             consume(new ConsumeLiquid(
-                    aspect, outletRate
+                    MeldLiquids.aspect, outletRate
             ));
 
             consume(new ConsumeLiquid(
-                    meld, 1
+                    MeldLiquids.meld, 1
             ){{
                 optional = true;
                 booster = true;
@@ -538,7 +514,7 @@ public class MeldContent {
 
             consume(
                 new ConsumeLiquid(
-                    aspect, 2 * outletRate
+                    MeldLiquids.aspect, 2 * outletRate
                 )
             );
 
@@ -551,7 +527,7 @@ public class MeldContent {
             size = 5;
             health = 2500;
 
-            consume(new ConsumeLiquid(aspect, outletRate * 12));
+            consume(new ConsumeLiquid(MeldLiquids.aspect, outletRate * 12));
             plans.addAll(new UnitPlan(MeldUnits.shark, 60 * 5, with(MeldItems.silver, 80, MeldItems.carbolith, 60)));
         }};
 
@@ -575,7 +551,7 @@ public class MeldContent {
 
             consume(
                     new ConsumeLiquid(
-                            aspect, 2 * outletRate
+                            MeldLiquids.aspect, 2 * outletRate
                     )
             );
         }};
@@ -591,7 +567,7 @@ public class MeldContent {
 
             consume(
                     new ConsumeLiquid(
-                            aspect, 3 * outletRate
+                            MeldLiquids.aspect, 3 * outletRate
                     )
             );
         }};
@@ -667,7 +643,7 @@ public class MeldContent {
         }};
 
         meldAmplifier = new SonarSpire("meld-amplifier"){{
-            requirements(Category.effect, with(larvalPlating, 2000));
+            requirements(Category.effect, with(MeldItems.larvalPlating, 2000));
             size = 5;
             health = 400000;
             armor = 5000;
@@ -680,21 +656,21 @@ public class MeldContent {
             status = MeldStatusEffects.amplified;
             ringColor = MeldPal.flamePink;
 
-            consume(new ConsumeLiquid(meld, 1));
+            consume(new ConsumeLiquid(MeldLiquids.meld, 1));
         }};
 
         meldCapsule = new ForceProjector("meld-capsule"){{
-            requirements(Category.effect, with(larvalPlating, 350));
+            requirements(Category.effect, with(MeldItems.larvalPlating, 350));
             size = 3;
             health = 1500;
             armor = 5;
             liquidCapacity = 120;
 
-            consume(new ConsumeLiquid(meld, 1));
+            consume(new ConsumeLiquid(MeldLiquids.meld, 1));
         }};
 
         carbonicBarrier = new Wall("stone-blocker"){{
-            requirements(Category.defense, with(stonyParticulate, 15));
+            requirements(Category.defense, with(MeldItems.stonyParticulate, 15));
             health = 400;
             armor = 85;
 
@@ -704,7 +680,7 @@ public class MeldContent {
         }};
 
         carbonicBarrierLarge = new Wall("stone-blocker-large"){{
-            requirements(Category.defense, with(stonyParticulate, 60));
+            requirements(Category.defense, with(MeldItems.stonyParticulate, 60));
             size = 2;
             health = 400;
             armor = 85;
@@ -726,28 +702,28 @@ public class MeldContent {
         }};
 
         pipeline = new Conduit("pipeline"){{
-            requirements(Category.liquid, with(larvalPlating, 1));
+            requirements(Category.liquid, with(MeldItems.larvalPlating, 1));
             underBullets = false;
             liquidCapacity = 100;
             liquidPressure = 4;
         }};
 
         pipelineCrossing = new LiquidJunction("pipeline-crossing"){{
-            requirements(Category.liquid, with(larvalPlating, 3));
+            requirements(Category.liquid, with(MeldItems.larvalPlating, 3));
             liquidCapacity = 100;
             liquidPressure = 4;
 
         }};
 
         pipelineRouter = new LiquidRouter("pipeline-router"){{
-            requirements(Category.liquid, with(larvalPlating, 5));
+            requirements(Category.liquid, with(MeldItems.larvalPlating, 5));
             liquidCapacity = 200;
             liquidPressure = 4;
 
         }};
 
         pipelineBridge = new DirectionLiquidBridge("pipeline-overpass"){{
-            requirements(Category.liquid, with(larvalPlating, 12));
+            requirements(Category.liquid, with(MeldItems.larvalPlating, 12));
             liquidCapacity = 100;
             liquidPressure = 4;
             range = 8;
@@ -755,7 +731,7 @@ public class MeldContent {
 
         meldCultivator = new AttributeCrafter("meld-cultivator"){{
             requirements(Category.production, with(
-                    larvalPlating, 120
+                    MeldItems.larvalPlating, 120
             ));
 
             size = 3;
@@ -766,11 +742,11 @@ public class MeldContent {
             boostScale = 1f/9f;
             displayEfficiencyScale = 9;
 
-            outputLiquid = new LiquidStack(meld, 3);
+            outputLiquid = new LiquidStack(MeldLiquids.meld, 3);
         }};
 
         meldCannon = new LiquidTurret("meld-cannon"){{
-            requirements(Category.turret, with(stonyParticulate, 60));
+            requirements(Category.turret, with(MeldItems.stonyParticulate, 60));
             size = 3;
             reload = 20;
             range = 5 * 46;
@@ -887,7 +863,7 @@ public class MeldContent {
             }};
 
             ammoTypes.put(
-                    meld,
+                    MeldLiquids.meld,
                     new BasicBulletType(){{
                         speed = 5;
 
@@ -910,11 +886,11 @@ public class MeldContent {
                     }}
             );
 
-            consume(new ConsumeLiquid(meld, 1));
+            consume(new ConsumeLiquid(MeldLiquids.meld, 1));
         }};
 
         meldMortar = new LiquidTurret("meld-mortar"){{
-            requirements(Category.turret, with(stonyParticulate, 60));
+            requirements(Category.turret, with(MeldItems.stonyParticulate, 60));
             size = 3;
             reload = 120;
             range = 240;
@@ -926,7 +902,7 @@ public class MeldContent {
             }};
 
             ammoTypes.put(
-                    meld,
+                    MeldLiquids.meld,
                     new BasicBulletType(){{
                         speed = 2;
 
@@ -947,7 +923,7 @@ public class MeldContent {
                     }}
             );
 
-            consume(new ConsumeLiquid(meld, 1));
+            consume(new ConsumeLiquid(MeldLiquids.meld, 1));
         }};
 
         jillaCoffer = new Wall("jilla-coffer"){{
@@ -986,7 +962,7 @@ public class MeldContent {
             shootEffect = Fx.shootSmall;
 
             ammoTypes.put(
-                    meld,
+                    MeldLiquids.meld,
                     new BasicBulletType(){{
                         sprite = Meld.prefix("glob");
                         speed = 4;
@@ -1034,7 +1010,7 @@ public class MeldContent {
             }};
 
             ammoTypes.put(
-                    meld,
+                    MeldLiquids.meld,
                     new BasicBulletType(){{
                         sprite = Meld.prefix("clump");
                         speed = 4;

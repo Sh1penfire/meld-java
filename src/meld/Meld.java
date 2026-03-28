@@ -63,6 +63,7 @@ public class Meld extends Mod{
         MeldStatusEffects.load();
         MeldUnits.load();
         MeldItems.load();
+        MeldLiquids.load();
         MeldContent.load();
         MeldEnvironment.load();
 

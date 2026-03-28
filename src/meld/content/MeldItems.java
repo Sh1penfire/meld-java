@@ -8,6 +8,9 @@ public class MeldItems {
 
             meldShard;
 
+    //Items that meld mostly uses
+    public static Item stonyParticulate, larvalPlating;
+
     public static void load(){
 
         debris = new Item("debris"){{
@@ -20,5 +23,13 @@ public class MeldItems {
             cost = 0.4f;
         }};
         resonarum = new Item("resonarum");
+
+        stonyParticulate = new Item("stony-particulate"){{
+
+        }};
+
+        larvalPlating = new Item("larval-plating"){{
+
+        }};
     };
 }

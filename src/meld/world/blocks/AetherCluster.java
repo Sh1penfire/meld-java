@@ -6,6 +6,7 @@ import arc.scene.ui.layout.Table;
 import arc.util.Log;
 import arc.util.Time;
 import meld.content.MeldContent;
+import meld.content.MeldLiquids;
 import mindustry.Vars;
 import mindustry.game.Team;
 import mindustry.gen.Building;
@@ -24,7 +25,7 @@ public class AetherCluster extends LiquidBlock {
     public AetherCluster(String name) {
         super(name);
         liquidCapacity = 300;
-        outputLiquid = new LiquidStack(MeldContent.aether, 1);
+        outputLiquid = new LiquidStack(MeldLiquids.aether, 1);
     }
     public TextureRegion[] icons() {
         return new TextureRegion[]{region};
