@@ -1,6 +1,5 @@
 package meld.content;
 
-import arc.Events;
 import arc.graphics.Color;
 import arc.math.Interp;
 import meld.*;
@@ -8,6 +7,11 @@ import meld.entities.bullet.OutflowBulletType;
 import meld.entities.bullet.TransitionBulletType;
 import meld.graphics.*;
 import meld.world.blocks.*;
+import meld.world.blocks.crafting.ModularCrafter;
+import meld.world.blocks.crafting.modules.ConsumeGate;
+import meld.world.blocks.crafting.modules.ConsumeLiquidModule;
+import meld.world.blocks.crafting.modules.MultiplierModule;
+import meld.world.blocks.crafting.modules.ProduceLiquidModule;
 import meld.world.meta.*;
 import mindustry.Vars;
 import mindustry.content.Fx;
@@ -20,7 +24,6 @@ import mindustry.entities.part.RegionPart;
 import mindustry.entities.part.ShapePart;
 import mindustry.entities.pattern.ShootAlternate;
 import mindustry.entities.pattern.ShootSpread;
-import mindustry.game.EventType;
 import mindustry.gen.Sounds;
 import mindustry.graphics.Layer;
 import mindustry.type.*;
@@ -33,9 +36,7 @@ import mindustry.world.blocks.distribution.*;
 import mindustry.world.blocks.liquid.Conduit;
 import mindustry.world.blocks.liquid.LiquidJunction;
 import mindustry.world.blocks.liquid.LiquidRouter;
-import mindustry.world.blocks.production.AttributeCrafter;
-import mindustry.world.blocks.production.BeamDrill;
-import mindustry.world.blocks.production.GenericCrafter;
+import mindustry.world.blocks.production.*;
 import mindustry.world.blocks.units.UnitFactory;
 import mindustry.world.consumers.ConsumeLiquid;
 import mindustry.world.draw.*;
@@ -123,8 +124,7 @@ public class MeldBlocks {
 
         aspectPipe = new AspectPipe("aspect-pipe"){{
             requirements(Category.liquid, with(
-                    MeldItems.debris, 2,
-                    MeldItems.silver, 2
+                    MeldItems.silver, 3
             ));
             leaks = false;
             health = 120;
@@ -502,16 +502,14 @@ public class MeldBlocks {
             ));
             size = 3;
 
+            hasItems = true;
+            hasLiquids = true;
+            liquidCapacity = outletRate * 60 * 2;
 
-            consume(
-                new ConsumeLiquid(
-                    MeldLiquids.aspect, 2 * outletRate
-                )
-            );
+            acceptedLiquids.add(MeldLiquids.fumes, MeldLiquids.aspect);
+            acceptedItems.add(MeldItems.debris);
+            dumpedItems.add(MeldItems.carbolith);
 
-            consumeItem(MeldItems.debris, 1);
-
-            defaultData = new float[]{1, 0, 0, 0};
 
             //Should make all the modules trigger in order
             hookAll(BlockEvent.Defaults.proximityUpdate,
@@ -521,21 +519,27 @@ public class MeldBlocks {
                         minEfficiency = 1;
                         boostScale = 1f/9f;
 
-                        efficiencyPin = 1;
+                        efficiencyPin = 0;
                     }}
             );
 
-            modules.add(
-                    new ItemCraftingModule(){{
-                        efficiencyPin = 2;
-                        progressPin = 3;
-                        craftTime = 120;
+            defaultData.put(1, 1);
 
-                        outputItem = new ItemStack(MeldItems.carbolith, 1);
-                    }},
+            modules.addAll(
+                    new ProduceLiquidModule(new LiquidStack(MeldLiquids.fumes, 2f), 0),
+                    new ConsumeLiquidModule(LiquidStack.with(MeldLiquids.fumes, 1, MeldLiquids.aspect, outletRate * 2), 1, 2),
+                    new ConsumeGate(with(MeldItems.debris, 1), 3),
                     new MultiplierModule(){{
-                        inputPins = new int[]{0, 1};
-                        outputPin = 2;
+                        inputPins = new int[]{2,3};
+                        outputPin = 4;
+                    }},
+                    new ItemCraftingModule(){{
+                        efficiencyPin = 4;
+                        progressPin = 5;
+                        craftTime = 12;
+
+                        inputItems = with(MeldItems.debris, 1);
+                        outputItem = new ItemStack(MeldItems.carbolith, 1);
                     }}
             );
 

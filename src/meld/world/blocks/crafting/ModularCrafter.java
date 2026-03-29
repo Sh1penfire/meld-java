@@ -1,19 +1,19 @@
-package meld.world.blocks;
+package meld.world.blocks.crafting;
 
-import arc.math.Mathf;
+import arc.struct.IntFloatMap;
 import arc.struct.ObjectMap;
 import arc.struct.Seq;
 import arc.util.Log;
 import arc.util.Time;
-import meld.world.WorldUtil;
 import mindustry.game.Team;
 import mindustry.gen.Building;
 import mindustry.type.Item;
 import mindustry.type.ItemStack;
+import mindustry.type.Liquid;
 import mindustry.world.Block;
-import mindustry.world.blocks.production.AttributeCrafter;
-import mindustry.world.blocks.production.GenericCrafter;
 import mindustry.world.meta.Attribute;
+
+import java.util.HashMap;
 
 public class ModularCrafter extends Block {
 
@@ -21,13 +21,35 @@ public class ModularCrafter extends Block {
     public Seq<CrafterModule> modules = new Seq<CrafterModule>();
     public ObjectMap<Object, Seq<CrafterModule>> listeners = new ObjectMap<Object, Seq<CrafterModule>>();
 
+    public Seq<Liquid> acceptedLiquids = new Seq<>();
+    public Seq<Item> acceptedItems = new Seq<>();
+
+    public Seq<Liquid> dumpedLiquids = new Seq<>();
+    public Seq<Item> dumpedItems = new Seq<>();
+
+
+    @Override
+    public void setBars() {
+        super.setBars();
+
+        if(acceptedLiquids.size + dumpedLiquids.size > 0){
+            removeBar("liquid");
+            for(Liquid liquid: acceptedLiquids){
+                addLiquidBar(liquid);
+            }
+            for(Liquid liquid: dumpedLiquids){
+                addLiquidBar(liquid);
+            }
+        }
+    }
+
     public ModularCrafter(String name) {
         super(name);
         update = true;
     }
 
     //Default float data array
-    public float[] defaultData;
+    public IntFloatMap defaultData = new IntFloatMap();
 
     public static void trigger(ModularCrafter block, ModularCrafterBuild build, Object event){
         Seq<CrafterModule> events = block.listeners.get(event);
@@ -51,12 +73,13 @@ public class ModularCrafter extends Block {
         }
         events.add(module);
     }
+
     public static class BlockEvent{
         public enum Defaults{
             update,
             proximityUpdate
         }
-    };
+    }
 
     public static abstract class CrafterModule{
         public void update(ModularCrafterBuild build){
@@ -70,32 +93,18 @@ public class ModularCrafter extends Block {
         public float craftTime;
 
         public void update(ModularCrafterBuild build){
-            float efficiency = build.data[efficiencyPin];
-            float progress = build.data[progressPin];
+            float efficiency = build.getPin(efficiencyPin);
+            float progress = build.getPin(progressPin);
             progress += efficiency * Time.delta;
 
             if(progress > craftTime) {
                 craft(build);
                 progress %= craftTime;
             }
-            build.data[progressPin] = progress;
+            build.setPin(progressPin, progress);
         }
 
         public abstract void craft(ModularCrafterBuild build);
-    }
-
-    public static class MultiplierModule extends CrafterModule{
-        public int[] inputPins;
-        public int outputPin;
-
-        @Override
-        public void update(ModularCrafterBuild build) {
-            float value = 1;
-            for(int i: inputPins){
-                value *= build.data[i];
-            }
-            build.data[outputPin] = value;
-        }
     }
 
     public static class AttributeModule extends CrafterModule{
@@ -114,11 +123,11 @@ public class ModularCrafter extends Block {
             Log.info(efficiency);
 
             if(minEfficiency != -1 && efficiency < minEfficiency) {
-                build.data[efficiencyPin] = 0;
+                build.setPin(efficiencyPin, 0);
                 return;
             }
 
-            build.data[efficiencyPin] = efficiency;
+            build.data.put(efficiencyPin, efficiency);
         }
     }
 
@@ -126,10 +135,19 @@ public class ModularCrafter extends Block {
         public ItemStack outputItem;
         public ItemStack[] outputItems;
 
+        public ItemStack[] inputItems;
+
+        @Override
+        public void update(ModularCrafterBuild build) {
+            super.update(build);
+
+        }
 
         @Override
         public void craft(ModularCrafterBuild build) {
             if(outputItem != null) build.items.add(outputItem.item, outputItem.amount);
+
+            if(inputItems != null) build.items.remove(inputItems);
 
             if(outputItems != null) {
                 for (ItemStack item : outputItems) {
@@ -140,8 +158,44 @@ public class ModularCrafter extends Block {
     }
 
     public class ModularCrafterBuild extends Building {
+
         public ModularCrafter modular;
-        public float[] data = defaultData;
+        public IntFloatMap data = new IntFloatMap();
+
+        @Override
+        public void created() {
+            super.created();
+            data.putAll(defaultData);
+        }
+
+        @Override
+        public void updateTile() {
+            super.updateTile();
+            this.dumpOutputs();
+        }
+
+        public void dumpOutputs(){
+            dumpedLiquids.each(this::dumpLiquid);
+            dumpedItems.each(this::dump);
+        }
+
+        public void setPin(int pin, float value){
+            data.put(pin, value);
+        };
+
+        public float getPin(int pin){
+            return data.get(pin);
+        }
+
+        @Override
+        public boolean acceptLiquid(Building source, Liquid liquid) {
+            return super.acceptLiquid(source, liquid) || acceptedLiquids.contains(liquid);
+        }
+
+        @Override
+        public boolean acceptItem(Building source, Item item) {
+            return (this.block.consumesItem(item) || acceptedItems.contains(item)) && this.items.get(item) < this.getMaximumAccepted(item);
+        }
 
         @Override
         public Building create(Block block, Team team) {
