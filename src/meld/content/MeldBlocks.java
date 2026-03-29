@@ -1,5 +1,6 @@
 package meld.content;
 
+import arc.Events;
 import arc.graphics.Color;
 import arc.math.Interp;
 import meld.*;
@@ -19,6 +20,7 @@ import mindustry.entities.part.RegionPart;
 import mindustry.entities.part.ShapePart;
 import mindustry.entities.pattern.ShootAlternate;
 import mindustry.entities.pattern.ShootSpread;
+import mindustry.game.EventType;
 import mindustry.gen.Sounds;
 import mindustry.graphics.Layer;
 import mindustry.type.*;
@@ -493,19 +495,13 @@ public class MeldBlocks {
             }});
         }};
 
-        earthboundInfuser = new AttributeCrafter("earthbound-infuser"){{
+        earthboundInfuser = new ModularCrafter("earthbound-infuser"){{
             requirements(Category.crafting, with(
                     MeldItems.debris, 40,
                     MeldItems.silver, 60
             ));
             size = 3;
 
-            attribute = Attribute.steam;
-            baseEfficiency = 0;
-            minEfficiency = 9;
-            boostScale = 1f/9f;
-            displayEfficiencyScale = 9;
-            craftTime = 60/5f;
 
             consume(
                 new ConsumeLiquid(
@@ -514,7 +510,41 @@ public class MeldBlocks {
             );
 
             consumeItem(MeldItems.debris, 1);
-            outputItem = new ItemStack(MeldItems.carbolith, 1);
+
+            defaultData = new float[]{1, 0, 0, 0};
+
+            //Should make all the modules trigger in order
+            hookAll(BlockEvent.Defaults.proximityUpdate,
+                    new AttributeModule(){{
+                        attribute = Attribute.steam;
+                        baseEfficiency = 0;
+                        minEfficiency = 1;
+                        boostScale = 1f/9f;
+
+                        efficiencyPin = 1;
+                    }}
+            );
+
+            modules.add(
+                    new ItemCraftingModule(){{
+                        efficiencyPin = 2;
+                        progressPin = 3;
+                        craftTime = 120;
+
+                        outputItem = new ItemStack(MeldItems.carbolith, 1);
+                    }},
+                    new MultiplierModule(){{
+                        inputPins = new int[]{0, 1};
+                        outputPin = 2;
+                    }}
+            );
+
+
+            /*
+
+            displayEfficiencyScale = 9;
+            craftTime = 60/5f;
+             */
         }};
 
         sharkFactory = new UnitFactory("shark-factory"){{
