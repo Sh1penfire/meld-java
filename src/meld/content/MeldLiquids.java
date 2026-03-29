@@ -5,7 +5,7 @@ import mindustry.type.Liquid;
 
 public class MeldLiquids {
 
-    public static Liquid aether, aspect, meld;
+    public static Liquid aether, aspect, meld, fumes;
 
     public static void load(){
         aether = new Liquid("aether"){{
@@ -23,6 +23,12 @@ public class MeldLiquids {
         meld = new Liquid("meld"){{
             gas = true;
             color = Color.valueOf("e4aad5");
+            temperature = 0.6f;
+        }};
+
+        meld = new Liquid("fumes"){{
+            gas = true;
+            color = Color.valueOf("3b2a2a");
             temperature = 0.6f;
         }};
     }
