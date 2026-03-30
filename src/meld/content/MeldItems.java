@@ -11,6 +11,10 @@ public class MeldItems {
     //Items that meld mostly uses
     public static Item stonyParticulate, larvalPlating;
 
+    //Heavy industry content
+    public static Item
+    tenbris, shadesteel, elnarDust, annealedSilver, cruciblePlating, aspectPipe;
+
     public static void load(){
 
         debris = new Item("debris"){{
@@ -29,6 +33,31 @@ public class MeldItems {
         }};
 
         larvalPlating = new Item("larval-plating"){{
+
+        }};
+
+        //Heavy Industry
+        tenbris = new Item("tenbris"){{
+
+        }};
+
+        shadesteel = new Item("shadesteel"){{
+
+        }};
+
+        elnarDust = new Item("elnar-dust"){{
+
+        }};
+
+        annealedSilver = new Item("annealed-silver"){{
+
+        }};
+
+        aspectPipe = new Item("aspect-pipe"){{
+
+        }};
+
+        cruciblePlating = new Item("crucible-plating"){{
 
         }};
     };

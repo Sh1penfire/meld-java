@@ -26,9 +26,9 @@ public class MeldLiquids {
             temperature = 0.6f;
         }};
 
-        meld = new Liquid("fumes"){{
+        fumes = new Liquid("fumes"){{
             gas = true;
-            color = Color.valueOf("3b2a2a");
+            color = Color.valueOf("5b4739");
             temperature = 0.6f;
         }};
     }

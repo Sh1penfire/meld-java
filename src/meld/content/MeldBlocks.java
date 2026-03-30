@@ -7,6 +7,11 @@ import meld.entities.bullet.OutflowBulletType;
 import meld.entities.bullet.TransitionBulletType;
 import meld.graphics.*;
 import meld.world.blocks.*;
+import meld.world.blocks.crafting.ModularCrafter;
+import meld.world.blocks.crafting.modules.ConsumeGate;
+import meld.world.blocks.crafting.modules.ConsumeLiquidModule;
+import meld.world.blocks.crafting.modules.MultiplierModule;
+import meld.world.blocks.crafting.modules.ProduceLiquidModule;
 import meld.world.meta.*;
 import mindustry.Vars;
 import mindustry.content.Fx;
@@ -31,9 +36,7 @@ import mindustry.world.blocks.distribution.*;
 import mindustry.world.blocks.liquid.Conduit;
 import mindustry.world.blocks.liquid.LiquidJunction;
 import mindustry.world.blocks.liquid.LiquidRouter;
-import mindustry.world.blocks.production.AttributeCrafter;
-import mindustry.world.blocks.production.BeamDrill;
-import mindustry.world.blocks.production.GenericCrafter;
+import mindustry.world.blocks.production.*;
 import mindustry.world.blocks.units.UnitFactory;
 import mindustry.world.consumers.ConsumeLiquid;
 import mindustry.world.draw.*;
@@ -121,8 +124,7 @@ public class MeldBlocks {
 
         aspectPipe = new AspectPipe("aspect-pipe"){{
             requirements(Category.liquid, with(
-                    MeldItems.debris, 2,
-                    MeldItems.silver, 2
+                    MeldItems.silver, 3
             ));
             leaks = false;
             health = 120;
@@ -493,28 +495,60 @@ public class MeldBlocks {
             }});
         }};
 
-        earthboundInfuser = new AttributeCrafter("earthbound-infuser"){{
+        earthboundInfuser = new ModularCrafter("earthbound-infuser"){{
             requirements(Category.crafting, with(
                     MeldItems.debris, 40,
                     MeldItems.silver, 60
             ));
             size = 3;
 
-            attribute = Attribute.steam;
-            baseEfficiency = 0;
-            minEfficiency = 9;
-            boostScale = 1f/9f;
-            displayEfficiencyScale = 9;
-            craftTime = 60/5f;
+            hasItems = true;
+            hasLiquids = true;
+            liquidCapacity = outletRate * 60 * 2;
 
-            consume(
-                new ConsumeLiquid(
-                    MeldLiquids.aspect, 2 * outletRate
-                )
+            acceptedLiquids.add(MeldLiquids.fumes, MeldLiquids.aspect);
+            acceptedItems.add(MeldItems.debris);
+            dumpedItems.add(MeldItems.carbolith);
+
+
+            //Should make all the modules trigger in order
+            hookAll(BlockEvent.Defaults.proximityUpdate,
+                    new AttributeModule(){{
+                        attribute = Attribute.steam;
+                        baseEfficiency = 0;
+                        minEfficiency = 1;
+                        boostScale = 1f/9f;
+
+                        efficiencyPin = 0;
+                    }}
             );
 
-            consumeItem(MeldItems.debris, 1);
-            outputItem = new ItemStack(MeldItems.carbolith, 1);
+            defaultData.put(1, 1);
+
+            modules.addAll(
+                    new ProduceLiquidModule(new LiquidStack(MeldLiquids.fumes, 2f), 0),
+                    new ConsumeLiquidModule(LiquidStack.with(MeldLiquids.fumes, 1, MeldLiquids.aspect, outletRate * 2), 1, 2),
+                    new ConsumeGate(with(MeldItems.debris, 1), 3),
+                    new MultiplierModule(){{
+                        inputPins = new int[]{2,3};
+                        outputPin = 4;
+                    }},
+                    new ItemCraftingModule(){{
+                        efficiencyPin = 4;
+                        progressPin = 5;
+                        craftTime = 12;
+
+                        inputItems = with(MeldItems.debris, 1);
+                        outputItem = new ItemStack(MeldItems.carbolith, 1);
+                    }}
+            );
+
+
+            /*
+
+            displayEfficiencyScale = 9;
+            craftTime = 60/5f;
+             */
         }};
 
         sharkFactory = new UnitFactory("shark-factory"){{
