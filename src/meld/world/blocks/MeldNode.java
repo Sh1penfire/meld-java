@@ -1,5 +1,8 @@
 package meld.world.blocks;
 
+import arc.func.*;
+import meld.*;
+import meld.core.*;
 import mindustry.content.Blocks;
 import mindustry.world.blocks.storage.CoreBlock;
 
@@ -12,11 +15,11 @@ public class MeldNode extends CoreBlock {
     public class MeldNodeBuild extends CoreBuild{
         @Override
         public void killed() {
+            /// start melting before killing
+            /// otherwise {@link mindustry.world.Tile#getLinkedTiles(Cons)} won't work
+            Meld.melting.start(tileOn());
+            
             super.killed();
-            //Spawn melting overlays on all tiles touching the edges of this block
-            eachEdge(t -> {
-                t.setOverlay(Blocks.pebbles);
-            });
         }
     }
 }
