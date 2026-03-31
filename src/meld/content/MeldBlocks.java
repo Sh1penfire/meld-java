@@ -9,6 +9,8 @@ import meld.graphics.*;
 import meld.world.blocks.*;
 import meld.world.blocks.crafting.ModularCrafter;
 import meld.world.blocks.crafting.ItemRecipe;
+import meld.world.blocks.crafting.Recipe;
+import meld.world.blocks.crafting.SpoolRecipe;
 import meld.world.blocks.crafting.modules.*;
 import meld.world.blocks.crafting.modules.GateModule.ConsumeCondition;
 import meld.world.blocks.crafting.modules.GateModule.OutputCondition;
@@ -50,7 +52,7 @@ import static mindustry.type.ItemStack.with;
 public class MeldBlocks {
 
     //Strata blocks first
-    public static Block chute, chuteRouter, chuteBridge, chuteJunction, unloadingHub;
+    public static Block chute, chuteRouter, chuteBridge, chuteJunction, chuteOverflow, unloadingHub;
 
     public static Block sonarSpire, movementAnchor, nullifier,
             //Bruiskit: Targets largest, highest hp blocks, functional blocks first, continuously heals
@@ -61,11 +63,11 @@ public class MeldBlocks {
             bruisekit, gauze, suture;
 
     public static Block coreRaft, aetherAccumulator, elementalBlaster, pneumaticPulsear,
-            earthboundInfuser, sharkFactory;
+            earthboundInfuser, fumehood, sharkFactory;
 
     public static ModularCrafter gasKiln, rotaryKiln, pneumaticExtruder;
 
-    public static Block channelNode, channelFace, aspectOutlet, aspectChannel;
+    public static Block channelNode, channelFace, aspectOutlet, aspectChannel, channelVent;
 
     public static Block sunder, molotov, vivisection;
 
@@ -109,6 +111,23 @@ public class MeldBlocks {
             placeableLiquid = true;
         }};
 
+        channelVent = new ChannelVent("pressure-vent"){{
+            requirements(Category.liquid, with(
+                    MeldItems.debris, 8,
+                    MeldItems.carbolith,
+                    8
+            ));
+            health = 180;
+            armor = 1;
+
+            minPressure = 0.25f;
+            ventRate = 2;
+
+            liquidCapacity = 100;
+            solid = false;
+            placeableLiquid = true;
+        }};
+
         aspectOutlet = new GenericCrafter("aspect-outlet"){{
             requirements(Category.liquid, with(
                     MeldItems.debris, 7
@@ -138,7 +157,7 @@ public class MeldBlocks {
             outputLiquid = new LiquidStack(MeldLiquids.aspect, outletRate);
         }};
 
-        aspectChannel = new AspectPipe("aspect-channel"){{
+        aspectChannel = new VisualAspectPipe("aspect-channel"){{
             requirements(Category.liquid, with(
                     MeldItems.annealedSilver, 5, MeldItems.glassMallows, 2
             ));
@@ -150,6 +169,7 @@ public class MeldBlocks {
             liquidCapacity = 80;
             size = 1;
             botColor = Color.white;
+            junctionReplacement = channelFace;
         }};
 
         sunder = new ItemTurret("sunder"){{
@@ -515,6 +535,45 @@ public class MeldBlocks {
             outputLiquid = new LiquidStack(MeldLiquids.aether, 1);
         }};
 
+        fumehood = new ModularCrafter("fumehood"){{
+            requirements(Category.production, with(
+                    MeldItems.debris, 80, MeldItems.shadesteel, 40
+            ));
+            size = 3;
+            health = 500;
+            armor = 2;
+            hasLiquids = true;
+
+            squareSprite = false;
+
+            dumpedLiquids.addAll(MeldLiquids.aether, MeldLiquids.fumes);
+
+            //Should make all the modules trigger in order
+            hookAll(BlockEvent.Defaults.proximityUpdate,
+                    new AttributeModule(){{
+                        attribute = MeldAttributes.aetherAttr;
+                        baseEfficiency = 0;
+                        minEfficiency = 1;
+                        boostScale = 1f/9f;
+
+                        efficiencyPin = 0;
+                    }},
+                    new AttributeModule(){{
+                        attribute = Attribute.steam;
+                        baseEfficiency = 0;
+                        minEfficiency = 1;
+                        boostScale = 1f/9f;
+
+                        efficiencyPin = 1;
+                    }}
+            );
+
+            modules.addAll(
+                    new ProduceLiquidModule(new LiquidStack(MeldLiquids.aether, 1), 0),
+                    new ProduceLiquidModule(new LiquidStack(MeldLiquids.fumes, 1), 1)
+            );
+        }};
+
         elementalBlaster = new BeamDrill("elemental-blaster"){{
             requirements(Category.production, with(
                     MeldItems.debris, 40
@@ -581,16 +640,17 @@ public class MeldBlocks {
                     }}
             );
 
-            defaultData.put(1, 1);
+            ItemRecipe carbolith = new ItemRecipe(with(MeldItems.debris, 1), with(MeldItems.carbolith, 1));
 
             modules.addAll(
                     new ProduceLiquidModule(new LiquidStack(MeldLiquids.fumes, 2f), 0),
+                    new GateModule(2, new GateModule.RecipeCondition(carbolith)),
                     new ConsumeLiquidModule(LiquidStack.with(MeldLiquids.fumes, 1, MeldLiquids.aspect, outletRate * 2), 1, 2),
                     new RecipeCraftingModule(){{
                         efficiencyPin = 2;
                         progressPin = 5;
                         craftTime = 12;
-                        recipe = new ItemRecipe(with(MeldItems.debris, 1), with(MeldItems.carbolith, 1));
+                        recipe = carbolith;
                     }}
             );
 
@@ -604,24 +664,24 @@ public class MeldBlocks {
 
         gasKiln = new ModularCrafter("gas-kiln"){{
             requirements(Category.crafting, with(MeldItems.debris, 80));
-            size = 2;
+            size = 3;
 
             hasItems = true;
             hasLiquids = true;
-            liquidCapacity = outletRate * 60;
+            liquidCapacity = outletRate * 60 * 2;
 
             itemCapacity = 10;
 
             acceptedLiquids.addAll(MeldLiquids.aspect);
             acceptedItems.addAll(MeldItems.tenbris, MeldItems.clayMallows, MeldItems.carbolith, MeldItems.debris, MeldItems.shadesteel, MeldItems.glassMallows, MeldItems.silver);
             dumpedItems.addAll(MeldItems.cruciblePlating, MeldItems.shadesteel, MeldItems.glassMallows, MeldItems.annealedSilver);
-
+            dumpedLiquids.addAll(MeldLiquids.fumes);
 
             ItemRecipe
-            shadesteel = new ItemRecipe(with(MeldItems.tenbris, 2), with(MeldItems.shadesteel, 2)),
+            shadesteel = new ItemRecipe(with(MeldItems.tenbris, 2, MeldItems.carbolith, 2), with(MeldItems.shadesteel, 2)).output(LiquidStack.with(MeldLiquids.fumes, 60)),
             glass = new ItemRecipe(with(MeldItems.clayMallows, 2), with(MeldItems.glassMallows, 2)),
             silver = new ItemRecipe(with(MeldItems.silver, 1), with(MeldItems.annealedSilver, 2)),
-            platings1 = new ItemRecipe(with(MeldItems.shadesteel, 4, MeldItems.carbolith, 2), with(MeldItems.cruciblePlating, 4)),
+            platings1 = new ItemRecipe(with(MeldItems.shadesteel, 4, MeldItems.debris, 2), with(MeldItems.cruciblePlating, 4)),
             platings2 = new ItemRecipe(with(MeldItems.glassMallows, 4, MeldItems.debris, 2), with(MeldItems.cruciblePlating, 4));
 
             float produceTime = 60;
@@ -820,7 +880,7 @@ public class MeldBlocks {
             dumpedItems.addAll(MeldItems.aspectPipe);
 
             ItemRecipe
-                    aspectPipe1 = new ItemRecipe(with(MeldItems.tenbris, 2, MeldItems.elnarDust, 2), with(MeldItems.aspectPipe, 4)),
+                    aspectPipe1 = new ItemRecipe(with(MeldItems.shadesteel, 2, MeldItems.elnarDust, 2), with(MeldItems.aspectPipe, 4)),
                     aspectPipe2 = new ItemRecipe(with(MeldItems.debris, 1, MeldItems.annealedSilver, 2), with(MeldItems.aspectPipe, 4));
 
             float produceTime = 30;
@@ -938,6 +998,14 @@ public class MeldBlocks {
             size = 3;
 
             health = 640;
+            propagateMaxRange = 16;
+
+            recipies.addAll(
+                    new SpoolRecipe(new ItemStack(MeldItems.resonarum, 2), 200)
+            );
+
+            consumeLiquid(MeldLiquids.fumes, 0.5f);
+            consumeItem(MeldItems.resonarum, 2);
         }};
 
         chute = new Duct("chute"){{
@@ -952,7 +1020,6 @@ public class MeldBlocks {
             speed = 4f;
             solid = false;
         }};
-
         chuteBridge = new DuctBridge("chute-bridge"){{
             requirements(Category.distribution, with(MeldItems.debris, 8));
             range = 5;
@@ -960,6 +1027,13 @@ public class MeldBlocks {
             speed = 4f;
             solid = false;
             ((Duct) chute).bridgeReplacement = this;
+        }};
+
+        chuteOverflow = new OverflowDuct("chute-overflow"){{
+            requirements(Category.distribution, with(MeldItems.debris, 4));
+            health = 90;
+            speed = 4f;
+            solid = false;
         }};
 
         unloadingHub = new Unloader("unloading-hub"){{

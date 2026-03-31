@@ -14,13 +14,23 @@ import mindustry.world.meta.BuildVisibility;
 public class MeldEnvironment {
 
     //Ore deposits
-    public static Block debrisDeposit, debrisDepositLarge, debrisNodule, carbolithDeposit, carbolithDepositDepleted, silverDeposit, resonarumDeposit, resonarumCrystal, resonarumOutcrop,
+    public static Block
+
+    //Marsh pt1
+        debrisDeposit, debrisDepositLarge, debrisNodule,
+    //Barrens
+        carbolithDeposit, carbolithDepositDepleted, tenbrisMix, tenbrisRidges, elnarSilt, embeddedElnar, embeddedElnarOverflowing,
+    //Badlands
+        silverDeposit,
+    //Storm Planes
+        resonarumDeposit, resonarumCrystal, resonarumOutcrop,
 
     //Marsh
     meldWall, meldCrystalWall,
     metalMeshWall, metalMeshWallMeld, metalAetherWall,
     //Badlands
     pillowWall, sandstoneWall,
+    mallowWall, crackstoneWall,
     //Barrens
     carbonicWall, earthenWall
     //Storm Planes
@@ -31,6 +41,7 @@ public class MeldEnvironment {
             metalWeave, metalWeaveHole, metalWeaveGlow,
     //Badlands
             sandMeld, softSand, sandstone,
+            redsandMeld, redSand, redSandWeave, crackstone,
     //Barrens
             bedrock, bedrockMeld,
             slate, slateMeld,
@@ -68,6 +79,32 @@ public class MeldEnvironment {
         carbolithDeposit = new StaticWall("carbolith-deposit"){{
             variants = 3;
             itemDrop = MeldItems.carbolith;
+        }};
+
+        tenbrisMix = new StaticWall("tenbris-mix"){{
+            variants = 2;
+            itemDrop = MeldItems.tenbris;
+        }};
+
+        tenbrisRidges = new StaticWall("tenbris-ridges"){{
+            variants = 2;
+            itemDrop = MeldItems.tenbris;
+        }};
+
+        embeddedElnar = new StaticWall("embedded-elnar"){{
+            variants = 2;
+            itemDrop = MeldItems.elnarDust;
+        }};
+
+        elnarSilt = new OreBlock("elnar-silt"){{
+            variants = 4;
+            itemDrop = MeldItems.elnarDust;
+            needsSurface = false;
+        }};
+
+        embeddedElnarOverflowing = new StaticWall("embedded-elnar-overflowing"){{
+            variants = 2;
+            itemDrop = MeldItems.elnarDust;
         }};
 
         carbolithDepositDepleted = new StaticWall("carbolith-deposit-depleted"){{
@@ -127,10 +164,13 @@ public class MeldEnvironment {
         //Barrens
         bedrock = new Floor("bedrock", 3);
         slate = new Floor("slate", 0);
-        literallyCarbonStoneFromMindustryButSlightlyDifferent = new Floor("carbonic-stone", 4);
+
         earthenStone = new Floor("earthen-stone", 4);
         carbonicPlates = new Floor("carbonic-plates", 3);
-        earthenStone = new Floor("mixture-stone", 3);
+        literallyCarbonStoneFromMindustryButSlightlyDifferent = new Floor("carbonic-stone", 4);
+
+        slate.blendGroup = bedrock;
+        mixtureStone = new Floor("mixture-stone", 3);
 
         metalWeave = new Floor("metal-weave", 3);
         metalWeaveHole= new Floor("metal-weave-hole", 0);
@@ -183,7 +223,10 @@ public class MeldEnvironment {
             isLiquid = true;
             cacheLayer = CacheLayer.water;
         }};
-
+        redsandMeld = new Floor("red-sand-meld", 3){{
+            isLiquid = true;
+            cacheLayer = CacheLayer.water;
+        }};
         slateMeld = new Floor("slate-meld", 3){{
             isLiquid = true;
             cacheLayer = CacheLayer.water;
@@ -236,6 +279,9 @@ public class MeldEnvironment {
 
         softSand = new Floor("soft-sand", 3);
         sandstone = new Floor("hard-sand", 3);
+        redSandWeave = new Floor("red-sand-weave", 3);
+        redSand = new Floor("red-sand", 3);
+        crackstone = new Floor("cracked-sand", 4);
 
         meldWall = new StaticWall("meld-wall"){{
             variants = 3;
@@ -263,6 +309,15 @@ public class MeldEnvironment {
         }};
 
         sandstoneWall = new StaticWall("sandstone-wall"){{
+            variants = 2;
+        }};
+
+        mallowWall = new StaticWall("mallow-wall"){{
+            variants = 2;
+            itemDrop = MeldItems.clayMallows;
+        }};
+
+        crackstoneWall = new StaticWall("crackstone-wall"){{
             variants = 2;
         }};
 

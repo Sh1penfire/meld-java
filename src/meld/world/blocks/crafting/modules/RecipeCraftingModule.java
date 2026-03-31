@@ -9,11 +9,11 @@ public class RecipeCraftingModule extends ModularCrafter.CraftingModule {
 
     @Override
     public boolean canCraft(ModularCrafter.ModularCrafterBuild build) {
-        return recipe.valid(build);
+        return recipe.valid(build.block, build);
     }
 
     @Override
     public void craft(ModularCrafter.ModularCrafterBuild build) {
-        recipe.apply(build);
+        recipe.apply(build.block, build);
     }
 }

@@ -4,8 +4,9 @@ import meld.world.blocks.LiquidUtil;
 import mindustry.gen.Building;
 import mindustry.type.ItemStack;
 import mindustry.type.LiquidStack;
+import mindustry.world.Block;
 
-public class ItemRecipe extends Recipe{
+public class ItemRecipe extends Recipe<Block, Building>{
     public ItemStack[] inputItems;
     public ItemStack[] outputItems;
 
@@ -22,7 +23,7 @@ public class ItemRecipe extends Recipe{
     };
 
     @Override
-    public boolean valid(Building build){
+    public boolean valid(Block block, Building build){
         if(outputItems != null){
             for(var output : outputItems){
                 if(build.items.get(output.item) + output.amount > build.block.itemCapacity){
@@ -44,7 +45,7 @@ public class ItemRecipe extends Recipe{
     }
 
     @Override
-    public void apply(Building building) {
+    public void apply(Block block, Building building) {
         if(inputItems != null) building.items.remove(inputItems);
 
         if(outputItems != null) {

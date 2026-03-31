@@ -108,7 +108,7 @@ public class GateModule extends ModularCrafter.CrafterModule {
 
         @Override
         public boolean valid(ModularCrafter.ModularCrafterBuild build) {
-            return recipe.valid(build);
+            return recipe.valid(build.block, build);
         }
     }
 

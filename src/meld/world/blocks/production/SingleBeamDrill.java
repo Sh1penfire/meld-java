@@ -27,9 +27,11 @@ public class SingleBeamDrill extends Block {
     public int range = 5, tier = 4;
 
     //I know that sounds like a lot of items at once but well... yeah it's a lot of items at once
-    public int baseProductivity = 25;
+    public int baseProductivity = 30;
+    public float selfDamage = 400;
+    public float targetDamage = 2400;
     public ObjectFloatMap<Item> itemMultipliers = new ObjectFloatMap<>();
-    public float drillTime = 120;
+    public float drillTime = 300;
 
     public SingleBeamDrill(String name) {
         super(name);
@@ -62,6 +64,8 @@ public class SingleBeamDrill extends Block {
         }
 
         public void drill(){
+            damage(selfDamage);
+
             Item found = null;
 
             int offset = (size + 1)/2;
@@ -75,7 +79,10 @@ public class SingleBeamDrill extends Block {
                 if(other.solid()){
                     Damage.dynamicExplosion(other.worldx(), other.worldy(), 5, 5, 30000, Vars.tilesize * 3, true);
                     Damage.dynamicExplosion(other.worldx(), other.worldy(), 5, 15, 0, Vars.tilesize * 2, true);
+                    if(other.build != null) other.build.damage(targetDamage);
+
                     Item drop = other.wallDrop();
+
                     if(drop == null) break;
 
                     if(drop.hardness <= tier) found = drop;

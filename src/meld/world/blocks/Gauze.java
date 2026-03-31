@@ -1,40 +1,100 @@
 package meld.world.blocks;
 
+import arc.graphics.Color;
+import arc.graphics.g2d.Lines;
 import arc.math.Mathf;
 import arc.struct.Seq;
+import arc.util.Time;
+import meld.world.blocks.crafting.Recipe;
+import meld.world.blocks.crafting.SpoolRecipe;
+import mindustry.Vars;
 import mindustry.content.Fx;
 import mindustry.gen.Building;
 import mindustry.graphics.Pal;
+import mindustry.ui.Bar;
 import mindustry.world.Block;
 import mindustry.world.Tile;
 
 public class Gauze extends Block {
-    public float reload = 60;
+
+    public float craftTime = 60;
+    public float spoolStorage = 800;
+
+    public Seq<SpoolRecipe> recipies = new Seq<>();
+
+    public float reload = 120;
+    public float detectHeadstart = 0.75f;
+
+    public float syncMargin = 5f;
+
     public int propagateMaxRange = 10;
 
     public float healAmount = 200;
     public float maxFract = 0.1f;
 
     Seq<Building> searching = new Seq<>(), qued = new Seq<>(), explored = new Seq<>();
+    Seq<GauzeBuild> connectedGauzes = new Seq<>();
 
     public Gauze(String name) {
         super(name);
         update = true;
     }
 
+    @Override
+    public void setBars() {
+        super.setBars();
+        addBar(
+                "spool",
+                entity -> new Bar("stats.spool", Pal.heal, () -> ((GauzeBuild)entity).spoolf()).blink(Color.red)
+        );
+    }
 
     public class GauzeBuild extends Building {
 
+        Gauze gauze;
+
         public float time;
+        public float craftTimer;
+        public float energy = 0;
+
+        public float spoolf(){
+            return energy/spoolStorage;
+        }
 
         @Override
         public void updateTile() {
             super.updateTile();
-            time += efficiency;
             if(time >= reload){
-                propagate();
                 time %= reload;
+                propagate();
             }
+            time += Time.delta;
+
+            craftTimer += efficiency;
+            if(craftTimer >= craftTime){
+                craft();
+                craftTimer %= craftTime;
+            }
+        }
+
+        @Override
+        public void created() {
+            super.created();
+            gauze = (Gauze) block;
+        }
+
+        public boolean shouldCraft(){
+            return recipies.copy().find(r -> r.valid(gauze, this)) != null;
+        }
+
+        @Override
+        public boolean shouldConsume() {
+            return super.shouldConsume() && shouldCraft();
+        }
+
+        public void craft(){
+                SpoolRecipe recipe = recipies.find(r -> r.valid(gauze, this));
+                recipe.apply(gauze, this);
         }
 
         //Only propagates through 1x1 blocks and their adjacent blocks
@@ -46,6 +106,7 @@ public class Gauze extends Block {
             explored.add(this);
             searching.addAll(this.proximity);
 
+            boolean healed = false;
             float charge = healAmount;
 
             for(int i = 0; i < propagateMaxRange; i++){
@@ -64,10 +125,14 @@ public class Gauze extends Block {
                             Fx.healBlockFull.at(build.x, build.y, 0, Pal.heal, build.block);
                             build.heal(healAmount);
                             charge -= healAmount;
+                            healed = true;
                         }
                     }
 
                     if(build.block.size == 1) build.proximity.each( b -> !explored.contains(b), qued::addUnique);
+                    if(build instanceof GauzeBuild gauze){
+                        connectedGauzes.add(gauze);
+                    }
                 }
 
                 explored.add(searching);
@@ -77,6 +142,44 @@ public class Gauze extends Block {
                 //No more healing to expand, goodbye world
                 if(charge == 0) break;
             }
+
+            if(healed) time = reload * detectHeadstart;
+            energy = energy - Mathf.clamp(healAmount - charge, 0, healAmount);
+
+            float totalTime = 0;
+            float averageEnergy = 0;
+            connectedGauzes.addAll(this);
+
+            for(GauzeBuild gauze: connectedGauzes){
+                averageEnergy += gauze.energy;
+            }
+            averageEnergy /= connectedGauzes.size;
+
+            for(GauzeBuild gauze: connectedGauzes){
+                gauze.energy = averageEnergy;
+            }
+
+            //Remove gauzes close to firing, then sync
+
+            connectedGauzes.removeAll(b -> reload - b.time < syncMargin);
+            for(GauzeBuild gauze: connectedGauzes){
+                totalTime += gauze.time;
+            }
+
+            float averageTime = totalTime / (connectedGauzes.size);
+
+            for(GauzeBuild gauze: connectedGauzes){
+                gauze.time = averageTime;
+            }
+
+            connectedGauzes.clear();
+        }
+
+        @Override
+        public void draw() {
+            super.draw();
+
+            Lines.arc(x, y, Vars.tilesize * 3, time/reload);
         }
     }
 }

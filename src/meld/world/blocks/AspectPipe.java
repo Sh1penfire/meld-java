@@ -1,17 +1,28 @@
 package meld.world.blocks;
 
+import arc.graphics.g2d.Draw;
+import arc.graphics.g2d.TextureRegion;
 import arc.math.Mathf;
 import arc.math.geom.Geometry;
+import arc.util.Tmp;
 import meld.content.MeldLiquids;
 import mindustry.Vars;
 import mindustry.gen.Building;
+import mindustry.graphics.Drawf;
+import mindustry.graphics.Layer;
 import mindustry.type.Liquid;
 import mindustry.world.Block;
 import mindustry.world.Tile;
 import mindustry.world.blocks.liquid.Conduit;
 import mindustry.world.blocks.liquid.LiquidRouter;
 
+import static mindustry.Vars.renderer;
+import static mindustry.Vars.tilesize;
+
 public class AspectPipe extends Conduit {
+    static final float rotatePad = 6, hpad = rotatePad / 2f / 4f;
+    static final float[][] rotateOffsets = {{hpad, hpad}, {-hpad, hpad}, {-hpad, -hpad}, {hpad, -hpad}};
+
     public AspectPipe(String name) {
         super(name);
     }
