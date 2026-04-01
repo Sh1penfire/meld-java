@@ -1,5 +1,7 @@
 package meld.world.blocks.crafting.recipe;
 
+import arc.util.Log;
+import arc.util.Nullable;
 import meld.world.blocks.LiquidUtil;
 import mindustry.gen.Building;
 import mindustry.type.ItemStack;
@@ -7,10 +9,15 @@ import mindustry.type.LiquidStack;
 import mindustry.world.Block;
 
 public class ItemRecipe extends Recipe<Block, Building>{
+
+    @Nullable
     public ItemStack[] inputItems;
+    @Nullable
     public ItemStack[] outputItems;
 
+    @Nullable
     public LiquidStack[] inputLiquids;
+    @Nullable
     public LiquidStack[] outputLiquids;
 
     public ItemRecipe(){
@@ -38,10 +45,12 @@ public class ItemRecipe extends Recipe<Block, Building>{
                 }
             }
         }
-        if(inputLiquids != null && !LiquidUtil.has(inputLiquids, build)) return false;
+        if(inputLiquids != null && !LiquidUtil.has(inputLiquids, build)) {
+            return false;
+        }
 
         //Set the output to zero if the build doesn't have the items, otherwise set it to whatever the out is
-        return build.items.has(inputItems);
+        return build.items == null || build.items.has(inputItems);
     }
 
     @Override
@@ -55,7 +64,7 @@ public class ItemRecipe extends Recipe<Block, Building>{
         }
 
         if(inputLiquids != null) LiquidUtil.remove(inputLiquids, building.liquids);
-        if(outputLiquids != null) LiquidUtil.add(outputLiquids, building.liquids);
+        if(outputLiquids != null) LiquidUtil.add(outputLiquids, building, building);
     }
 
     //Builder methods

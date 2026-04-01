@@ -13,21 +13,22 @@ import mindustry.ui.Bar;
 import mindustry.world.Block;
 import mindustry.world.consumers.*;
 
-public class ConsumeAspects extends ConsumeLiquidBase implements MeldGenericCrafter.BarConsumer {
+public class ConsumeAspects extends ConsumeLiquidFilter implements MeldGenericCrafter.BarConsumer {
 
-    public ObjectFloatMap<Liquid> efficiencyMap;
+    public ObjectFloatMap<Liquid> efficiencyMap, densityMap;
 
 
-    public ConsumeAspects(float amount, ObjectFloatMap<Liquid> efficiencyMap){
+    public ConsumeAspects(float amount, ObjectFloatMap<Liquid> efficiencyMap, ObjectFloatMap<Liquid> densityMap){
         super();
         this.efficiencyMap = efficiencyMap;
+        this.densityMap = densityMap;
         this.amount = amount;
+        filter = efficiencyMap::containsKey;
     }
 
     private static Liquid currentBest;
 
-
-
+    @Override
     public void apply(Block block) {
         block.hasLiquids = true;
         Vars.content.liquids().each(l -> efficiencyMap.containsKey(l), (item) -> {
@@ -40,11 +41,13 @@ public class ConsumeAspects extends ConsumeLiquidBase implements MeldGenericCraf
         return efficiencyMap.containsKey(liquid);
     }
 
+    @Override
     public void update(Building build) {
-        build.liquids.remove(getConsumed(build), this.amount * build.edelta() * this.multiplier.get(build));
+        Liquid consumed = getConsumed(build);
+        build.liquids.remove(consumed, this.amount * build.edelta()/densityMap.get(consumed, 1));
     }
 
-
+    @Override
     public Liquid getConsumed(Building build){
         float highest = 0;
         currentBest = null;
@@ -67,7 +70,9 @@ public class ConsumeAspects extends ConsumeLiquidBase implements MeldGenericCraf
         float ed = build.edelta();
         if(Mathf.zero(ed)) return 0;
         else {
+
             float multi = efficiencyMap.get(liq, 0);
+
             return liq != null ? Math.min(build.liquids.get(liq) / (this.amount * ed * multi), multi) : 0;
         }
     }

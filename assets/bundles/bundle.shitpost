@@ -1,3 +1,5 @@
-item.meld.glass-mallow.name = Pan-fried Plates
+item.meld-glass-mallow.name = Pan-fried Plates
 
-item.meld.crucible-plating.name = Boiled Plates
+item.meld-crucible-plating.name = Boiled Plates
+
+block.meld-sonar-spire.name = Slay the Sonar Spire

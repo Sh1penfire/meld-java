@@ -6,6 +6,7 @@ import arc.math.Mathf;
 import arc.math.geom.Geometry;
 import arc.util.Tmp;
 import meld.content.MeldLiquids;
+import meld.world.blocks.crafting.RecipeCrafter;
 import mindustry.Vars;
 import mindustry.gen.Building;
 import mindustry.graphics.Drawf;
@@ -16,6 +17,8 @@ import mindustry.world.Tile;
 import mindustry.world.blocks.liquid.Conduit;
 import mindustry.world.blocks.liquid.LiquidRouter;
 
+import static meld.content.MeldLiquids.aetherEfficiencies;
+import static meld.content.MeldLiquids.outletMapping;
 import static mindustry.Vars.renderer;
 import static mindustry.Vars.tilesize;
 
@@ -45,7 +48,7 @@ public class AspectPipe extends Conduit {
                     //get the tile above and below the current pipe, accounting for rotation
                     Tile t = Vars.world.tile(tile.x + Geometry.d4(1 + i * 2 + rotation).x, tile.y + Geometry.d4(1 + i * 2 + rotation).y);
 
-                    if(t == null || t.build == null || !t.build.block.hasLiquids || t.build.liquids == null || t.build.block.consumers.length == 0) continue;
+                    if(t == null || t.build == null || !t.build.block.hasLiquids || t.build.liquids == null || (!(t.build.block instanceof RecipeCrafter) && t.build.block.consumers.length == 0)) continue;
                     moveLiquid(t.build, liquids.current());
                 }
 
@@ -83,10 +86,11 @@ public class AspectPipe extends Conduit {
                     }
                 }
 
+                Liquid outletProduct = outletMapping.get(liquid);
                 //At the same time try dumping aspect
-                if(!(other instanceof ConduitBuild || other instanceof LiquidRouter.LiquidRouterBuild) && liquid == MeldLiquids.aether && this.canDumpLiquid(other, MeldLiquids.aspect)) {
+                if(outletProduct != null && !(other instanceof ConduitBuild || other instanceof LiquidRouter.LiquidRouterBuild) && this.canDumpLiquid(other, outletProduct)) {
                     Liquid original = liquid;
-                    liquid = MeldLiquids.aspect;
+                    liquid = outletProduct;
                     float ofract = other.liquids.get(liquid) / other.block.liquidCapacity;
                     float fract = this.liquids.get(original) / this.block.liquidCapacity;
 
@@ -97,7 +101,7 @@ public class AspectPipe extends Conduit {
                         float flow = Math.min(other.block.liquidCapacity - other.liquids.get(liquid), amount) * 10;
                         if (other.acceptLiquid(this, liquid)) {
                             other.handleLiquid(this, liquid, flow);
-                            this.liquids.remove(original, flow/10);
+                            this.liquids.remove(original, flow/aetherEfficiencies.get(outletProduct, 1));
                             total += amount;
                         }
 
@@ -105,34 +109,6 @@ public class AspectPipe extends Conduit {
                 }
             }
             return total;
-        }
-
-        @Override
-        public void transferLiquid(Building next, float amount, Liquid liquid) {
-            transferLiquid(next, amount, liquid, false);
-        }
-
-        //Translating original liquid to the pipe's target liquid;
-        public void transferLiquid(Building next, float amount, Liquid liquid, boolean translating){
-
-            if(translating){
-                Liquid original = liquid;
-                liquid = MeldLiquids.aspect;
-
-                float flow = Math.min(next.block.liquidCapacity - next.liquids.get(liquid), amount);
-                if (next.acceptLiquid(this, liquid)) {
-                    next.handleLiquid(this, liquid, flow);
-                    this.liquids.remove(original, flow/10);
-                }
-
-                return;
-            }
-
-            float flow = Math.min(next.block.liquidCapacity - next.liquids.get(liquid), amount);
-            if (next.acceptLiquid(this, liquid)) {
-                next.handleLiquid(this, liquid, flow);
-                this.liquids.remove(liquid, flow);
-            }
         }
     }
 }

@@ -127,67 +127,6 @@ public class ModularCrafter extends Block {
         public abstract void craft(ModularCrafterBuild build);
     }
 
-    public static class AttributeModule extends CrafterModule{
-        public int efficiencyPin;
-
-        public Attribute attribute;
-        public float baseEfficiency = 1;
-        public float boostScale = 1;
-        public float maxBoost = 1;
-        public float minEfficiency = -1;
-
-        @Override
-        public void update(ModularCrafterBuild build) {
-            float efficiency = baseEfficiency + Math.min(maxBoost, boostScale * build.block.sumAttribute(attribute, build.tileX(), build.tileY()) + attribute.env());
-
-            Log.info(efficiency);
-
-            if(minEfficiency != -1 && efficiency < minEfficiency) {
-                build.setPin(efficiencyPin, 0);
-                return;
-            }
-
-            build.data.put(efficiencyPin, efficiency);
-        }
-    }
-
-    public static class ItemCraftingModule extends CraftingModule{
-        public ItemStack outputItem;
-        public ItemStack[] outputItems;
-
-        public ItemStack[] inputItems;
-
-        @Override
-        public void update(ModularCrafterBuild build) {
-            super.update(build);
-        }
-
-        @Override
-        public boolean canCraft(ModularCrafterBuild build) {
-            if(outputItems != null){
-                for(var output : outputItems){
-                    if(build.items.get(output.item) + output.amount >= build.block.itemCapacity){
-                        return false;
-                    }
-                }
-            }
-            if(outputItem != null && build.items.get(outputItem.item) + outputItem.amount >= build.block.itemCapacity) return false;
-            return true;
-        }
-
-        @Override
-        public void craft(ModularCrafterBuild build) {
-            if(outputItem != null) build.items.add(outputItem.item, outputItem.amount);
-
-            if(inputItems != null) build.items.remove(inputItems);
-
-            if(outputItems != null) {
-                for (ItemStack item : outputItems) {
-                    build.items.add(item.item, item.amount);
-                }
-            }
-        }
-    }
 
     //Just some static finals to help readability
     public static class ModOUT{
