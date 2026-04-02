@@ -2,6 +2,7 @@ package meld.world.blocks.crafting.modules;
 
 import meld.world.blocks.crafting.ModularCrafter.*;
 
+//TODO remake this to be the same as the consumption modules
 public class StupidCraftingModule extends CrafterModule{
     public int[] requestPins;
     public int outputPin;
