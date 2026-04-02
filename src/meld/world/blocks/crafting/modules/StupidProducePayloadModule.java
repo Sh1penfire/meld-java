@@ -12,6 +12,7 @@ import mindustry.world.blocks.payloads.*;
 
 import java.util.*;
 
+//TODO remake this to be the same as the consumption modules
 public class StupidProducePayloadModule extends CrafterModule{
     public PayloadStack[] payloads;
     /// Pin used to read production efficiency.

@@ -5,6 +5,7 @@ import meld.world.blocks.crafting.*;
 import meld.world.blocks.crafting.ModularCrafter.*;
 import mindustry.type.*;
 
+//TODO remake this to be the same as the consumption modules
 public class StupidProduceLiquidModule extends CrafterModule{
     public LiquidStack[] liquids;
     /// Pin used to read production efficiency.

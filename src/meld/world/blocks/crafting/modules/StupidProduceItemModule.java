@@ -7,8 +7,7 @@ import mindustry.type.*;
 
 import java.util.*;
 
-import static java.lang.Math.min;
-
+//TODO remake this to be the same as the consumption modules
 public class StupidProduceItemModule extends CrafterModule{
     public ItemStack[] items;
     /// Pin used to read production efficiency.
