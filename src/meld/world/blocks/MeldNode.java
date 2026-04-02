@@ -1,8 +1,5 @@
 package meld.world.blocks;
 
-import arc.func.*;
-import meld.*;
-import meld.core.*;
 import mindustry.content.Blocks;
 import mindustry.world.blocks.storage.CoreBlock;
 
