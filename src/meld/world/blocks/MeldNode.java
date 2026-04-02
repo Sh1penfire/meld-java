@@ -17,7 +17,10 @@ public class MeldNode extends CoreBlock {
         public void killed() {
             /// start melting before killing
             /// otherwise {@link mindustry.world.Tile#getLinkedTiles(Cons)} won't work
-            Meld.melting.start(tileOn());
+            //Spawn melting overlays on all tiles touching the edges of this block
+            eachEdge(t -> {
+                t.setOverlay(Blocks.pebbles);
+            });
             
             super.killed();
         }
