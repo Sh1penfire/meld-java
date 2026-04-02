@@ -1,5 +1,6 @@
 package meld.content;
 
+import arc.*;
 import arc.graphics.Color;
 import arc.math.Interp;
 import meld.*;
@@ -10,6 +11,7 @@ import meld.world.blocks.consumers.ConsumeAspects;
 import meld.world.blocks.*;
 import meld.world.blocks.crafting.ModularCrafter;
 import meld.world.blocks.crafting.RecipeCrafter;
+import meld.world.blocks.crafting.*;
 import meld.world.blocks.crafting.recipe.ItemRecipe;
 import meld.world.blocks.crafting.recipe.SpoolRecipe;
 import meld.world.blocks.crafting.modules.*;
@@ -23,8 +25,7 @@ import meld.world.blocks.items.PriorityInputSplitter;
 import meld.world.blocks.production.SingleBeamDrill;
 import meld.world.meta.*;
 import mindustry.Vars;
-import mindustry.content.Fx;
-import mindustry.content.StatusEffects;
+import mindustry.content.*;
 import mindustry.entities.bullet.*;
 import mindustry.entities.effect.MultiEffect;
 import mindustry.entities.effect.ParticleEffect;
@@ -662,6 +663,85 @@ public class MeldBlocks {
 
             consume(new ConsumeAspects(outletRate/2, MeldLiquids.outletEfficiencies, MeldLiquids.outletDensities));
         }};
+
+        new ModularCrafter("stupid-crafter"){{
+            requirements(Category.crafting, with(MeldItems.debris, 40));
+            size = 3;
+
+            modules.addAll(
+                new StupidCraftingModule(0){{
+                    requestPins = new int[]{1, 2, 3, 4, 5, 6};
+                }},
+
+                new StupidConsumeItemModule(1, -1){{
+                    items = ItemStack.with(Items.copper, 2);
+                    time = 60f;
+                }},
+                new StupidConsumeLiquidModule(2){{
+                    liquids = LiquidStack.with(Liquids.water, 1f);
+                }},
+                new StupidConsumePayloadModule(3, -3){{
+                    payloads = PayloadStack.with(Blocks.plastaniumWallLarge, 1);
+                    time = 180f;
+                }},
+
+                new StupidProduceItemModule(4, 0, -4){{
+                    items = ItemStack.with(Items.titanium, 2);
+                    time = 60f;
+                }},
+                new StupidProduceLiquidModule(5, 0){{
+                    liquids = LiquidStack.with(Liquids.cryofluid, 1f);
+                }},
+                new StupidProducePayloadModule(6, 0, -6){{
+                    payloads = PayloadStack.with(Blocks.plastaniumWall, 2);
+                    time = 60f;
+                }}
+            );
+        }};
+
+        new ModularCrafter("stupid-silicon-smelter"){
+            @Override
+            public void load(){
+                super.load();
+                region = Core.atlas.find("silicon-smelter");
+                fullIcon = Core.atlas.find("silicon-smelter");
+                uiIcon = Core.atlas.find("silicon-smelter");
+            }
+
+            {
+                requirements(Category.crafting, with(MeldItems.debris, 40));
+                size = 2;
+
+                modules.addAll(
+                    new StupidCraftingModule(0){{
+                        requestPins = new int[]{1, 2, 3};
+                    }},
+                    new StupidProduceItemModule(1, 0, -1){{
+                        items = ItemStack.with(Items.silicon, 1);
+                        time = 60f;
+                    }},
+
+                    new StupidConsumeItemModule(2, -2){{
+                        items = ItemStack.with(Items.sand, 1);
+                        time = 20f;
+                    }},
+
+                    new StupidConsumeHighestModule(3){{
+                        requestPins = new int[]{4, 5};
+                    }},
+                    new StupidConsumeItemModule(4, -4){{
+                        items = ItemStack.with(Items.coal, 1);
+                        time = 40f;
+                    }},
+                    new StupidConsumeItemModule(5, -5){{
+                        items = ItemStack.with(Items.pyratite, 1);
+                        time = 60f;
+
+                        efficiencyIncrease = 2.5f;
+                    }}
+                );
+            }
+        };
 
         earthboundInfuser = new ModularCrafter("earthbound-infuser"){{
             requirements(Category.crafting, with(
