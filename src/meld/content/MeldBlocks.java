@@ -172,14 +172,16 @@ public class MeldBlocks {
                     new TimedRecipe(){{
                         craftTime = 10;
                         float multi = MeldLiquids.aetherEfficiencies.get(MeldLiquids.aether, 1);
-                        inputLiquids = LiquidStack.with(MeldLiquids.aether, outletRate);
-                        outputLiquids = LiquidStack.with(MeldLiquids.aspect, outletRate * multi);
+                        float density = MeldLiquids.aetherDensities.get(MeldLiquids.aether, 1);
+                        inputLiquids = LiquidStack.with(MeldLiquids.aether, outletRate/density);
+                        outputLiquids = LiquidStack.with(MeldLiquids.aspect, outletRate * multi * 10);
                     }},
                     new TimedRecipe(){{
                         craftTime = 10;
                         float multi = MeldLiquids.aetherEfficiencies.get(MeldLiquids.pollutantMixture, 1);
-                        inputLiquids = LiquidStack.with(MeldLiquids.pollutantMixture, outletRate);
-                        outputLiquids = LiquidStack.with(MeldLiquids.boundAspect, outletRate * multi);
+                        float density = MeldLiquids.aetherDensities.get(MeldLiquids.pollutantMixture, 1);
+                        inputLiquids = LiquidStack.with(MeldLiquids.pollutantMixture, outletRate/density);
+                        outputLiquids = LiquidStack.with(MeldLiquids.boundAspect, outletRate * multi * 10);
                     }}
             );
         }};
@@ -644,7 +646,7 @@ public class MeldBlocks {
 
             range = 8;
 
-            consume(new ConsumeLiquid(MeldLiquids.aether, outletRate/2));
+            consume(new ConsumeAspects(outletRate/2, MeldLiquids.outletEfficiencies, MeldLiquids.outletDensities));
         }};
 
         earthboundInfuser = new ModularCrafter("earthbound-infuser"){{
