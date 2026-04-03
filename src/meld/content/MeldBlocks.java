@@ -18,6 +18,7 @@ import meld.world.blocks.crafting.modules.GateModule.OutputCondition;
 import meld.world.blocks.crafting.recipe.TimedRecipe;
 import meld.world.blocks.fluid.ChannelValve;
 import meld.world.blocks.fluid.ChannelVent;
+import meld.world.blocks.fluid.ValveController;
 import meld.world.blocks.fluid.VisualAspectPipe;
 import meld.world.blocks.items.PriorityInputSplitter;
 import meld.world.blocks.production.SingleBeamDrill;
@@ -73,7 +74,7 @@ public class MeldBlocks {
 
     public static ModularCrafter gasKiln, rotaryKiln, pneumaticExtruder;
 
-    public static Block channelNode, channelFace, aspectOutlet, aspectChannel, channelVent, manualValve, intakeValve;
+    public static Block channelNode, channelFace, aspectOutlet, aspectChannel, channelVent, manualValve, intakeValve, valveController;
 
     public static Block sunder, molotov, vivisection;
 
@@ -226,6 +227,18 @@ public class MeldBlocks {
 
             health = 800;
             armor = 8;
+
+            solid = false;
+            placeableLiquid = true;
+        }};
+
+        valveController = new ValveController("valve-controller"){{
+            requirements(Category.liquid, with(
+                    MeldItems.debris, 12
+            ));
+            size = 1;
+
+            health = 120;
 
             solid = false;
             placeableLiquid = true;
@@ -532,8 +545,9 @@ public class MeldBlocks {
         }};
 
         shadesteelShingles = new Wall("shadesteel-shingles"){{
-            requirements(Category.defense, with(MeldItems.shadesteel, 24));
-            health = 800;
+            requirements(Category.defense, with(MeldItems.shadesteel, 64));
+            size = 2;
+            health = 2400;
         }};
 
         silverHusk = new RegenProjector("silver-husk"){{
@@ -552,7 +566,8 @@ public class MeldBlocks {
                 new DrawRegion("-bottom"){{
                     layer = Layer.block - 1;
                 }},
-                new DrawLiquidTile(MeldLiquids.aspect),
+                    new DrawLiquidTile(MeldLiquids.aspect),
+                    new DrawLiquidTile(MeldLiquids.boundAspect),
                 new DrawDefault()
             );
 
