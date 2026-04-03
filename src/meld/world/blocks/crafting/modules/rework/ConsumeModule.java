@@ -15,14 +15,14 @@ public abstract class ConsumeModule extends CrafterModule{
     public float getCurrent(ModularCrafterBuild build){
         if(!dumpExtra){
             //Find the least consumed output, it signals inactivity
-            float max = 0f;
+            float max = Float.NEGATIVE_INFINITY;
             for(int i : outputPins){
                 max = Math.max(max, build.getPin(i));
             }
             return max;
         }else{
             //If we don't care about a few full inputs, pick the minimum instead
-            float min = 0f;
+            float min = Float.POSITIVE_INFINITY;
             for(int i : outputPins){
                 min = Math.min(min, build.getPin(i));
             }

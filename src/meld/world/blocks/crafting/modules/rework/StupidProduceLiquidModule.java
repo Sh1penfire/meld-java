@@ -5,29 +5,24 @@ import meld.world.blocks.crafting.*;
 import meld.world.blocks.crafting.ModularCrafter.*;
 import mindustry.type.*;
 
-public class StupidProduceLiquidModule extends CrafterModule{
+public class StupidProduceLiquidModule extends ProduceModule{
     public LiquidStack[] liquids;
-    /// Pin to consume efficiency from.
-    public int[] inputPins;
 
     public StupidProduceLiquidModule(int... inputPins){
-        this.inputPins = inputPins;
+        super(inputPins);
     }
 
     @Override
     public void update(ModularCrafterBuild build){
-        float input = 1f;
-        for(int i : inputPins) input *= build.getPin(i);
-
-        //After summing, subtract the final efficiency
-        for(int i : inputPins) build.setPin(i, build.getPin(i) - input);
-
         //check full
         for(LiquidStack stack : liquids){
             if(build.liquids.get(stack.liquid) >= build.block.liquidCapacity - 0.001f){
                 return;
             }
         }
+
+        //Sum efficiencies and timescale up
+        float input = takeEfficiency(build);
 
         //continuously output based on efficiency
         for(LiquidStack stack : liquids){

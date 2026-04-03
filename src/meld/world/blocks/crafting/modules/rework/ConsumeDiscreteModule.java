@@ -26,6 +26,8 @@ public abstract class ConsumeDiscreteModule extends ConsumeModule{
         float consumed = (efficiencyIncrease - current - baseEfficiency) / (efficiencyIncrease - baseEfficiency);
         float output = Math.max(baseEfficiency, current);
 
+        build.setPin(outputPins[0] + 20, current);
+
         //if efficiency has been used
         if(consumed > 0f && canConsume(build)){
             float progress = build.getPin(progressPin);

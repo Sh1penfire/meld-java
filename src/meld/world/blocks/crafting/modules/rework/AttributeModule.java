@@ -23,7 +23,7 @@ public class AttributeModule extends CrafterModule {
 
     @Override
     public void update(ModularCrafterBuild build){
-        for(int o : outputPins) build.setPin(o, build.getPin(storagePin));
+        for(int i : outputPins) build.setPin(i, Math.max(build.getPin(storagePin), build.getPin(i)));
     }
 
     @Override

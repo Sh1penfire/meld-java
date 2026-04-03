@@ -669,37 +669,20 @@ public class MeldBlocks {
             size = 3;
 
             modules.addAll(
+                new ProduceItemModule(1, 2){{
+                    items = ItemStack.with(Items.titanium, 2);
+                    time = 30f;
+
+                    progressPin = 0;
+                }},
                 new ConsumeItemModule(1){{
                     items = ItemStack.with(Items.copper, 2);
-                    time = 60f;
+                    time = 30f;
 
                     progressPin = -1;
                 }},
-                new ProduceItemModule(1){{
-                    items = ItemStack.with(Items.titanium, 2);
-                    time = 60f;
-
-                    progressPin = -2;
-                }},
-                /*
-                new StupidConsumeLiquidModule(2){{ TODO does not work properly
-                    liquids = LiquidStack.with(Liquids.water, 1f);
-                }},
-                new StupidProduceLiquidModule(5){{
-                    liquids = LiquidStack.with(Liquids.cryofluid, 1f);
-                }},
-                */
-                new ConsumePayloadModule(3){{
-                    payloads = PayloadStack.with(Blocks.plastaniumWallLarge, 1);
-                    time = 180f;
-
-                    progressPin = -3;
-                }},
-                new ProducePayloadModule(3){{
-                    payloads = PayloadStack.with(Blocks.plastaniumWall, 2);
-                    time = 60f;
-
-                    progressPin = -4;
+                new EfficiencySourceModule(2){{
+                    baseEfficiency = 3f;
                 }}
             );
         }};
@@ -723,7 +706,6 @@ public class MeldBlocks {
                         time = 60f;
                         progressPin = 0;
                     }},
-                        //TODO sand consumption does not scale.
                         new ConsumeItemModule(1){{
                             items = ItemStack.with(Items.sand, 1);
                             time = 20f;
