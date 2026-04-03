@@ -16,10 +16,7 @@ import meld.world.blocks.crafting.modules.*;
 import meld.world.blocks.crafting.modules.GateModule.ConsumeCondition;
 import meld.world.blocks.crafting.modules.GateModule.OutputCondition;
 import meld.world.blocks.crafting.recipe.TimedRecipe;
-import meld.world.blocks.fluid.ChannelValve;
-import meld.world.blocks.fluid.ChannelVent;
-import meld.world.blocks.fluid.ValveController;
-import meld.world.blocks.fluid.VisualAspectPipe;
+import meld.world.blocks.fluid.*;
 import meld.world.blocks.items.PriorityInputSplitter;
 import meld.world.blocks.production.SingleBeamDrill;
 import meld.world.meta.*;
@@ -36,6 +33,7 @@ import mindustry.entities.pattern.ShootAlternate;
 import mindustry.entities.pattern.ShootSpread;
 import mindustry.gen.Sounds;
 import mindustry.graphics.Layer;
+import mindustry.graphics.Pal;
 import mindustry.type.*;
 import mindustry.world.Block;
 import mindustry.world.blocks.defense.ForceProjector;
@@ -44,6 +42,7 @@ import mindustry.world.blocks.defense.Wall;
 import mindustry.world.blocks.defense.turrets.ItemTurret;
 import mindustry.world.blocks.defense.turrets.LiquidTurret;
 import mindustry.world.blocks.distribution.*;
+import mindustry.world.blocks.liquid.ArmoredConduit;
 import mindustry.world.blocks.liquid.Conduit;
 import mindustry.world.blocks.liquid.LiquidJunction;
 import mindustry.world.blocks.liquid.LiquidRouter;
@@ -74,7 +73,7 @@ public class MeldBlocks {
 
     public static ModularCrafter gasKiln, rotaryKiln, pneumaticExtruder;
 
-    public static Block channelNode, channelFace, aspectOutlet, aspectChannel, channelVent, manualValve, intakeValve, valveController;
+    public static Block channelNode, channelFace, aspectOutlet, aspectChannel, channelDirector, channelVent, manualValve, intakeValve, valveController, pipebox;
 
     public static Block sunder, molotov, vivisection;
 
@@ -98,13 +97,14 @@ public class MeldBlocks {
 
     public static void load(){
 
-        channelFace = new LiquidJunction("channel-face"){{
+        channelFace = new FlexibleSizeJunction("channel-face"){{
             requirements(Category.liquid, with(
                     MeldItems.debris, 2
             ));
             health = 120;
             solid = false;
             placeableLiquid = true;
+            usePassedOffset = false;
         }};
 
         channelNode = new LiquidRouter("channel-node"){{
@@ -190,6 +190,24 @@ public class MeldBlocks {
             junctionReplacement = channelFace;
         }};
 
+        channelDirector = new Conduit("channel-director"){{
+            requirements(Category.liquid, with(
+                    MeldItems.debris, 5
+            ));
+
+            leaks = false;
+            health = 200;
+
+            botColor = Pal.gray;
+            placeableLiquid = true;
+            liquidPressure = 0.5f;
+
+            liquidCapacity = 80;
+            size = 1;
+            botColor = Color.white;
+            junctionReplacement = channelFace;
+        }};
+
         channelVent = new ChannelVent("pressure-vent"){{
             requirements(Category.liquid, with(
                     MeldItems.debris, 8,
@@ -234,7 +252,21 @@ public class MeldBlocks {
 
         valveController = new ValveController("valve-controller"){{
             requirements(Category.liquid, with(
-                    MeldItems.debris, 12
+                    MeldItems.debris, 12,
+                    MeldItems.aspectPipe, 6
+            ));
+            size = 1;
+
+            health = 120;
+
+            solid = false;
+            placeableLiquid = true;
+        }};
+
+        pipebox = new Pipebox("pipebox") {{
+            requirements(Category.liquid, with(
+                    MeldItems.debris, 2,
+                    MeldItems.aspectPipe, 4
             ));
             size = 1;
 
