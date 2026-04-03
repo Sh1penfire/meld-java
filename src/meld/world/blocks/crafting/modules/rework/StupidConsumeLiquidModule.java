@@ -5,25 +5,23 @@ import meld.world.blocks.crafting.*;
 import meld.world.blocks.crafting.ModularCrafter.*;
 import mindustry.type.*;
 
-public class StupidConsumeLiquidModule extends CrafterModule{
+public class StupidConsumeLiquidModule extends ConsumeModule{
     public LiquidStack[] liquids;
-    /// Pin to provide efficiency on.
-    public int outputPin;
 
     public float baseEfficiency = 0;
     public float efficiencyIncrease = 1;
 
-    public StupidConsumeLiquidModule(int outputPin){
-        this.outputPin = outputPin;
+    public StupidConsumeLiquidModule(int... outputPins){
+        super(outputPins);
     }
 
     @Override
     public void update(ModularCrafterBuild build){
-        float output = build.getPin(outputPin);
+        //Find the least consumed output, it signals inactivity
+        float current = getCurrent(build);
         //Get the amount of efficiency that was eaten
-        float consumed = (efficiencyIncrease - output - baseEfficiency) / (efficiencyIncrease - baseEfficiency);
-
-        if(output < baseEfficiency) build.setPin(outputPin, baseEfficiency);
+        float consumed = (efficiencyIncrease - current - baseEfficiency) / (efficiencyIncrease - baseEfficiency);
+        float output = Math.max(baseEfficiency, current);
 
         //if efficiency has been used
         if(consumed > 0f){
@@ -36,9 +34,11 @@ public class StupidConsumeLiquidModule extends CrafterModule{
                 for(LiquidStack stack : liquids){
                     build.liquids.remove(stack.liquid, stack.amount * min);
                 }
-                build.setPin(outputPin, baseEfficiency + efficiencyIncrease * min);
+                output = baseEfficiency + efficiencyIncrease * min;
             }
         }
+
+        build.setPins(outputPins, output);
     }
 
     @Override

@@ -669,13 +669,17 @@ public class MeldBlocks {
             size = 3;
 
             modules.addAll(
-                new ConsumeItemModule(1, -1){{
+                new ConsumeItemModule(1){{
                     items = ItemStack.with(Items.copper, 2);
                     time = 60f;
+
+                    progressPin = -1;
                 }},
-                new ProduceItemModule(1, -2){{
+                new ProduceItemModule(1){{
                     items = ItemStack.with(Items.titanium, 2);
                     time = 60f;
+
+                    progressPin = -2;
                 }},
                 /*
                 new StupidConsumeLiquidModule(2){{ TODO does not work properly
@@ -685,13 +689,17 @@ public class MeldBlocks {
                     liquids = LiquidStack.with(Liquids.cryofluid, 1f);
                 }},
                 */
-                new ConsumePayloadModule(3, -3){{
+                new ConsumePayloadModule(3){{
                     payloads = PayloadStack.with(Blocks.plastaniumWallLarge, 1);
                     time = 180f;
+
+                    progressPin = -3;
                 }},
-                new ProducePayloadModule(3, -4){{
+                new ProducePayloadModule(3){{
                     payloads = PayloadStack.with(Blocks.plastaniumWall, 2);
                     time = 60f;
+
+                    progressPin = -4;
                 }}
             );
         }};
@@ -710,37 +718,37 @@ public class MeldBlocks {
                 size = 2;
 
                 modules.addAll(
-                    new ProduceItemModule( 1, -1){{
+                    new ProduceItemModule( 1, 2){{
                         items = ItemStack.with(Items.silicon, 1);
                         time = 60f;
+                        progressPin = 0;
                     }},
-                        new ConsumeAllModule(1){{
-                            inputPins = new int[]{2, 3};
+                        //TODO sand consumption does not scale.
+                        new ConsumeItemModule(1){{
+                            items = ItemStack.with(Items.sand, 1);
+                            time = 20f;
+                            progressPin = -1;
                         }},
-                            new ConsumeItemModule(2, -2){{
-                                items = ItemStack.with(Items.sand, 1);
-                                time = 20f;
-                            }},
-                            new ConsumeHighestModule(3){{
-                                inputPins = new int[]{4, 5};
-                            }},
-                                new ConsumeItemModule(4, -4){{
-                                    items = ItemStack.with(Items.coal, 1);
-                                    time = 40f;
-                                }},
-                                new AttributeModule(5, -5){{
-                                    attribute = Attribute.heat;
-                                    baseEfficiency = 0f;
-                                    maxBoost = 2f;
-                                }},
-                                //This is assigned to the same pin as the attribute, and updates after, which means
-                                //it will only "top off" the efficiency that the attributes don't reach.
-                                new ConsumeItemModule(5, -6){{
-                                    items = ItemStack.with(Items.pyratite, 1);
-                                    time = 20f;
-
-                                    efficiencyIncrease = 2.5f;
-                                }}
+                        new AttributeModule(2){{
+                            attribute = Attribute.heat;
+                            baseEfficiency = 0f;
+                            maxBoost = 2f;
+                            storagePin = -2;
+                        }},
+                        //This is assigned to the same pin as the attribute, and updates after,
+                        //which means it will only "top off" the efficiency that the attributes don't reach.
+                        new ConsumeItemModule(2){{
+                            items = ItemStack.with(Items.pyratite, 1);
+                            efficiencyIncrease = 2.5f;
+                            time = 20f;
+                            progressPin = -3;
+                        }},
+                        //Same as above, but will also cover for the pyratite consumer.
+                        new ConsumeItemModule(2){{
+                            items = ItemStack.with(Items.coal, 1);
+                            time = 40f;
+                            progressPin = -4;
+                        }}
                 );
             }
         };

@@ -5,8 +5,8 @@ import meld.world.blocks.crafting.ModularCrafter.*;
 import mindustry.world.meta.Attribute;
 
 public class AttributeModule extends CrafterModule {
-    /// Pin to provide efficiency on.
-    public int outputPin;
+    /// Pins to provide efficiency on.
+    public int[] outputPins;
     /// Pin to store the efficiency that should be output. Don't let other modules touch it.
     public int storagePin;
 
@@ -17,14 +17,13 @@ public class AttributeModule extends CrafterModule {
     /// The minimum attribute efficiency needed for it to affect output.
     public float minEfficiency = -1;
 
-    public AttributeModule(int outputPin, int storagePin){
-        this.outputPin = outputPin;
-        this.storagePin = storagePin;
+    public AttributeModule(int... outputPins){
+        this.outputPins = outputPins;
     }
 
     @Override
-    public void update(ModularCrafter.ModularCrafterBuild build) {
-        build.setPin(outputPin, build.getPin(storagePin));
+    public void update(ModularCrafterBuild build){
+        for(int o : outputPins) build.setPin(o, build.getPin(storagePin));
     }
 
     @Override

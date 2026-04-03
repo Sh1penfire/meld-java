@@ -116,6 +116,8 @@ public class ModularCrafter extends PayloadBlock{
         public void on_event(ModularCrafterBuild build){
 
         }
+
+
     }
 
     public static abstract class CraftingModule extends CrafterModule{
@@ -245,6 +247,10 @@ public class ModularCrafter extends PayloadBlock{
 
         public void setPin(int pin, float value){
             data.put(pin, value);
+        }
+
+        public void setPins(int[] pins, float value){
+            for(int i : pins) setPin(i, value);
         }
 
         public float getPin(int pin){

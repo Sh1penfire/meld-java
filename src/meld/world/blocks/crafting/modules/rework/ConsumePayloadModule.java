@@ -1,6 +1,5 @@
 package meld.world.blocks.crafting.modules.rework;
 
-import arc.util.*;
 import meld.world.blocks.crafting.*;
 import meld.world.blocks.crafting.ModularCrafter.*;
 import mindustry.type.*;
@@ -8,61 +7,40 @@ import mindustry.world.blocks.payloads.*;
 
 import java.util.*;
 
-public class ConsumePayloadModule extends CrafterModule{
+public class ConsumePayloadModule extends ConsumeDiscreteModule{
     public PayloadStack[] payloads;
-    /// Pin to provide efficiency on.
-    public int outputPin;
-    /// Pin to store consumption progress.
-    public int progressPin;
-    public float time = 60f;
 
-    public float baseEfficiency = 0f;
-    public float efficiencyIncrease = 1f;
-
-    public ConsumePayloadModule(int outputPin, int progressPin){
-        this.outputPin = outputPin;
-        this.progressPin = progressPin;
+    public ConsumePayloadModule(int... outputPins){
+        super(outputPins);
     }
 
     @Override
     public void update(ModularCrafterBuild build){
-        float output = build.getPin(outputPin);
-        //Get the amount of efficiency that was eaten
-        float consumed = (efficiencyIncrease - output - baseEfficiency) / (efficiencyIncrease - baseEfficiency);
-        float progress = build.getPin(progressPin);
+        super.update(build);
 
-        if(output < baseEfficiency) build.setPin(outputPin, baseEfficiency);
-
-        if(build.payload != null && contains(payloads, build.payload) && build.moveInPayload()){
+        if(build.payload != null && wants(build.payload) && build.moveInPayload()){
             build.payloads.add(build.payload.content());
             build.payload = null;
         }
+    }
 
-        //if efficiency has been used
-        if(consumed > 0f && has(build, payloads)){
-            build.setPin(outputPin, baseEfficiency + efficiencyIncrease);
-            progress += consumed * Time.delta;
+    @Override
+    public boolean canConsume(ModularCrafterBuild build){
+        return Arrays.stream(payloads).allMatch(stack -> build.payloads.contains(stack));
+    }
 
-            //consumption
-            while(progress > time && has(build, payloads)){
-                for(PayloadStack stack : payloads){
-                    build.payloads.remove(stack.item, stack.amount);
-                }
-                progress -= time;
-            }
-            build.setPin(progressPin, progress);
+    @Override
+    public void consume(ModularCrafterBuild build){
+        for(PayloadStack stack : payloads){
+            build.payloads.remove(stack.item, stack.amount);
         }
     }
 
-    public static boolean contains(PayloadStack[] payloads, Payload pay){
+    public boolean wants(Payload pay){
         for(PayloadStack stack : payloads){
             if(stack.item == pay.content()) return true;
         }
         return false;
-    }
-
-    public static boolean has(ModularCrafterBuild build, PayloadStack[] payloadStacks){
-        return Arrays.stream(payloadStacks).allMatch(stack -> build.payloads.contains(stack));
     }
 
     @Override

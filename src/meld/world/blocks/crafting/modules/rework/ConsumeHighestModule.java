@@ -2,13 +2,12 @@ package meld.world.blocks.crafting.modules.rework;
 
 import meld.world.blocks.crafting.ModularCrafter.*;
 
-public class ConsumeHighestModule extends CrafterModule{
+/// Will only consume from the pin with the highest efficiency.
+public class ConsumeHighestModule extends ConsumeModule{
     public int[] inputPins;
-    /// Pin to provide efficiency on.
-    public int[] outputPins;
 
     public ConsumeHighestModule(int... outputPins){
-        this.outputPins = outputPins;
+        super(outputPins);
     }
 
     public void update(ModularCrafterBuild build){
@@ -23,13 +22,12 @@ public class ConsumeHighestModule extends CrafterModule{
         }
 
         //Find the least consumed output, it signals inactivity
-        float output = 0f;
-        for(int o : outputPins) output = Math.max(output, build.getPin(o));
+        float current = getCurrent(build);
 
-        if(input > output){
+        if(input > current){
             //Just swap pin contents
-            build.setPin(inputPin, output);
-            for(int o : outputPins) build.setPin(o, input);
+            build.setPin(inputPin, current);
+            build.setPins(outputPins, input);
         }
 
     }

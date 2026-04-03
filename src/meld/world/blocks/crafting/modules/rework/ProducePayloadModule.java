@@ -1,7 +1,6 @@
 package meld.world.blocks.crafting.modules.rework;
 
 import arc.*;
-import arc.util.*;
 import meld.world.blocks.crafting.*;
 import meld.world.blocks.crafting.ModularCrafter.*;
 import mindustry.game.EventType.*;
@@ -12,36 +11,18 @@ import mindustry.world.blocks.payloads.*;
 
 import java.util.*;
 
-public class ProducePayloadModule extends CrafterModule{
+public class ProducePayloadModule extends ProduceDiscreteModule{
     public PayloadStack[] payloads;
-    /// Pin to consume efficiency from.
-    public int inputPin;
-    /// Pin used to store crafting progress.
-    public int progressPin;
-    public float time = 60f;
 
-    public ProducePayloadModule(int inputPin, int progressPin){
-        this.inputPin = inputPin;
-        this.progressPin = progressPin;
+    public ProducePayloadModule(int... inputPins){
+        super(inputPins);
     }
 
     @Override
     public void update(ModularCrafterBuild build){
-        if(outputFits(build)){
-            float progress = build.getPin(progressPin);
-            progress += build.getPin(inputPin) * build.timeScale() * Time.delta;
-            build.setPin(inputPin, 0f);
+        super.update(build);
 
-            while(progress > time && outputFits(build)){
-                for(PayloadStack stack : payloads){
-                    build.payloads.add(stack.item, stack.amount);
-                }
-                progress -= time;
-            }
-            build.setPin(progressPin, progress);
-        }
-
-        //output
+        //dump payloads
         if(build.payload == null && build.payloads.any()){
             for(PayloadStack stack : payloads){
                 if(build.payloads.contains(stack.item)){
@@ -50,9 +31,9 @@ public class ProducePayloadModule extends CrafterModule{
                     if(stack.item instanceof UnitType type){
                         build.payload = new UnitPayload(type.create(build.team));
                         Unit p = ((UnitPayload)build.payload).unit;
-                            /*if(commandPos != null && p.isCommandable()){
-                                p.command().commandPosition(commandPos);
-                            }*/
+                        /*if(commandPos != null && p.isCommandable()){
+                            p.command().commandPosition(commandPos);
+                        }*/
                         Events.fire(new UnitCreateEvent(p, build));
                     }else if(stack.item instanceof Block block){
                         build.payload = new BuildPayload(block, build.team);
@@ -64,20 +45,28 @@ public class ProducePayloadModule extends CrafterModule{
             }
         }
 
-        if(build.payload != null && outputs(build.payload)){
+        if(build.payload != null && shouldDump(build.payload)){
             build.moveOutPayload();
         }
     }
 
-    public boolean outputs(Payload pay){
+    @Override
+    public boolean canOutput(ModularCrafterBuild build){
+        return Arrays.stream(payloads).allMatch(stack -> build.payloads.get(stack.item) + stack.amount <= build.modular.payloadCapacity);
+    }
+
+    @Override
+    public void output(ModularCrafterBuild build){
+        for(PayloadStack stack : payloads){
+            build.payloads.add(stack.item, stack.amount);
+        }
+    }
+
+    public boolean shouldDump(Payload pay){
         for(PayloadStack stack : payloads){
             if(stack.item == pay.content()) return true;
         }
         return false;
-    }
-
-    public boolean outputFits(ModularCrafterBuild build){
-        return Arrays.stream(payloads).allMatch(stack -> build.payloads.get(stack.item) + stack.amount <= build.modular.payloadCapacity);
     }
 
     @Override
