@@ -27,11 +27,6 @@ public class AttributeModule extends CrafterModule {
     }
 
     @Override
-    public void setup(ModularCrafter block){
-        block.hook(BlockEvent.Defaults.proximityUpdate, this);
-    }
-
-    @Override
     public void on_event(ModularCrafterBuild build){
         float efficiency = baseEfficiency + Math.min(maxBoost, boostScale * build.block.sumAttribute(attribute, build.tileX(), build.tileY()) + attribute.env());
 
@@ -41,5 +36,10 @@ public class AttributeModule extends CrafterModule {
         }
 
         build.setPin(storagePin, efficiency);
+    }
+
+    @Override
+    public void setup(ModularCrafter block){
+        block.hook(BlockEvent.Defaults.proximityUpdate, this);
     }
 }

@@ -202,6 +202,7 @@ public class ModularCrafter extends PayloadBlock{
         public IntFloatMap data = new IntFloatMap();
         public PayloadSeq payloads = new PayloadSeq();
 
+        public float[] sideHeat = new float[4];
         public float heat = 0f;
 
         @Override
@@ -285,23 +286,27 @@ public class ModularCrafter extends PayloadBlock{
             modules.each(c -> c.update(this));
         }
 
+        //the useful one
         @Override
-        public float heat(){ //the useful one
+        public float heat(){
             return heat;
         }
 
+        //only used by DrawHeatOutput
         @Override
-        public float heatFrac(){ //only used by DrawHeatOutput
+        public float heatFrac(){
             return 0;
         }
 
+        //only used by DrawHeatInput
         @Override
-        public float[] sideHeat(){ //only used by DrawHeatInput
-            return new float[0];
+        public float[] sideHeat(){
+            return sideHeat;
         }
 
+        //only used by DrawHeatInput and DrawHeatRegion
         @Override
-        public float heatRequirement(){ //only used by DrawHeatInput and DrawHeatRegion
+        public float heatRequirement(){
             return 0;
         }
 

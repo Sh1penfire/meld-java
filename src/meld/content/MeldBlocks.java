@@ -719,6 +719,7 @@ public class MeldBlocks {
                             time = 20f;
                             progressPin = -1;
                         }},
+                        new ConsumeHeatModule(2),
                         new AttributeModule(2){{
                             attribute = Attribute.heat;
                             baseEfficiency = 0f;
