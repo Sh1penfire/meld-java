@@ -1,44 +1,55 @@
 package meld.world.blocks.crafting;
 
+import arc.scene.ui.layout.*;
 import arc.struct.*;
-import arc.util.Log;
-import arc.util.Time;
+import arc.util.*;
 import arc.util.io.Reads;
 import arc.util.io.Writes;
+import mindustry.ctype.*;
 import mindustry.game.Team;
 import mindustry.gen.Building;
-import mindustry.type.Item;
-import mindustry.type.ItemStack;
-import mindustry.type.Liquid;
+import mindustry.type.*;
 import mindustry.world.Block;
-import mindustry.world.blocks.production.GenericCrafter;
-import mindustry.world.meta.Attribute;
+import mindustry.world.blocks.heat.*;
+import mindustry.world.blocks.payloads.*;
+import mindustry.world.draw.*;
+import mindustry.world.meta.*;
 
-import java.util.HashMap;
-
-public class ModularCrafter extends Block {
-
+public class ModularCrafter extends PayloadBlock{
     //Modules updates every update, listeners are for modules with specific events
-    public Seq<CrafterModule> modules = new Seq<CrafterModule>();
-    public ObjectMap<Object, Seq<CrafterModule>> listeners = new ObjectMap<Object, Seq<CrafterModule>>();
+    public Seq<CrafterModule> modules = new Seq<>();
+    public ObjectMap<Object, Seq<CrafterModule>> listeners = new ObjectMap<>();
 
-    //list of items/liquids which this block accepts
+    //Lists of stuff which this block accepts
+    //note: could be a single HashSet<UnlockableContent>.
     public Seq<Liquid> acceptedLiquids = new Seq<>();
     public Seq<Item> acceptedItems = new Seq<>();
+    public Seq<UnlockableContent> acceptedPayloads = new Seq<>();
 
-    //List of items/liquids which get dumped
+    //Lists of stuff which gets dumped
     public Seq<Liquid> dumpedLiquids = new Seq<>();
     public Seq<Item> dumpedItems = new Seq<>();
+    public Seq<UnlockableContent> dumpedPayloads = new Seq<>();
 
     public boolean replaceBars = true;
+    public int payloadCapacity = 3;
 
-    //Default float data array
+    /// Used to show heat as a percentage. Does not affect function.
+    public float fullHeat = 10f;
+
+    /// Default float data array
     public IntFloatMap defaultData = new IntFloatMap();
+    /// When true, shows a table with the data map in the block's display.
+    public boolean debugTable = true;
+
+    public DrawBlock drawer = new DrawDefault();
+
 
     public ModularCrafter(String name) {
         super(name);
         update = true;
         solid = true;
+        sync = true;
     }
 
     @Override
@@ -57,21 +68,24 @@ public class ModularCrafter extends Block {
         }
     }
 
+    @Override
+    public void init(){
+        super.init();
+        modules.each(m -> m.setup(this));
+    }
+
+    @Override
+    public void load(){
+        super.load();
+        drawer.load(this);
+    }
+
     public static void trigger(ModularCrafter block, ModularCrafterBuild build, Object event){
         Seq<CrafterModule> events = block.listeners.get(event);
-        if(events != null) events.each(c -> c.update(build));
+        if(events != null) events.each(c -> c.on_event(build));
     }
 
     public void hook(Object event, CrafterModule module){
-        Seq<CrafterModule> events = listeners.get(event);
-        if(events == null) {
-            listeners.put(event, Seq.with(module));
-            return;
-        }
-        events.add(module);
-    }
-
-    public void hookAll(Object event, CrafterModule... module){
         Seq<CrafterModule> events = listeners.get(event);
         if(events == null) {
             listeners.put(event, Seq.with(module));
@@ -87,10 +101,25 @@ public class ModularCrafter extends Block {
         }
     }
 
+    @Override
+    public boolean outputsItems(){
+        return !dumpedItems.isEmpty();
+    }
+
     public static abstract class CrafterModule{
         public void update(ModularCrafterBuild build){
 
         }
+
+        public void setup(ModularCrafter block){
+
+        }
+
+        public void on_event(ModularCrafterBuild build){
+
+        }
+
+
     }
 
     public static abstract class CraftingModule extends CrafterModule{
@@ -166,10 +195,47 @@ public class ModularCrafter extends Block {
 
     public static final float ON = 1, OFF = 0;
 
-    public class ModularCrafterBuild extends Building {
-
+    public class ModularCrafterBuild extends PayloadBlockBuild<Payload> implements HeatConsumer, HeatBlock{
         public ModularCrafter modular;
         public IntFloatMap data = new IntFloatMap();
+        public PayloadSeq payloads = new PayloadSeq();
+
+        public float[] sideHeat = new float[4];
+        public float heat = 0f;
+
+        public float totalProgress = 0f;
+        public float visualEfficiency = 0f;
+
+
+        @Override
+        public void draw(){
+            drawer.draw(this);
+
+            drawPayload();
+        }
+
+        @Override
+        public void display(Table table){
+            super.display(table);
+
+            if(debugTable){
+                table.row();
+                table.table(d -> {
+                    Runnable rebuild = () -> {
+                        d.clearChildren();
+                        d.table(debug -> {
+                            data.iterator().forEachRemaining(entry -> {
+                                debug.add(entry.key + ": " + StatValues.fixValue(entry.value)).left();
+                                debug.row();
+                            });
+                        }).left();
+                        d.table().growX(); //ugh
+                    };
+                    d.update(rebuild);
+                    rebuild.run();
+                }).growX(); //It doesn't actually grow for some fucking reason. See ugh above.
+            }
+        }
 
         @Override
         public void created() {
@@ -177,20 +243,13 @@ public class ModularCrafter extends Block {
             data.putAll(defaultData);
         }
 
-        @Override
-        public void updateTile() {
-            super.updateTile();
-            this.dumpOutputs();
-        }
-
-        public void dumpOutputs(){
-            dumpedLiquids.each(this::dumpLiquid);
-            dumpedItems.each(this::dump);
-        }
-
         public void setPin(int pin, float value){
             data.put(pin, value);
-        };
+        }
+
+        public void setPins(int[] pins, float value){
+            for(int i : pins) setPin(i, value);
+        }
 
         public float getPin(int pin){
             return data.get(pin);
@@ -204,6 +263,11 @@ public class ModularCrafter extends Block {
         @Override
         public boolean acceptItem(Building source, Item item) {
             return (this.block.consumesItem(item) || acceptedItems.contains(item)) && this.items.get(item) < this.getMaximumAccepted(item);
+        }
+
+        @Override
+        public boolean acceptPayload(Building source, Payload payload){
+            return this.payload == null && acceptedPayloads.contains(payload.content()) && payloads.get(payload.content()) < payloadCapacity;
         }
 
         @Override
@@ -221,12 +285,51 @@ public class ModularCrafter extends Block {
         @Override
         public void update() {
             super.update();
+            visualEfficiency = 0f;
+
             modules.each(c -> c.update(this));
+
+            totalProgress += visualEfficiency * Time.delta;
+        }
+
+        //the useful one
+        @Override
+        public float heat(){
+            return heat;
+        }
+
+        //only used by DrawHeatOutput
+        @Override
+        public float heatFrac(){
+            return heat / fullHeat;
+        }
+
+        //only used by DrawHeatInput
+        @Override
+        public float[] sideHeat(){
+            return sideHeat;
+        }
+
+        //only used by DrawHeatInput and DrawHeatRegion
+        @Override
+        public float heatRequirement(){
+            return fullHeat;
+        }
+
+        @Override
+        public float warmup(){
+            return visualEfficiency;
+        }
+
+        @Override
+        public float totalProgress(){
+            return totalProgress;
         }
 
         @Override
         public void write(Writes write) {
             super.write(write);
+
             write.i(data.size);
             int[] keys = data.keys().toArray().toArray();
 
@@ -234,16 +337,26 @@ public class ModularCrafter extends Block {
                 write.i(i);
                 write.f(data.get(i));
             }
+
+            write.f(heat);
         }
 
         @Override
         public void read(Reads read, byte revision) {
             super.read(read, revision);
+
             data = new IntFloatMap();
             int len = read.i();
             for (int i = 0; i < len; i++){
                 data.put(read.i(), read.f());
             }
+
+            if(revision >= 1) heat = read.f();
+        }
+
+        @Override
+        public byte version(){
+            return 1;
         }
     }
 }

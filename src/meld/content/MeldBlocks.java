@@ -1,5 +1,6 @@
 package meld.content;
 
+import arc.*;
 import arc.graphics.Color;
 import arc.math.Interp;
 import meld.*;
@@ -10,6 +11,7 @@ import meld.world.blocks.consumers.ConsumeAspects;
 import meld.world.blocks.*;
 import meld.world.blocks.crafting.ModularCrafter;
 import meld.world.blocks.crafting.RecipeCrafter;
+import meld.world.blocks.crafting.modules.rework.*;
 import meld.world.blocks.crafting.recipe.ItemRecipe;
 import meld.world.blocks.crafting.recipe.SpoolRecipe;
 import meld.world.blocks.crafting.modules.*;
@@ -21,8 +23,7 @@ import meld.world.blocks.items.PriorityInputSplitter;
 import meld.world.blocks.production.SingleBeamDrill;
 import meld.world.meta.*;
 import mindustry.Vars;
-import mindustry.content.Fx;
-import mindustry.content.StatusEffects;
+import mindustry.content.*;
 import mindustry.entities.bullet.*;
 import mindustry.entities.effect.MultiEffect;
 import mindustry.entities.effect.ParticleEffect;
@@ -651,7 +652,7 @@ public class MeldBlocks {
             dumpedLiquids.addAll(MeldLiquids.pollutantMixture, MeldLiquids.fumes);
 
             //Should make all the modules trigger in order
-            hookAll(BlockEvent.Defaults.proximityUpdate,
+            /*hookAll(BlockEvent.Defaults.proximityUpdate,
                     new AttributeModule(){{
                         attribute = MeldAttributes.aetherAttr;
                         baseEfficiency = 0;
@@ -668,12 +669,12 @@ public class MeldBlocks {
 
                         efficiencyPin = 1;
                     }}
-            );
+            );*/
 
-            modules.addAll(
+            /*modules.addAll(
                     new ProduceLiquidModule(new LiquidStack(MeldLiquids.pollutantMixture, 1), 0),
                     new ProduceLiquidModule(new LiquidStack(MeldLiquids.fumes, 1), 1)
-            );
+            );*/
         }};
 
         elementalBlaster = new BeamDrill("elemental-blaster"){{
@@ -725,6 +726,97 @@ public class MeldBlocks {
             consume(new ConsumeAspects(outletRate/2, MeldLiquids.outletEfficiencies, MeldLiquids.outletDensities));
         }};
 
+        new ModularCrafter("stupid-crafter"){{
+            requirements(Category.crafting, with(MeldItems.debris, 40));
+            size = 3;
+
+            modules.addAll(
+                new ProduceHeatModule(0){{
+                    heatOutput = 10;
+                }},
+                new AttributeModule(0){{
+                    attribute = Attribute.heat;
+                    baseEfficiency = 0f;
+                    maxBoost = 2f;
+                    storagePin = 1;
+                }},
+                //This is assigned to the same pin as the attribute, and updates after,
+                //which means it will only "top off" the efficiency that the attributes don't reach.
+                new ConsumeItemModule(0){{
+                    items = ItemStack.with(Items.pyratite, 1);
+                    efficiencyIncrease = 4f;
+                    time = 20f;
+                    progressPin = 2;
+                }},
+                //Same as above, but will also cover for the pyratite consumer.
+                new ConsumeItemModule(0){{
+                    items = ItemStack.with(Items.coal, 1);
+                    time = 40f;
+                    progressPin = 3;
+                }}
+            );
+        }};
+
+        new ModularCrafter("stupid-silicon-smelter"){
+            //I refuse to add sprites to the files.
+            @Override
+            public void load(){
+                super.load();
+                region = Core.atlas.find("silicon-smelter");
+                fullIcon = Core.atlas.find("silicon-smelter");
+                uiIcon = Core.atlas.find("silicon-smelter");
+                if(drawer instanceof DrawMulti m && m.drawers[1] instanceof DrawHeatInput f) f.heat = Core.atlas.find("phase-heater-heat");
+                if(drawer instanceof DrawMulti m && m.drawers[2] instanceof DrawRegion r) r.region = Core.atlas.find("pneumatic-drill-rotator");
+                if(drawer instanceof DrawMulti m && m.drawers[3] instanceof DrawFlame f) f.top = Core.atlas.find("silicon-smelter-top");
+            }
+
+            {
+                requirements(Category.crafting, with(MeldItems.debris, 40));
+                size = 2;
+
+                drawer = new DrawMulti(
+                    new DrawDefault(),
+                    new DrawHeatInput(),
+                    new DrawRegion("", 3f, true),
+                    new DrawFlame(Color.valueOf("ffef99"))
+                );
+
+                modules.addAll(
+                    new ProduceItemModule( 1, 2){{
+                        items = ItemStack.with(Items.silicon, 1);
+                        time = 60f;
+                        progressPin = 0;
+                    }},
+                        new ConsumeItemModule(1){{
+                            items = ItemStack.with(Items.sand, 1);
+                            time = 20f;
+                            progressPin = -1;
+                        }},
+                        new ConsumeHeatModule(2),
+                        new AttributeModule(2){{
+                            attribute = Attribute.heat;
+                            baseEfficiency = 0f;
+                            maxBoost = 2f;
+                            storagePin = -2;
+                        }},
+                        //This is assigned to the same pin as the attribute, and updates after,
+                        //which means it will only "top off" the efficiency that the attributes don't reach.
+                        new ConsumeItemModule(2){{
+                            items = ItemStack.with(Items.pyratite, 1);
+                            efficiencyIncrease = 2.5f;
+                            time = 20f;
+                            progressPin = -3;
+                        }},
+                        //Same as above, but will also cover for the pyratite consumer.
+                        new ConsumeItemModule(2){{
+                            items = ItemStack.with(Items.coal, 1);
+                            time = 40f;
+                            progressPin = -4;
+                        }}
+                );
+            }
+        };
+
         earthboundInfuser = new ModularCrafter("earthbound-infuser"){{
             requirements(Category.crafting, with(
                     MeldItems.debris, 40,
@@ -741,7 +833,7 @@ public class MeldBlocks {
             dumpedItems.add(MeldItems.carbolith);
 
 
-            //Should make all the modules trigger in order
+            /*//Should make all the modules trigger in order
             hookAll(BlockEvent.Defaults.proximityUpdate,
                     new AttributeModule(){{
                         attribute = Attribute.steam;
@@ -751,11 +843,11 @@ public class MeldBlocks {
 
                         efficiencyPin = 0;
                     }}
-            );
+            );*/
 
             ItemRecipe carbolith = new ItemRecipe(with(MeldItems.debris, 1), with(MeldItems.carbolith, 1));
 
-            modules.addAll(
+            /*modules.addAll(
                     new ProduceLiquidModule(new LiquidStack(MeldLiquids.fumes, 2f), 0),
                     new GateModule(1, new GateModule.RecipeCondition(carbolith)),
                     new ConsumeLiquidModule(LiquidStack.with(MeldLiquids.fumes, 1, MeldLiquids.aspect, outletRate * 2), 1, 2),
@@ -765,7 +857,7 @@ public class MeldBlocks {
                         craftTime = 12;
                         recipe = carbolith;
                     }}
-            );
+            );*/
 
 
             /*
@@ -983,7 +1075,7 @@ public class MeldBlocks {
 
             float produceTime = 30;
 
-            modules.addAll(
+            /*modules.addAll(
                     new GateModule(
                             ModOUT.ZERO, new GateModule.RecipeCondition(aspectPipe1)
                     ),
@@ -1014,7 +1106,7 @@ public class MeldBlocks {
                         progressPin = ModOUT.FIVE;
                         craftTime = produceTime;
                     }}
-            );
+            );*/
         }};
 
         sharkFactory = new UnitFactory("shark-factory"){{
