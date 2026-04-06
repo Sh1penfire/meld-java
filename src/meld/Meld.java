@@ -10,6 +10,7 @@ import arc.util.Time;
 import arc.util.Tmp;
 import meld.content.*;
 import meld.graphics.MeldRegions;
+import meld.meta.MeldStatUnit;
 import meld.core.*;
 import mindustry.Vars;
 import mindustry.content.Blocks;
