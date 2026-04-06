@@ -2,19 +2,26 @@ package meld.world.blocks.fluid;
 
 import arc.math.Mathf;
 import arc.math.geom.Geometry;
+import arc.struct.Seq;
 import arc.util.Log;
+import meld.content.MeldLiquids;
 import meld.world.blocks.crafting.RecipeCrafter;
 import mindustry.Vars;
+import mindustry.game.Team;
 import mindustry.gen.Building;
 import mindustry.type.Liquid;
 import mindustry.world.Block;
 import mindustry.world.Tile;
+import mindustry.world.blocks.distribution.DuctBridge;
+import mindustry.world.blocks.liquid.ArmoredConduit;
 import mindustry.world.blocks.liquid.Conduit;
 import mindustry.world.blocks.liquid.LiquidRouter;
 
 import static meld.content.MeldLiquids.*;
 
-public class AspectPipe extends Conduit {
+public class AspectPipe extends ArmoredConduit {
+
+    Seq<Liquid> liquidSeq = new Seq<>();
     static final float rotatePad = 6, hpad = rotatePad / 2f / 4f;
     static final float[][] rotateOffsets = {{hpad, hpad}, {-hpad, hpad}, {-hpad, -hpad}, {hpad, -hpad}};
 
@@ -24,7 +31,7 @@ public class AspectPipe extends Conduit {
 
     @Override
     public boolean blends(Tile tile, int rotation, int otherx, int othery, int otherrot, Block otherblock) {
-        return super.blends(tile, rotation, otherx, othery, otherrot, otherblock) || (otherblock.hasLiquids && !(otherblock instanceof Conduit || otherblock instanceof LiquidRouter));
+        return super.blends(tile, rotation, otherx, othery, otherrot, otherblock) || (otherblock.hasLiquids && !(otherblock instanceof Conduit || otherblock instanceof LiquidRouter) && outletMapping.keys().toSeq().find(l -> otherblock.consumesLiquid(l)) != null);
     }
 
     public class AspectPipeBuild extends ConduitBuild{

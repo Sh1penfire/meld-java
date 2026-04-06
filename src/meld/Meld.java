@@ -9,6 +9,7 @@ import arc.struct.Seq;
 import arc.util.Time;
 import arc.util.Tmp;
 import meld.content.*;
+import meld.graphics.MeldRegions;
 import meld.core.*;
 import mindustry.Vars;
 import mindustry.content.Blocks;
@@ -26,8 +27,11 @@ public class Meld extends Mod{
     public static NativeJavaPackage p = null;
 
     public static Melting melting;
-    
+
     public Meld(){
+        Events.on(EventType.ClientLoadEvent.class, e -> {
+            MeldRegions.load();
+        });
     }
 
     public static String prefix(String in){

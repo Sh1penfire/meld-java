@@ -1,6 +1,7 @@
 package meld.world.blocks.fluid;
 
 import arc.graphics.g2d.Draw;
+import arc.math.Interp;
 import arc.math.Mathf;
 import mindustry.entities.Puddles;
 import mindustry.type.Liquid;
@@ -15,11 +16,15 @@ public class ChannelVent extends LiquidRouter {
 
     int ventTimer = timers++;
 
+    public Interp ventScaling = Interp.pow2In;
+
     public ChannelVent(String name) {
         super(name);
     }
 
     public class ChannelVentBuild extends LiquidRouterBuild{
+
+
         @Override
         public void updateTile() {
             super.updateTile();
@@ -27,7 +32,7 @@ public class ChannelVent extends LiquidRouter {
             Liquid liquid = liquids.current();
 
             if(timer.get(ventTimer, ventDelay) && liquid.gas || liquid.boilPoint <= Attribute.heat.env()){
-                float ventEfficiency = (liquids.get(liquid)/liquidCapacity - minPressure)/(1 - minPressure);
+                float ventEfficiency = ventScaling.apply((liquids.get(liquid)/liquidCapacity - minPressure)/(1 - minPressure));
 
                 if(ventEfficiency > 0){
 

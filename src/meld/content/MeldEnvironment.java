@@ -162,13 +162,13 @@ public class MeldEnvironment {
         }};
 
         //Barrens
+        literallyCarbonStoneFromMindustryButSlightlyDifferent = new Floor("carbonic-stone", 4);
+
         bedrock = new Floor("bedrock", 3);
         slate = new Floor("slate", 0);
 
         earthenStone = new Floor("earthen-stone", 4);
         carbonicPlates = new Floor("carbonic-plates", 3);
-        literallyCarbonStoneFromMindustryButSlightlyDifferent = new Floor("carbonic-stone", 4);
-
         slate.blendGroup = bedrock;
         mixtureStone = new Floor("mixture-stone", 3);
 

@@ -1,5 +1,6 @@
 package meld.content;
 
+import arc.func.Prov;
 import arc.graphics.Blending;
 import arc.graphics.Color;
 import arc.graphics.g2d.Draw;
@@ -8,6 +9,8 @@ import arc.graphics.g2d.Lines;
 import arc.math.Angles;
 import arc.math.Interp;
 import arc.math.Mathf;
+import arc.struct.ObjectIntMap;
+import arc.util.Log;
 import arc.util.Tmp;
 import meld.*;
 import meld.entities.bullet.TransitionBulletType;
@@ -39,8 +42,52 @@ import mindustry.graphics.Pal;
 import mindustry.type.UnitType;
 import mindustry.type.Weapon;
 import mindustry.type.weapons.RepairBeamWeapon;
+import arc.struct.ObjectMap.Entry;
 
 public class MeldUnits {
+
+    private static Entry<Class<? extends Entityc>, Prov<? extends Entityc>>[] types = new Entry[]{
+            prov(BulbheadEntity.class, BulbheadEntity::new)
+    };
+
+    private static ObjectIntMap<Class<? extends Entityc>> idMap = new ObjectIntMap<>();
+
+    /**
+     * Internal function to flatmap {@code Class -> Prov} into an {@link Entry}.
+     * @author GlennFolker
+     */
+
+    private static <T extends Entityc> Entry<Class<T>, Prov<T>> prov(Class<T> type, Prov<T> prov){
+        Entry<Class<T>, Prov<T>> entry = new Entry<>();
+        entry.key = type;
+        entry.value = prov;
+        return entry;
+    }
+
+    /**
+     * Setups all entity IDs and maps them into {@link EntityMapping}.
+     * Find all free ids to map to, then put the Entry(s) from types into the idMap. Starts searching after the last known index of a vanilla Entry
+     */
+
+    private static void setupID(){
+        int start = 33;
+        int[] free = new int[types.length];
+        for (int i = start, j = 0; i < EntityMapping.idMap.length; i++) {
+            if(EntityMapping.idMap[i] == null) free[j++] = i;
+            if(j > free.length - 1) break;
+        }
+
+        Log.info("setting up map");
+        for (int i = 0; i < free.length; i++) {
+            idMap.put(types[i].key, free[i]);
+            EntityMapping.idMap[free[i]] = types[i].value;
+        }
+    }
+
+    public static <T extends Entityc> int classID(Class<T> type){
+        return idMap.get(type, -1);
+    }
+
     //player units
     public static UnitType
     bulbhead, shark,
@@ -53,6 +100,8 @@ public class MeldUnits {
     jilla, kathid;
 
     public static void load(){
+        setupID();
+
         bulbheadOverseer = new UnitType("bulbhead-overseer"){{
             float IR = 80;
 
@@ -206,7 +255,7 @@ public class MeldUnits {
         }};
 
         bulbhead = new UnitType("bulbhead"){{
-            float IR = 120;
+            float IR = 140;
 
             health = 290;
 
@@ -376,7 +425,7 @@ public class MeldUnits {
                         color = Pal.accent;
                     }}
             );
-            constructor = UnitEdgeWaterMove::new;
+            constructor = BulbheadEntity::new;
 
             abilities.addAll(
                     new RegenAbility(){{

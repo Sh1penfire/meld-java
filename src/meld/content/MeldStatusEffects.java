@@ -8,6 +8,7 @@ import mindustry.type.StatusEffect;
 
 public class MeldStatusEffects {
     public static StatusEffect amplified, rally, anchored, aspectBurn, sentry, spurting, newborn, interference, drenched, stunned;
+    public static StatusEffect lacerated;
 
 
     public static void load(){
@@ -165,6 +166,13 @@ public class MeldStatusEffects {
 
                 speedMultiplier = 0.5f;
 
+        }};
+
+        lacerated = new StatusEffect("lacerated"){{
+            damage = -0.2f;
+            speedMultiplier = 0.45f;
+            reloadMultiplier = 0.5f;
+            buildSpeedMultiplier = 0.5f;
         }};
     }
 }

@@ -1,8 +1,10 @@
 package meld.world.blocks;
 
+import arc.Events;
 import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.Lines;
 import arc.math.Interp;
+import arc.struct.Seq;
 import arc.util.Nullable;
 import arc.util.Time;
 import meld.content.MeldStatusEffects;
@@ -10,6 +12,8 @@ import mindustry.Vars;
 import mindustry.content.Fx;
 import mindustry.entities.Units;
 import mindustry.entities.units.WeaponMount;
+import mindustry.game.EventType;
+import mindustry.game.Team;
 import mindustry.gen.Building;
 import mindustry.gen.Player;
 import mindustry.gen.Unit;
@@ -22,8 +26,10 @@ import mindustry.world.blocks.storage.CoreBlock;
 import static mindustry.Vars.tilesize;
 
 
-//Rallies units nearby,
+//Rallies units nearby, provides an extended build radius for core units
 public class CoreRaft extends CoreBlock {
+
+    public static Seq<CoreRaftBuild> rafts = new Seq<>();
 
     private float nearestLen;
 
@@ -35,7 +41,13 @@ public class CoreRaft extends CoreBlock {
 
     public CoreRaft(String name) {
         super(name);
-        fogRadius = 40;
+        fogRadius = 50;
+        Events.on(EventType.WorldLoadEvent.class, e -> {
+            rafts.clear();
+            Team.sharded.cores().each(c -> {
+                if(c instanceof CoreRaftBuild raft) rafts.add(raft);
+            });
+        });
     }
 
     @Override
@@ -89,14 +101,34 @@ public class CoreRaft extends CoreBlock {
 
     public class CoreRaftBuild extends CoreBuild {
         public @Nullable Tile targetTile;
+        public boolean building = false, lastBuilding = false;
+
+        @Override
+        public void onRemoved() {
+            super.onRemoved();
+            rafts.remove(this);
+        }
+
+        @Override
+        public Building init(Tile tile, Team team, boolean shouldAdd, int rotation) {
+            rafts.add(this);
+            return super.init(tile, team, shouldAdd, rotation);
+        }
 
         @Override
         public void updateTile() {
             super.updateTile();
+            lastBuilding = building;
+            building = false;
+
             if(timer.get(rallyTimer, 5)){
                 Units.nearby(team, x, y, fogRadius() * tilesize, (other) -> {
                     other.apply(MeldStatusEffects.rally, rallyDuration);
                 });
+            }
+
+            if(lastBuilding){
+
             }
         }
 
@@ -115,7 +147,6 @@ public class CoreRaft extends CoreBlock {
             }
 
             Draw.z(layer);
-
         }
 
         /*

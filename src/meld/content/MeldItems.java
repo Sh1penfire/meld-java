@@ -1,5 +1,6 @@
 package meld.content;
 
+import arc.struct.Seq;
 import mindustry.type.Item;
 
 public class MeldItems {
@@ -66,5 +67,8 @@ public class MeldItems {
         cruciblePlating = new Item("crucible-plating"){{
 
         }};
+
+        Seq<Item> heavyIndustry = Seq.with(tenbris, shadesteel, elnarDust, annealedSilver, glassMallows, cruciblePlating, aspectPipe);
+        heavyIndustry.each(i -> i.databaseTag = "heavy-industry");
     };
 }
