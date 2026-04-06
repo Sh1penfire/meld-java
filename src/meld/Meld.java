@@ -14,6 +14,7 @@ import meld.core.*;
 import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.content.Fx;
+import mindustry.game.EventType;
 import mindustry.game.EventType.*;
 import mindustry.mod.*;
 import mindustry.world.Tile;
@@ -95,6 +96,10 @@ public class Meld extends Mod{
         MeldLiquids.load();
         MeldBlocks.load();
         MeldEnvironment.load();
+
+        Vars.content.items().each(c -> {
+                c.stats.add(Stat.buildCost, c.cost, MeldStatUnit.ticks);
+        });
         
         Vars.content.blocks().each(b -> {
             if(b.minfo.mod != null && b.minfo.mod.name.equals("meld")){
