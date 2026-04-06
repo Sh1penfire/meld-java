@@ -12,6 +12,7 @@ import meld.*;
 import meld.entities.bullet.OutflowBulletType;
 import meld.entities.bullet.TransitionBulletType;
 import meld.graphics.*;
+import meld.meta.MeldStatUnit;
 import meld.world.blocks.consumers.ConsumeAspects;
 import meld.world.blocks.*;
 import meld.world.blocks.crafting.ModularCrafter;
@@ -59,6 +60,8 @@ import mindustry.world.blocks.units.UnitFactory;
 import mindustry.world.consumers.ConsumeLiquid;
 import mindustry.world.draw.*;
 import mindustry.world.meta.Attribute;
+import mindustry.world.meta.Stat;
+import mindustry.world.meta.StatUnit;
 
 import static mindustry.type.ItemStack.with;
 
@@ -80,7 +83,7 @@ public class MeldBlocks {
 
     public static ModularCrafter gasKiln, rotaryKiln, pneumaticExtruder;
 
-    public static Block channelNode, channelFace, aspectOutlet, aspectChannel, channelDirector, channelVent, manualValve, intakeValve, valveController, pipebox;
+    public static Block channelNode, channelFace, aspectOutlet, aspectChannel, channelHub, channelDirector, channelVent, manualValve, intakeValve, valveController, pipebox;
 
     public static Block sunder, molotov, vivisection;
 
@@ -120,7 +123,7 @@ public class MeldBlocks {
             ));
             health = 120;
 
-            liquidCapacity = 200;
+            liquidCapacity = 100;
             solid = false;
             placeableLiquid = true;
         }};
@@ -187,6 +190,20 @@ public class MeldBlocks {
             );
         }};
 
+        channelDirector = new ChannelDirector("channel-director"){{
+            requirements(Category.liquid, with(
+                    MeldItems.debris, 5
+            ));
+
+            health = 200;
+
+            placeableLiquid = true;
+            liquidPressure = 0.5f;
+
+            liquidCapacity = 80;
+            size = 1;
+        }};
+
         aspectChannel = new VisualAspectPipe("aspect-channel"){{
             requirements(Category.liquid, with(
                     MeldItems.annealedSilver, 5, MeldItems.glassMallows, 2
@@ -204,18 +221,24 @@ public class MeldBlocks {
             junctionReplacement = channelFace;
         }};
 
-        channelDirector = new ChannelDirector("channel-director"){{
+        channelHub = new LiquidRouter("channel-hub"){
+            @Override
+            public void setStats(){
+                stats.remove(Stat.liquidCapacity);
+                stats.add(Stat.liquidCapacity, liquidCapacity/1000 + "k ", StatUnit.liquidUnits);
+            }
+            {
             requirements(Category.liquid, with(
-                    MeldItems.debris, 5
+                    MeldItems.debris, 250,
+                    MeldItems.shadesteel, 320
             ));
+            size = 4;
+            health = 150 * 4 * 4;
+            armor = 8;
 
-            health = 200;
-
+            liquidCapacity = 100 * 100;
+            solid = false;
             placeableLiquid = true;
-            liquidPressure = 0.5f;
-
-            liquidCapacity = 80;
-            size = 1;
         }};
 
         //TODO: Lock players out of using in badlands/storm plains route if waste becomes too big of an issue
@@ -601,7 +624,6 @@ public class MeldBlocks {
             shootWarmupSpeed = 0.09f;
             minWarmup = 0.7f;
 
-            velocityRnd = 0.2f;
             recoil = 1.5f;
             inaccuracy = 2;
             shootCone = 5;
@@ -776,6 +798,10 @@ public class MeldBlocks {
                             fragAngle = 180;
                             fragVelocityMin = 0.5f;
                             fragVelocityMax = 1;
+                            splashDamageRadius = Vars.tilesize * 4;
+                            splashDamage = 0;
+                            status = MeldStatusEffects.lacerated;
+                            statusDuration = 60;
                             fragBullet = new BulletType(){{
                                 spawnBullets.addAll(
                                         new TransitionBulletType(){{
@@ -796,13 +822,15 @@ public class MeldBlocks {
                                                             color = Color.white.cpy().a(0f);
                                                             colorTo = Color.white.cpy().a(0.1f);
                                                             progress = PartProgress.life.curve(Interp.slope);
-                                                            moveRot = 360;
                                                             blending = Blending.additive;
                                                             layer = Layer.flyingUnitLow;
 
                                                             xScl = yScl = 0.5f;
                                                             growX = growY = 0.5f;
                                                             growProgress = PartProgress.life.compress(0, 1).curve(Interp.pow2In);
+                                                            moves.add(
+                                                                    new PartMove(PartProgress.life, 0, 0, 360)
+                                                            );
                                                         }}
                                                 );
 
@@ -825,7 +853,7 @@ public class MeldBlocks {
                                                         spin = 15;
                                                         hitEffect = despawnEffect = Fx.none;
                                                         status = MeldStatusEffects.lacerated;
-                                                        statusDuration = 20;
+                                                        statusDuration = 120;
                                                         sticky = true;
                                                         stickyExtraLifetime = 60;
 
@@ -876,7 +904,7 @@ public class MeldBlocks {
                                 frontColor = Color.valueOf("85c799");
                                 pierce = true;
                                 status = MeldStatusEffects.lacerated;
-                                statusDuration = 15;
+                                statusDuration = 60;
                                 hitEffect = Fx.none;
                                 despawnEffect = Fx.none;
                                 absorbable = hittable = reflectable = false;
@@ -887,11 +915,13 @@ public class MeldBlocks {
                                             color = Color.clear;
                                             colorTo = Color.white.cpy().a(1f);
                                             progress = PartProgress.life.compress(0, 0.65f).curve(Interp.pow5Out).curve(Interp.slope);
-                                            moveRot = 360;
                                             blending = Blending.additive;
 
                                             growX = growY = 2;
                                             growProgress = PartProgress.life.compress(0, 0.65f).curve(Interp.pow2In);
+                                            moves.add(
+                                                    new PartMove(PartProgress.life.compress(0, 0.65f).curve(Interp.pow5Out), 0, 0, 360)
+                                            );
                                         }},
                                         //less glowey layer
                                         new RegionPart(){{
@@ -900,11 +930,13 @@ public class MeldBlocks {
                                             color = Color.clear;
                                             colorTo = Color.white.cpy().a(0.6f);
                                             progress = PartProgress.life.curve(Interp.pow5Out).curve(Interp.slope);
-                                            moveRot = 180 * 1.5f;
                                             layer = Layer.flyingUnitLow;
 
                                             growX = growY = 4;
                                             growProgress = PartProgress.life.compress(0, 0.8f).curve(Interp.pow2Out);
+                                            moves.add(
+                                                    new PartMove(PartProgress.life.compress(0, 0.65f).curve(Interp.pow5Out), 0, 0, 180 * 1.5f)
+                                            );
                                         }}
                                 );
                             }};
@@ -925,7 +957,7 @@ public class MeldBlocks {
         }};
 
         silverHusk = new RegenProjector("silver-husk"){{
-            requirements(Category.defense, with(MeldItems.debris, 15, MeldItems.annealedSilver, 8));
+            requirements(Category.defense, with(MeldItems.debris, 15, MeldItems.annealedSilver, 16));
             health = 600;
             armor = 3;
             range = 1;
@@ -1141,8 +1173,8 @@ public class MeldBlocks {
             shadesteel = new ItemRecipe(with(MeldItems.tenbris, 2, MeldItems.carbolith, 2), with(MeldItems.shadesteel, 2)).output(LiquidStack.with(MeldLiquids.fumes, 60)),
             glass = new ItemRecipe(with(MeldItems.clayMallows, 2), with(MeldItems.glassMallows, 2)),
             silver = new ItemRecipe(with(MeldItems.silver, 1), with(MeldItems.annealedSilver, 2)),
-            platings1 = new ItemRecipe(with(MeldItems.shadesteel, 4, MeldItems.debris, 2), with(MeldItems.cruciblePlating, 4)),
-            platings2 = new ItemRecipe(with(MeldItems.glassMallows, 4, MeldItems.debris, 2), with(MeldItems.cruciblePlating, 4));
+            platings1 = new ItemRecipe(with(MeldItems.shadesteel, 4, MeldItems.debris, 4), with(MeldItems.cruciblePlating, 4)),
+            platings2 = new ItemRecipe(with(MeldItems.glassMallows, 4, MeldItems.debris, 4), with(MeldItems.cruciblePlating, 4));
 
             float produceTime = 60;
 
@@ -1207,8 +1239,9 @@ public class MeldBlocks {
             );
         }};
 
+        //Require making crucible platings to create, but gate based off debris economy instead
         rotaryKiln = new ModularCrafter("rotary-kiln"){{
-            requirements(Category.crafting, with(MeldItems.debris, 250, MeldItems.cruciblePlating, 150));
+            requirements(Category.crafting, with(MeldItems.debris, 600, MeldItems.cruciblePlating, 150));
             size = 5;
 
             hasItems = true;
@@ -1226,8 +1259,8 @@ public class MeldBlocks {
             ItemRecipe shadesteel = new ItemRecipe(with(MeldItems.tenbris, 12), with(MeldItems.shadesteel, 12));
             ItemRecipe glass = new ItemRecipe(with(MeldItems.clayMallows, 12), with(MeldItems.glassMallows, 12));
             ItemRecipe silver = new ItemRecipe(with(MeldItems.silver, 1), with(MeldItems.annealedSilver, 2));
-            ItemRecipe platings1 = new ItemRecipe(with(MeldItems.shadesteel, 4, MeldItems.debris, 2), with(MeldItems.cruciblePlating, 4));
-            ItemRecipe platings2 = new ItemRecipe(with(MeldItems.glassMallows, 4, MeldItems.debris, 2), with(MeldItems.cruciblePlating, 4));
+            ItemRecipe platings1 = new ItemRecipe(with(MeldItems.shadesteel, 4, MeldItems.debris, 4), with(MeldItems.cruciblePlating, 4));
+            ItemRecipe platings2 = new ItemRecipe(with(MeldItems.glassMallows, 4, MeldItems.debris, 4), with(MeldItems.cruciblePlating, 4));
 
             //The max crafting speed when boosted
             float craftingTime = 120;
@@ -1326,7 +1359,7 @@ public class MeldBlocks {
 
             ItemRecipe
                     aspectPipe1 = new ItemRecipe(with(MeldItems.shadesteel, 2, MeldItems.elnarDust, 2), with(MeldItems.aspectPipe, 4)),
-                    aspectPipe2 = new ItemRecipe(with(MeldItems.debris, 1, MeldItems.annealedSilver, 2), with(MeldItems.aspectPipe, 4));
+                    aspectPipe2 = new ItemRecipe(with(MeldItems.debris, 2, MeldItems.annealedSilver, 4), with(MeldItems.aspectPipe, 4));
 
             float produceTime = 30;
 

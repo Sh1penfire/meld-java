@@ -55,7 +55,7 @@ public class MeldItems {
         }};
 
         annealedSilver = new Item("annealed-silver"){{
-
+            cost = 0.3f;
         }};
 
         glassMallows = new Item("glass-mallow");

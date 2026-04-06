@@ -10,12 +10,15 @@ import arc.math.Angles;
 import arc.math.Interp;
 import arc.math.Mathf;
 import arc.math.geom.Position;
+import arc.math.geom.Vec2;
 import arc.util.*;
+import meld.Meld;
 import meld.content.MeldUnits;
 import meld.graphics.Draww;
 import meld.graphics.MeldRegions;
 import meld.world.blocks.CoreRaft;
 import mindustry.Vars;
+import mindustry.async.PhysicsProcess;
 import mindustry.content.Blocks;
 import mindustry.content.Fx;
 import mindustry.entities.EntityCollisions;
@@ -35,6 +38,9 @@ import mindustry.world.Build;
 import mindustry.world.Tile;
 import mindustry.world.blocks.ConstructBlock;
 import mindustry.world.blocks.storage.CoreBlock;
+
+import static meld.Meld.slowFactor;
+import static meld.Meld.slowProg;
 
 //Bandaid fix for multiplayer units dying randomly because I legit have no idea how to fix it otherwise
 public class BulbheadEntity extends UnitWaterMove {
@@ -56,8 +62,23 @@ public class BulbheadEntity extends UnitWaterMove {
         return super.canShoot();
     }
 
+
+    //Try this...
+    @Override
+    public void rotateMove(Vec2 vec) {
+        this.moveAt(Tmp.v2.trns(this.rotation, vec.len()));
+        if (!vec.isZero()) {
+            this.rotation = Angles.moveToward(this.rotation, vec.angle(), this.type.rotateSpeed * Time.delta * this.speedMultiplier/ slowFactor);
+        }
+
+    }
+
     @Override
     public void update() {
+        dragMultiplier *= slowFactor;
+
+        Time.delta /= slowFactor;
+
         getNearbyLink();
 
         Tile tile = this.tileOn();
@@ -75,6 +96,9 @@ public class BulbheadEntity extends UnitWaterMove {
         }
         super.update();
 
+        Time.delta *= slowFactor;
+
+        //speedMultiplier /= slowFactor;
     }
 
     public void getNearbyLink(){
