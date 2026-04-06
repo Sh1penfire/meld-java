@@ -11,17 +11,20 @@ import arc.util.Tmp;
 import meld.content.*;
 import meld.graphics.MeldRegions;
 import meld.meta.MeldStatUnit;
-import meld.core.*;
 import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.content.Fx;
+import mindustry.ctype.UnlockableContent;
 import mindustry.game.EventType;
 import mindustry.game.EventType.*;
 import mindustry.mod.*;
 import mindustry.world.Tile;
 import mindustry.world.blocks.environment.Floor;
+import mindustry.world.meta.Stat;
+import mindustry.world.meta.StatUnit;
 import rhino.ImporterTopLevel;
 import rhino.NativeJavaPackage;
+
 
 public class Meld extends Mod{
     public static final String name = "meld";
