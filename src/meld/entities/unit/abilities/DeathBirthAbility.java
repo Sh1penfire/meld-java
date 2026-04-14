@@ -6,9 +6,21 @@ import meld.content.MeldStatusEffects;
 import mindustry.Vars;
 import mindustry.entities.abilities.SpawnDeathAbility;
 import mindustry.gen.Unit;
+import mindustry.type.UnitType;
 
 //literally the same but with a status effect attached to it.  yes, that's literally it.
 public class DeathBirthAbility extends SpawnDeathAbility {
+
+    public DeathBirthAbility(UnitType unit, int amount, float spread){
+        super(unit, amount, spread);
+    }
+    public DeathBirthAbility(UnitType unit, int amount){
+        super(unit, amount, 8);
+    }
+
+    public DeathBirthAbility(){
+        super();
+    }
 
     @Override
     public void death(Unit unit) {

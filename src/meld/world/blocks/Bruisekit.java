@@ -4,6 +4,7 @@ import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.Lines;
 import arc.math.Mathf;
 import arc.struct.Seq;
+import arc.util.Log;
 import mindustry.entities.Units;
 import mindustry.gen.Building;
 
@@ -32,9 +33,10 @@ public class Bruisekit extends FieldPulsar{
             super.updateTile();
             if(timer.get(targetTimer, retargetInterval)) findTarget();
             if(target != null){
-                if(target.isAdded() && target.damaged()) {
-                    float healAmount = healSpeed;
+                if(target.isValid() && target.damaged()) {
+                    float healAmount = healSpeed * edelta();
                     if(target.wasRecentlyDamaged()) healAmount *= recentDamageMultiplier;
+                    Log.info(healAmount);
 
                     target.heal(healAmount);
                 }

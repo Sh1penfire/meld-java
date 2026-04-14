@@ -19,7 +19,7 @@ import mindustry.world.blocks.liquid.LiquidRouter;
 
 import static meld.content.MeldLiquids.*;
 
-public class AspectPipe extends ArmoredConduit {
+public class AspectPipe extends Conduit {
 
     Seq<Liquid> liquidSeq = new Seq<>();
     static final float rotatePad = 6, hpad = rotatePad / 2f / 4f;

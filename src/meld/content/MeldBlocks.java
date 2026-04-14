@@ -1,6 +1,5 @@
 package meld.content;
 
-import arc.*;
 import arc.graphics.Blending;
 import arc.graphics.Color;
 import arc.math.Angles;
@@ -12,12 +11,13 @@ import arc.util.Tmp;
 import meld.*;
 import meld.entities.bullet.OutflowBulletType;
 import meld.entities.bullet.TransitionBulletType;
+import meld.fluid.AspectGroup;
 import meld.graphics.*;
 import meld.world.blocks.consumers.ConsumeAspects;
 import meld.world.blocks.*;
+import meld.world.blocks.consumers.StupidConsumeAspects;
 import meld.world.blocks.crafting.ModularCrafter;
 import meld.world.blocks.crafting.RecipeCrafter;
-import meld.world.blocks.crafting.modules.rework.*;
 import meld.world.blocks.crafting.recipe.ItemRecipe;
 import meld.world.blocks.crafting.recipe.SpoolRecipe;
 import meld.world.blocks.crafting.modules.*;
@@ -29,7 +29,8 @@ import meld.world.blocks.items.PriorityInputSplitter;
 import meld.world.blocks.production.SingleBeamDrill;
 import meld.world.meta.*;
 import mindustry.Vars;
-import mindustry.content.*;
+import mindustry.content.Fx;
+import mindustry.content.StatusEffects;
 import mindustry.entities.bullet.*;
 import mindustry.entities.effect.MultiEffect;
 import mindustry.entities.effect.ParticleEffect;
@@ -92,9 +93,13 @@ public class MeldBlocks {
 
     //Meld blocks
     public static Block pipeline, pipelineRouter, pipelineCrossing, pipelineBridge,
-            meldCannon, meldMortar,
-            jillaCoffer, craigCoffer, braigCoffer,
+
+    //More for areas outside glacier
+            meldCannon, meldMortar, meldNailgun,
+            jillaCoffer, billaCoffer, craigCoffer, braigCoffer,
             meldCultivator, meldNode, meldSuppressor, meldSynapse,
+
+    //Mostly for glacier
             meldAmplifier, meldCapsule;
     public static Block crystalBarrier, crystalBarrierLarge,
             carbonicBarrier, carbonicBarrierLarge
@@ -108,11 +113,13 @@ public class MeldBlocks {
 
     public static void load(){
 
+        int channelHealth = 120;
+
         channelFace = new FlexibleSizeJunction("channel-face"){{
             requirements(Category.liquid, with(
                     MeldItems.debris, 2
             ));
-            health = 120;
+            health = channelHealth;
             solid = false;
             placeableLiquid = true;
             usePassedOffset = false;
@@ -122,7 +129,7 @@ public class MeldBlocks {
             requirements(Category.liquid, with(
                     MeldItems.debris, 5
             ));
-            health = 120;
+            health = channelHealth;
 
             liquidCapacity = 200;
             solid = false;
@@ -130,13 +137,13 @@ public class MeldBlocks {
         }};
 
         aspectOutlet = new RecipeCrafter("aspect-outlet"){{
-            outputDirections.putAll(MeldLiquids.aspect, new int[]{0}, MeldLiquids.boundAspect, new int[]{0});
+            outputDirections.putAll(MeldLiquids.aspect, new int[]{0}, MeldLiquids.boundAspect, new int[]{0}, MeldLiquids.stormingAspect, new int[]{0});
 
             requirements(Category.liquid, with(
                     MeldItems.debris, 7
             ));
 
-            health = 200;
+            health = channelHealth * 2;
 
             solid = false;
             hasLiquids = true;
@@ -161,6 +168,8 @@ public class MeldBlocks {
             );
 
             //consumeLiquid(MeldLiquids.aether, outletRate/10);
+
+
 
             liquidCapacity = 100;
 
@@ -195,8 +204,9 @@ public class MeldBlocks {
             requirements(Category.liquid, with(
                     MeldItems.annealedSilver, 5, MeldItems.glassMallows, 2
             ));
+            underBullets = false;
             leaks = false;
-            health = 200;
+            health = channelHealth * 2;
             armor = 2;
             insulated = true;
 
@@ -212,7 +222,7 @@ public class MeldBlocks {
             requirements(Category.liquid, with(MeldItems.debris, 80, MeldItems.shadesteel, 120));
             size = 4;
 
-            health = 120 * 16;
+            health = channelHealth * 16;
             armor = 8;
             liquidCapacity = 100 * 100;
         }};
@@ -222,7 +232,7 @@ public class MeldBlocks {
                     MeldItems.debris, 5
             ));
 
-            health = 200;
+            health = channelHealth;
 
             placeableLiquid = true;
             liquidPressure = 0.5f;
@@ -236,7 +246,7 @@ public class MeldBlocks {
             requirements(Category.liquid, with(
                     MeldItems.debris, 8
             ));
-            health = 180;
+            health = channelHealth;
             armor = 1;
 
             minPressure = -0.25f;
@@ -252,7 +262,7 @@ public class MeldBlocks {
                     MeldItems.debris, 8
             ));
 
-            health = 120;
+            health = channelHealth;
 
             solid = false;
             placeableLiquid = true;
@@ -265,7 +275,7 @@ public class MeldBlocks {
             ));
             size = 3;
 
-            health = 800;
+            health = channelHealth * 10;
             armor = 8;
 
             solid = false;
@@ -279,7 +289,7 @@ public class MeldBlocks {
             ));
             size = 1;
 
-            health = 120;
+            health = channelHealth;
 
             solid = false;
             placeableLiquid = true;
@@ -292,7 +302,7 @@ public class MeldBlocks {
             ));
             size = 1;
 
-            health = 120;
+            health = channelHealth;
 
             solid = false;
             placeableLiquid = true;
@@ -304,7 +314,7 @@ public class MeldBlocks {
                     MeldItems.carbolith, 60
             ));
             size = 2;
-            health = 840;
+            health = 640;
             range = 200;
             fogRadiusMultiplier = 0.25f;
 
@@ -362,11 +372,11 @@ public class MeldBlocks {
 
         shredstorm = new ItemTurret("shredstorm"){{
             requirements(Category.turret, with(
-                    MeldItems.debris, 45,
-                    MeldItems.silver, 60
+                    MeldItems.debris, 35,
+                    MeldItems.silver, 50
             ));
             size = 2;
-            health = 600;
+            health = 450;
             range = 200;
 
             fogRadiusMultiplier = 0.25f;
@@ -386,7 +396,7 @@ public class MeldBlocks {
             rotate = quickRotate = false;
 
             shoot = new ShootBarrel(){{
-                shotDelay = 5;
+                shotDelay = 0;
                 shots = 7;
 
                 float[] spreadCone = new float[]{0, 3, 6, 15};
@@ -439,74 +449,7 @@ public class MeldBlocks {
             }};
 
             ammoTypes.putAll(
-                    MeldItems.debris,
-                    new BasicBulletType(){{
-                        damage = 2;
-                        lifetime = 5;
-                        speed = 12;
-                        sprite = Meld.prefix("clump");
-                        width = 8;
-                        height = 10;
-                        shrinkY = 0;
-
-                        despawnHit = true;
-
-                        fragLifeMin = 0.6f;
-                        ammoMultiplier = 2;
-
-                        fragRandomSpread = 5;
-                        fragBullets = 3;
-
-                        fragBullet = new BasicBulletType(12, 0.25f, Meld.prefix("clump")){{
-                            lifetime = 21;
-                            drag = 0.01f;
-                            width = 6;
-                            height = 12;
-                            shrinkX = 0.7f;
-                            shrinkY = 0.2f;
-
-                            splashDamage = 1;
-                            splashDamageRadius = 20;
-                            knockback = 0.25f;
-                            impact = true;
-
-                            hitEffect = Fx.none;
-                            despawnEffect = Fx.none;
-                            setDefaults = false;
-                            despawnHit = false;
-                            fragOnHit = true;
-
-                            pierce = true;
-                            pierceCap = 2;
-
-                            fragBullets = 3;
-                            fragRandomSpread = 60;
-                            fragAngle = 180;
-
-                            bulletInterval = 2;
-                            fragBullet = new BasicBulletType(9, 2, Meld.prefix("clump")){{
-                                    speed = 9;
-                                    damage = 0.5f;
-                                    lifetime = 8;
-                                    drag = 0.002f;
-                                    width = 2;
-                                    height = 6;
-                                    shrinkY = 0.2f;
-                                    shrinkX = 1;
-                                    sticky = true;
-                                    stickyExtraLifetime = 120;
-
-                                    hitEffect = Fx.none;
-                                    despawnEffect = Fx.none;
-                                    despawnHit = false;
-
-                                    pierce = true;
-                                    pierceCap = 2;
-                                    status = MeldStatusEffects.impaled;
-                                    statusDuration = 5;
-                            }};
-                        }};
-                    }},
+                    MeldItems.debris, MeldBullets.shredDebris,
                     MeldItems.silver, MeldBullets.shredSilver,
                     MeldItems.annealedSilver, MeldBullets.shredSilver
 
@@ -1028,13 +971,13 @@ public class MeldBlocks {
         shadesteelShingles = new Wall("shadesteel-shingles"){{
             requirements(Category.defense, with(MeldItems.shadesteel, 64));
             size = 2;
-            health = 2400;
+            health = 2000;
             buildCostMultiplier = 2f;
         }};
 
         silverHusk = new RegenProjector("silver-husk"){{
-            requirements(Category.defense, with(MeldItems.debris, 15, MeldItems.annealedSilver, 8));
-            health = 600;
+            requirements(Category.defense, with(MeldItems.debris, 15, MeldItems.annealedSilver, 16));
+            health = 450;
             armor = 3;
             range = 1;
             healPercent = 0.05f;
@@ -1059,8 +1002,7 @@ public class MeldBlocks {
         coreRaft = new CoreRaft("core-raft"){
             {
             requirements(Category.effect, with(
-                    MeldItems.debris, 600,
-                    MeldItems.carbolith, 350
+                    MeldItems.debris, 900
             ));
             size = 3;
             health = 4000;
@@ -1106,7 +1048,7 @@ public class MeldBlocks {
             dumpedLiquids.addAll(MeldLiquids.pollutantMixture, MeldLiquids.fumes);
 
             //Should make all the modules trigger in order
-            /*hookAll(BlockEvent.Defaults.proximityUpdate,
+            hookAll(BlockEvent.Defaults.proximityUpdate,
                     new AttributeModule(){{
                         attribute = MeldAttributes.aetherAttr;
                         baseEfficiency = 0;
@@ -1123,12 +1065,12 @@ public class MeldBlocks {
 
                         efficiencyPin = 1;
                     }}
-            );*/
+            );
 
-            /*modules.addAll(
+            modules.addAll(
                     new ProduceLiquidModule(new LiquidStack(MeldLiquids.pollutantMixture, 1), 0),
                     new ProduceLiquidModule(new LiquidStack(MeldLiquids.fumes, 1), 1)
-            );*/
+            );
         }};
 
         elementalBlaster = new BeamDrill("elemental-blaster"){{
@@ -1180,97 +1122,6 @@ public class MeldBlocks {
             consume(new ConsumeAspects(outletRate/2, MeldLiquids.outletEfficiencies, MeldLiquids.outletDensities));
         }};
 
-        new ModularCrafter("stupid-crafter"){{
-            requirements(Category.crafting, with(MeldItems.debris, 40));
-            size = 3;
-
-            modules.addAll(
-                new ProduceHeatModule(0){{
-                    heatOutput = 10;
-                }},
-                new AttributeModule(0){{
-                    attribute = Attribute.heat;
-                    baseEfficiency = 0f;
-                    maxBoost = 2f;
-                    storagePin = 1;
-                }},
-                //This is assigned to the same pin as the attribute, and updates after,
-                //which means it will only "top off" the efficiency that the attributes don't reach.
-                new ConsumeItemModule(0){{
-                    items = ItemStack.with(Items.pyratite, 1);
-                    efficiencyIncrease = 4f;
-                    time = 20f;
-                    progressPin = 2;
-                }},
-                //Same as above, but will also cover for the pyratite consumer.
-                new ConsumeItemModule(0){{
-                    items = ItemStack.with(Items.coal, 1);
-                    time = 40f;
-                    progressPin = 3;
-                }}
-            );
-        }};
-
-        new ModularCrafter("stupid-silicon-smelter"){
-            //I refuse to add sprites to the files.
-            @Override
-            public void load(){
-                super.load();
-                region = Core.atlas.find("silicon-smelter");
-                fullIcon = Core.atlas.find("silicon-smelter");
-                uiIcon = Core.atlas.find("silicon-smelter");
-                if(drawer instanceof DrawMulti m && m.drawers[1] instanceof DrawHeatInput f) f.heat = Core.atlas.find("phase-heater-heat");
-                if(drawer instanceof DrawMulti m && m.drawers[2] instanceof DrawRegion r) r.region = Core.atlas.find("pneumatic-drill-rotator");
-                if(drawer instanceof DrawMulti m && m.drawers[3] instanceof DrawFlame f) f.top = Core.atlas.find("silicon-smelter-top");
-            }
-
-            {
-                requirements(Category.crafting, with(MeldItems.debris, 40));
-                size = 2;
-
-                drawer = new DrawMulti(
-                    new DrawDefault(),
-                    new DrawHeatInput(),
-                    new DrawRegion("", 3f, true),
-                    new DrawFlame(Color.valueOf("ffef99"))
-                );
-
-                modules.addAll(
-                    new ProduceItemModule( 1, 2){{
-                        items = ItemStack.with(Items.silicon, 1);
-                        time = 60f;
-                        progressPin = 0;
-                    }},
-                        new ConsumeItemModule(1){{
-                            items = ItemStack.with(Items.sand, 1);
-                            time = 20f;
-                            progressPin = -1;
-                        }},
-                        new ConsumeHeatModule(2),
-                        new AttributeModule(2){{
-                            attribute = Attribute.heat;
-                            baseEfficiency = 0f;
-                            maxBoost = 2f;
-                            storagePin = -2;
-                        }},
-                        //This is assigned to the same pin as the attribute, and updates after,
-                        //which means it will only "top off" the efficiency that the attributes don't reach.
-                        new ConsumeItemModule(2){{
-                            items = ItemStack.with(Items.pyratite, 1);
-                            efficiencyIncrease = 2.5f;
-                            time = 20f;
-                            progressPin = -3;
-                        }},
-                        //Same as above, but will also cover for the pyratite consumer.
-                        new ConsumeItemModule(2){{
-                            items = ItemStack.with(Items.coal, 1);
-                            time = 40f;
-                            progressPin = -4;
-                        }}
-                );
-            }
-        };
-
         earthboundInfuser = new ModularCrafter("earthbound-infuser"){{
             requirements(Category.crafting, with(
                     MeldItems.debris, 40,
@@ -1287,7 +1138,7 @@ public class MeldBlocks {
             dumpedItems.add(MeldItems.carbolith);
 
 
-            /*//Should make all the modules trigger in order
+            //Should make all the modules trigger in order
             hookAll(BlockEvent.Defaults.proximityUpdate,
                     new AttributeModule(){{
                         attribute = Attribute.steam;
@@ -1297,11 +1148,11 @@ public class MeldBlocks {
 
                         efficiencyPin = 0;
                     }}
-            );*/
+            );
 
             ItemRecipe carbolith = new ItemRecipe(with(MeldItems.debris, 1), with(MeldItems.carbolith, 1));
 
-            /*modules.addAll(
+            modules.addAll(
                     new ProduceLiquidModule(new LiquidStack(MeldLiquids.fumes, 2f), 0),
                     new GateModule(1, new GateModule.RecipeCondition(carbolith)),
                     new ConsumeLiquidModule(LiquidStack.with(MeldLiquids.fumes, 1, MeldLiquids.aspect, outletRate * 2), 1, 2),
@@ -1311,7 +1162,7 @@ public class MeldBlocks {
                         craftTime = 12;
                         recipe = carbolith;
                     }}
-            );*/
+            );
 
 
             /*
@@ -1530,7 +1381,7 @@ public class MeldBlocks {
 
             float produceTime = 30;
 
-            /*modules.addAll(
+            modules.addAll(
                     new GateModule(
                             ModOUT.ZERO, new GateModule.RecipeCondition(aspectPipe1)
                     ),
@@ -1570,7 +1421,7 @@ public class MeldBlocks {
                         progressPin = ModOUT.SIX;
                         craftTime = produceTime;
                     }}
-            );*/
+            );
         }};
 
         sharkFactory = new UnitFactory("shark-factory"){{
@@ -1603,7 +1454,7 @@ public class MeldBlocks {
             liquidCapacity = 1 * outletRate * 60;
             hasLiquids = true;
 
-            consume(new ConsumeAspects(outletRate * 2, MeldLiquids.aspectEfficiencies, MeldLiquids.aspectDensities));
+            consume(new StupidConsumeAspects(outletRate * 2, AspectGroup.aspect));
         }};
 
         movementAnchor = new MovementAnchor("movement-anchor"){{
@@ -1638,7 +1489,7 @@ public class MeldBlocks {
             size = 2;
 
             consume(
-                    new ConsumeLiquid(MeldLiquids.fumes, 0.5f)
+                    new StupidConsumeAspects(0.5f, AspectGroup.fumes)
             );
         }};
 
@@ -1657,7 +1508,7 @@ public class MeldBlocks {
                     new SpoolRecipe(new ItemStack(MeldItems.resonarum, 2), 200)
             );
 
-            consumeLiquid(MeldLiquids.fumes, 1f);
+            consume(new StupidConsumeAspects(1f, AspectGroup.fumes));
             consumeItem(MeldItems.resonarum, 2);
         }};
 
@@ -1693,6 +1544,8 @@ public class MeldBlocks {
             requirements(Category.distribution, with(MeldItems.debris, 450));
             size = 3;
             health = 900;
+            armor = 30;
+
             speed = 1f;
 
             solid = false;
@@ -1963,6 +1816,8 @@ public class MeldBlocks {
                         splashDamage = 25;
                         splashDamageRadius = 16;
 
+                        buildingDamageMultiplier = 2;
+
                         status = MeldStatusEffects.interference;
                         statusDuration = 90;
 
@@ -2013,10 +1868,11 @@ public class MeldBlocks {
         }};
 
         jillaCoffer = new Wall("jilla-coffer"){{
+            requirements(Category.defense, with(MeldItems.larvalPlating, 50, MeldItems.meldShard, 35));
             size = 2;
             health = 400;
             destroyBulletSameTeam = true;
-            destroyBullet = new ExplosionBulletType(){{
+            destroyBullet = new TransitionBulletType(){{
                 hitEffect = despawnEffect = Fx.none;
                 fragBullets = 3;
                 fragBullet = new BulletType(){{
@@ -2025,7 +1881,25 @@ public class MeldBlocks {
             }};
         }};
 
+        billaCoffer = new Wall("billa-coffer"){{
+            requirements(Category.defense, with(MeldItems.larvalPlating, 50, MeldItems.meldShard, 35));
+            size = 2;
+            health = 400;
+            armor = 80;
+            destroyBulletSameTeam = true;
+
+            //TODO: WTF is the purpose of this...
+            destroyBullet = new TransitionBulletType(){{
+                hitEffect = despawnEffect = Fx.none;
+                fragBullets = 1;
+                fragBullet = new BulletType(){{
+                    spawnUnit = MeldUnits.billa;
+                }};
+            }};
+        }};
+
         craigCoffer = new LiquidTurret("craig-coffer"){{
+            requirements(Category.defense, with(MeldItems.larvalPlating, 50, MeldItems.meldShard, 35));
             size = 2;
             health = 400;
             destroyBulletSameTeam = true;
@@ -2064,6 +1938,7 @@ public class MeldBlocks {
         }};
 
         braigCoffer = new LiquidTurret("braig-coffer"){{
+            requirements(Category.defense, with(MeldItems.larvalPlating, 200, MeldItems.meldShard, 120));
             size = 3;
             health = 1200;
             destroyBulletSameTeam = true;
@@ -2105,9 +1980,10 @@ public class MeldBlocks {
                         height = 14;
 
                         pierce = true;
+                        pierceBuilding = true;
                         pierceCap = 2;
 
-                        damage = 10;
+                        splashDamage = 25;
                         splashDamageRadius = 25;
 
                         knockback = 4f;
@@ -2115,6 +1991,26 @@ public class MeldBlocks {
                         hitEffect = despawnEffect = Fx.explosion;
 
                         impact = true;
+
+                        fragBullets = 3;
+                        fragRandomSpread = 45;
+
+                        fragBullet = new BasicBulletType(4, 15, Meld.prefix("clump")){{
+                            speed = 4;
+                            lifetime = 10;
+                            width = 3;
+                            height = 8;
+
+                            pierce = true;
+                            pierceBuilding = true;
+                            pierceCap = 2;
+
+                            knockback = 4f;
+
+                            impact = true;
+
+                            hitEffect = despawnEffect = Fx.none;
+                        }};
                     }}
             );
         }};

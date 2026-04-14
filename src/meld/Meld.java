@@ -2,6 +2,7 @@ package meld;
 
 import arc.*;
 import arc.graphics.Color;
+import arc.graphics.Colors;
 import arc.math.geom.Geometry;
 import arc.math.geom.Point2;
 import arc.struct.IntSeq;
@@ -11,6 +12,7 @@ import arc.util.Tmp;
 import meld.content.*;
 import meld.core.*;
 import meld.entities.unit.abilities.BezerkAbility;
+import meld.fluid.AspectGroup;
 import meld.graphics.MeldRegions;
 import meld.meta.MeldStatUnit;
 import mindustry.Vars;
@@ -82,7 +84,8 @@ public class Meld extends Mod{
         Seq<String> packages = Seq.with(
                 "meld",
                 "meld.content",
-                "meld.world"
+                "meld.world",
+                "meld.fluid"
         );
 
         packages.each(name -> {
@@ -105,6 +108,9 @@ public class Meld extends Mod{
         MeldBlocks.load();
         MeldEnvironment.load();
 
+        //Just loads localised names
+        AspectGroup.loadAll();
+
         Vars.content.items().each(c -> {
                 c.stats.add(Stat.buildCost, c.cost, MeldStatUnit.ticks);
         });
@@ -113,6 +119,10 @@ public class Meld extends Mod{
             if(b.minfo.mod != null && b.minfo.mod.name.equals("meld")){
                 b.deconstructDropAllLiquid = true;
             }
+        });
+
+        Vars.content.liquids().each(l -> {
+            Colors.put(l.name, l.color);
         });
     }
 }

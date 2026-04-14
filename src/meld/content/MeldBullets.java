@@ -18,7 +18,7 @@ public class MeldBullets {
 
             pulsarBlast, pulsarShrapnel,
             sunderDebris, sunderGlass,
-            shredSilver;
+            shredDebris, shredSilver;
 
     public static void load(){
 
@@ -135,17 +135,19 @@ public class MeldBullets {
             }};
         }};
 
-        sunderGlass = new FlakBulletType(){{
+        sunderGlass = new FlakBulletType(6, 1){{
+            sprite = Meld.prefix("clump");
+
             frontColor = MeldPal.glassMallowsFront;
             backColor = MeldPal.glassMallowsBack;
             collidesGround = true;
             scaleLife = true;
 
             reloadMultiplier = 2;
+            rangeChange = -80;
 
-            speed = 6;
             damage = 0.5f;
-            lifetime = 30;
+            lifetime = 15;
             width = 3;
             height = 8;
 
@@ -174,7 +176,7 @@ public class MeldBullets {
 
             fragBullets = 5;
 
-            fragBullet = new BasicBulletType(8, 8, Meld.prefix("clump")){{
+            fragBullet = new BasicBulletType(6, 8, Meld.prefix("clump")){{
                 frontColor = MeldPal.glassMallowsFront;
                 backColor = MeldPal.glassMallowsBack;
                 lightRadius = 0;
@@ -198,15 +200,85 @@ public class MeldBullets {
             }};
         }};
 
+        shredDebris = new BasicBulletType(){{
+            damage = 2;
+            lifetime = 5;
+            speed = 12;
+            sprite = Meld.prefix("clump");
+            width = 8;
+            height = 10;
+            shrinkY = 0;
+
+            despawnHit = true;
+
+            fragLifeMin = 0.6f;
+            ammoMultiplier = 2;
+
+            fragRandomSpread = 5;
+            fragBullets = 3;
+
+            fragBullet = new BasicBulletType(12, 1, Meld.prefix("clump")){{
+                lifetime = 21;
+                drag = 0.01f;
+                width = 6;
+                height = 12;
+                shrinkX = 0.7f;
+                shrinkY = 0.2f;
+
+                splashDamage = 1;
+                splashDamageRadius = 20;
+                knockback = 0.25f;
+                impact = true;
+
+                hitEffect = Fx.none;
+                despawnEffect = Fx.none;
+                setDefaults = false;
+                despawnHit = false;
+                fragOnHit = true;
+
+                pierce = true;
+                pierceCap = 2;
+
+                fragBullets = 3;
+                fragRandomSpread = 60;
+
+                bulletInterval = 2;
+
+                fragBullet = new BasicBulletType(9, 2, Meld.prefix("clump")){{
+                    speed = 9;
+                    damage = 0.5f;
+                    lifetime = 8;
+                    drag = 0.002f;
+                    width = 1;
+                    height = 6;
+                    shrinkY = 0.2f;
+                    shrinkX = 1;
+
+                    lightRadius = 0;
+
+                    hitEffect = Fx.none;
+                    despawnEffect = Fx.none;
+                    despawnHit = false;
+
+                    sticky = true;
+                    stickyExtraLifetime = 60;
+
+                    status = MeldStatusEffects.impaled;
+                    statusDuration = 5;
+                }};
+            }};
+        }};
+
         shredSilver = new TransitionBulletType(){{
 
             fragLifeMin = 0.8f;
             ammoMultiplier = 2;
+            reloadMultiplier = 2f;
 
             fragRandomSpread = 5;
-            fragBullets = 2;
+            fragBullets = 1;
 
-            fragBullet = new RicochetBulletType(8, 6, "shell"){{
+            fragBullet = new RicochetBulletType(8, 10, "shell"){{
                 frontColor = Color.white;
                 backColor = MeldPal.aspect;
 
@@ -214,14 +286,17 @@ public class MeldBullets {
                 drag = 0.01f;
                 width = 8;
                 height = 8;
-                shrinkX = 0.7f;
-                shrinkY = 0.7f;
+                shrinkX = 1;
+                shrinkY = 1f;
+                shrinkInterp = Interp.pow10Out;
+
+                lightRadius = 0;
 
                 splashDamage = 5;
                 splashDamageRadius = 20;
 
                 //For some reason impact + knockback on bouncy bullets doesn't work how I want it to...
-                knockback = 3;
+                knockback = 5;
 
                 bounceEffect = Fx.none;
                 hitEffect = Fx.none;

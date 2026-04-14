@@ -5,7 +5,10 @@ import arc.struct.ObjectFloatMap;
 import arc.struct.ObjectMap;
 import arc.struct.Seq;
 import meld.fluid.Aspect;
+import meld.fluid.AspectGroup;
 import mindustry.type.Liquid;
+
+import static meld.fluid.AspectGroup.*;
 
 public class MeldLiquids {
 
@@ -79,6 +82,24 @@ public class MeldLiquids {
             temperature = 0.6f;
         }};
 
+        put(aether, AspectGroup.aether, new AspectStats(1, 1));
+        put(pollutantMixture, AspectGroup.aether, new AspectStats(1, 0.5f));
+        put(pollutantMixture, AspectGroup.aether, new AspectStats(1, 0.5f));
+        put(thunderingAether, AspectGroup.aether, new AspectStats(2, 0.5f));
+
+        put(aspect, AspectGroup.aspect, new AspectStats(1, 1));
+        put(boundAspect, AspectGroup.aspect, new AspectStats(1, 2));
+        put(stormingAspect, AspectGroup.aspect, new AspectStats(2, 1));
+
+        put(fumes, AspectGroup.fumes, new AspectStats(1, 1));
+        put(pollutantMixture, AspectGroup.fumes, new AspectStats(1, 0.5f));
+
+        outletMapping.putAll(
+                aether, aspect,
+                pollutantMixture, boundAspect,
+                thunderingAether, stormingAspect
+        );
+
         aetherEfficiencies.put(aether, 1);
         aetherEfficiencies.put(pollutantMixture, 1);
         aetherEfficiencies.put(thunderingAether, 2);
@@ -100,18 +121,16 @@ public class MeldLiquids {
         meld.databaseTag = "aspect-omnipotence";
         fumes.databaseTag = "aspect-vita";
 
-        outletMapping.putAll(
-                aether, aspect,
-                pollutantMixture, boundAspect,
-                thunderingAether, stormingAspect
-        );
+        mapOutlet(aether, aspect);
+        mapOutlet(pollutantMixture, boundAspect);
+        mapOutlet(thunderingAether, stormingAspect);
+    }
 
-        Seq<Liquid> outletLiquids = Seq.with(aether, pollutantMixture, thunderingAether);
+    public static void mapOutlet(Liquid input, Liquid output){
+        outletMapping.putAll(input, output);
 
-        outletLiquids.each(liquid -> {
-            Liquid aspecti = outletMapping.get(liquid);
-            outletEfficiencies.put(liquid, aetherEfficiencies.get(liquid, 1) * aspectEfficiencies.get(aspecti, 1));
-            outletDensities.put(liquid, aetherDensities.get(liquid, 1) * aspectDensities.get(aspecti, 1));
-        });
+        outletEfficiencies.put(input, aetherEfficiencies.get(input, 1) * aspectEfficiencies.get(output, 1));
+
+        outletDensities.put(input, aetherDensities.get(input, 1) * aspectDensities.get(output, 1));
     }
 }

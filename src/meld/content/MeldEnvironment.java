@@ -337,7 +337,7 @@ public class MeldEnvironment {
         }};
 
         meldCluster = new WobbleProp("meld-cluster-small"){{
-            requirements(Category.effect, ItemStack.with(MeldItems.debris, 40));
+            requirements(Category.effect, ItemStack.with(MeldItems.debris, 50));
 
             buildVisibility = BuildVisibility.sandboxOnly;
 
@@ -347,7 +347,7 @@ public class MeldEnvironment {
         }};
 
         meldClusterLarge = new AetherCluster("meld-cluster-large"){{
-            requirements(Category.effect, ItemStack.with(MeldItems.debris, 150));
+            requirements(Category.effect, ItemStack.with(MeldItems.debris, 300));
             size = 3;
 
             buildVisibility = BuildVisibility.sandboxOnly;

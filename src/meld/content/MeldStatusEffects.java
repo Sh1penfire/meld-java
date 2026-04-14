@@ -9,6 +9,7 @@ import mindustry.type.StatusEffect;
 public class MeldStatusEffects {
     public static StatusEffect amplified, rally, anchored, aspectBurn, sentry, spurting, newborn, interference, drenched, stunned;
     public static StatusEffect lacerated, impaled;
+    public static StatusEffect rush;
 
 
     public static void load(){
@@ -54,9 +55,29 @@ public class MeldStatusEffects {
             }
             {
             speedMultiplier = 1.25f;
-            reloadMultiplier = 2;
-
+            reloadMultiplier = 3;
         }};
+
+        rush = new StatusEffect("rush"){
+            @Override
+            public void update(Unit unit, StatusEntry entry) {
+
+                unit.speedMultiplier /= speedMultiplier;
+                //Start the falloff at 180 ticks remaining
+                unit.speedMultiplier *= Mathf.lerp(
+                        1, speedMultiplier,
+
+                        Interp.pow3.apply(
+                                Mathf.clamp(Math.min(entry.time, 180)/(180))
+                        )
+                );
+            }
+            {
+                damage = -1;
+                healthMultiplier = 2;
+                speedMultiplier = 2;
+                disarm = true;
+            }};
 
         anchored = new StatusEffect("anchored"){
 
@@ -99,6 +120,7 @@ public class MeldStatusEffects {
                         )
                 );
             }{
+            damage = 0.2f;
             speedMultiplier = 0.01f;
             dragMultiplier = 0.3f;
             disarm = true;

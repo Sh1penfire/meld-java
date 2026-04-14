@@ -14,7 +14,7 @@ public class MeldItems {
 
     //Heavy industry content
     public static Item
-    tenbris, shadesteel, elnarDust, annealedSilver, glassMallows, cruciblePlating, aspectPipe;
+    tenbris, motis, shadesteel, elnarDust, annealedSilver, glassMallows, cruciblePlating, aspectPipe;
 
     public static void load(){
 
@@ -46,6 +46,10 @@ public class MeldItems {
 
         }};
 
+        motis = new Item("motis"){{
+
+        }};
+
         shadesteel = new Item("shadesteel"){{
 
         }};
@@ -68,7 +72,7 @@ public class MeldItems {
 
         }};
 
-        Seq<Item> heavyIndustry = Seq.with(tenbris, shadesteel, elnarDust, annealedSilver, glassMallows, cruciblePlating, aspectPipe);
+        Seq<Item> heavyIndustry = Seq.with(tenbris, motis, shadesteel, elnarDust, annealedSilver, glassMallows, cruciblePlating, aspectPipe);
         heavyIndustry.each(i -> i.databaseTag = "heavy-industry");
     };
 }

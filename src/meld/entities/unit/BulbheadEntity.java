@@ -78,6 +78,7 @@ public class BulbheadEntity extends UnitWaterMove {
     }
 
     public void getNearbyLink(){
+        if(CoreRaft.rafts.isEmpty()) return;
         nearbyRaft = CoreRaft.rafts.sort(raft -> raft.dst(this)).first();
         if(!within(nearbyRaft, type.fogRadius * Vars.tilesize)) nearbyRaft = null;
     }
