@@ -24,6 +24,8 @@ public class SonarSpire extends FieldPulsar {
     }
 
     public class SonarSpireBuild extends PulsarBuild {
+        public float lastRadius = 0f;
+
         @Override
         public void updateTile() {
             super.updateTile();
@@ -41,7 +43,7 @@ public class SonarSpire extends FieldPulsar {
         }
         @Override
         public float fogRadius() {
-            return smoothRadius/ tilesize;
+            return smoothRadius/tilesize;
         }
 
         @Override

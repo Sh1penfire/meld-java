@@ -109,7 +109,6 @@ public class BezerkAbility extends Ability {
     public void death(Unit unit) {
         if(bezerk && deathBomb != null) {
             deathBomb.create(null, unit.team, unit.x, unit.y, unit.vel.angle());
-            Log.info("boomies!");
         }
         super.death(unit);
     }

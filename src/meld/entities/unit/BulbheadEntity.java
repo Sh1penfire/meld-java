@@ -49,11 +49,7 @@ public class BulbheadEntity extends UnitWaterMove {
     public EntityCollisions.SolidPred solidity() {
         return (x, y) -> {
             Tile tile = Vars.world.tile(x, y);
-            if(tile == null) return true;
-
-            if(tile.synthetic() || !tile.solid()) return false;
-
-            return !(tile.floor().isLiquid);
+            return tile == null || tile.solid();
         };
     }
 

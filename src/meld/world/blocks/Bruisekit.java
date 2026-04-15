@@ -29,7 +29,7 @@ public class Bruisekit extends FieldPulsar{
 
         @Override
         public boolean shouldConsume() {
-            return super.shouldConsume() && target != null && lastRadius < range;
+            return super.shouldConsume() && (target != null || Math.abs(smoothRadius - range) > 1);
         }
 
         @Override
@@ -41,8 +41,6 @@ public class Bruisekit extends FieldPulsar{
                     float healAmount = healSpeed * edelta();
                     if(target.wasRecentlyDamaged()) healAmount *= recentDamageMultiplier;
                     if(target.block.size == 0) healAmount *= smallMultiplier;
-
-                    Log.info(healAmount);
 
                     target.heal(healAmount);
                 }
