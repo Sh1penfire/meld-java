@@ -8,6 +8,7 @@ import arc.struct.Seq;
 import arc.util.Nullable;
 import arc.util.Time;
 import meld.content.MeldStatusEffects;
+import meld.world.blocks.crafting.StorageIncinerator;
 import mindustry.Vars;
 import mindustry.content.Fx;
 import mindustry.entities.Units;
@@ -16,14 +17,20 @@ import mindustry.game.EventType;
 import mindustry.game.Team;
 import mindustry.gen.Building;
 import mindustry.gen.Player;
+import mindustry.gen.Teamc;
 import mindustry.gen.Unit;
 import mindustry.graphics.Layer;
 import mindustry.graphics.Pal;
+import mindustry.type.Item;
 import mindustry.type.UnitType;
 import mindustry.world.Tile;
+import mindustry.world.blocks.production.Incinerator;
+import mindustry.world.blocks.production.ItemIncinerator;
+import mindustry.world.blocks.production.WallCrafter;
 import mindustry.world.blocks.storage.CoreBlock;
 
-import static mindustry.Vars.tilesize;
+import static mindustry.Vars.*;
+import static mindustry.Vars.net;
 
 
 //Rallies units nearby, provides an extended build radius for core units
@@ -103,6 +110,23 @@ public class CoreRaft extends CoreBlock {
         public @Nullable Tile targetTile;
         public boolean building = false, lastBuilding = false;
 
+        public Building incinerator;
+
+        public boolean canIncinerate = false;
+
+        @Override
+        public void onProximityUpdate() {
+            super.onProximityUpdate();
+            incinerator= null;
+            proximity.each(b -> {
+                if(b instanceof Incinerator.IncineratorBuild ||
+                        b instanceof ItemIncinerator.ItemIncineratorBuild ||
+                        b.block instanceof StorageIncinerator
+                ) incinerator = b;
+            });
+            canIncinerate = incinerator != null;
+        }
+
         @Override
         public void onRemoved() {
             super.onRemoved();
@@ -113,6 +137,57 @@ public class CoreRaft extends CoreBlock {
         public Building init(Tile tile, Team team, boolean shouldAdd, int rotation) {
             rafts.add(this);
             return super.init(tile, team, shouldAdd, rotation);
+        }
+
+        @Override
+        public boolean acceptItem(Building source, Item item){
+            return items.get(item) < getMaximumAccepted(item) || canIncinerate && incinerator.acceptItem(source, item);
+        }
+
+        @Override
+        public int getMaximumAccepted(Item item){
+            return canIncinerate ? incinerator.getMaximumAccepted(item) : storageCapacity;
+        }
+
+        @Override
+        public void handleStack(Item item, int amount, Teamc source){
+            boolean incinerate = canIncinerate && incinerateNonBuildable && !item.buildable;
+            int realAmount = incinerate ? 0 : Math.min(amount, storageCapacity - items.get(item));
+            super.handleStack(item, realAmount, source);
+
+            if(team == state.rules.defaultTeam && state.isCampaign()){
+                if(!incinerate){
+                    state.rules.sector.info.handleCoreItem(item, amount);
+                }
+
+                if(realAmount == 0 && wasVisible && canIncinerate){
+                    incinerator.handleStack(item, amount, source);
+                }
+            }
+        }
+
+        @Override
+        public void handleItem(Building source, Item item){
+            boolean incinerate = incinerateNonBuildable && !item.buildable;
+
+            if(team == state.rules.defaultTeam){
+                state.stats.coreItemCount.increment(item);
+            }
+
+            if(net.server() || !net.active()){
+                if(team == state.rules.defaultTeam && state.isCampaign() && !incinerate){
+                    state.rules.sector.info.handleCoreItem(item, 1);
+                }
+
+                if(items.get(item) >= storageCapacity || incinerate){
+                    //create item incineration effect at random intervals
+                    incinerator.handleItem(source, item);
+                }else{
+                    super.handleItem(source, item);
+                }
+            }else if(((state.rules.coreIncinerates && canIncinerate && items.get(item) >= storageCapacity) || incinerate) && !noEffect){
+                incinerator.handleItem(source, item);
+            }
         }
 
         @Override

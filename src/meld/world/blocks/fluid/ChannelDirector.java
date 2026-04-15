@@ -20,13 +20,14 @@ public class ChannelDirector extends FlexibleSizeJunction{
         super(name);
         rotate = true;
         quickRotate = true;
+        solid = false;
     }
 
     public class DirectorBuild extends FlexibleBuild{
 
         @Override
         public Building getLiquidDestination(Building source, Liquid liquid, Position otherOffset) {
-            int dir = WorldUtil.relativeTo(source.tile.x, source.tile.y, tile.x, tile.y);
+            int dir = source.tile.relativeTo(tile);
             if(!acceptDirection(source, this, dir)) return this;
 
             return super.getLiquidDestination(source, liquid, otherOffset);

@@ -47,7 +47,8 @@ public class FlexibleSizeJunction extends LiquidJunction {
             if(!enabled && enabledToggles) return this;
 
             //Find which direction the offset should go
-            int dir = WorldUtil.relativeTo(source.tile.x, source.tile.y, tile.x, tile.y);
+            int dir = source.relativeTo(tile);
+
             Point2 direction = Geometry.d4(dir);
 
             //Direction offset vector

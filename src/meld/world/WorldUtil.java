@@ -1,10 +1,12 @@
 package meld.world;
 
+import arc.func.Cons;
 import arc.math.Mathf;
 import arc.math.geom.Point2;
 import arc.struct.Seq;
 import arc.util.Nullable;
 import arc.util.Tmp;
+import mindustry.world.Block;
 import mindustry.world.Tile;
 import mindustry.world.meta.Attribute;
 
@@ -21,6 +23,10 @@ public class WorldUtil {
         if(tile == null) return 0;
         tile.getLinkedTiles(tempTiles);
         return tempTiles.sumf(other -> other.floor().attributes.get(attr));
+    }
+
+    public static void nearbyTiles(float x, float y, int size, Cons<Tile> cons){
+        Tmp.v1.set(size, (size - 1)/2f);
     }
 
     //Just to note

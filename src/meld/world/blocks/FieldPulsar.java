@@ -75,7 +75,6 @@ public class FieldPulsar extends Block {
 
         public float smoothRadius;
         public float duration, uptime, grace;
-        public float lastRadius = 0f;
 
         @Override
         public void update() {

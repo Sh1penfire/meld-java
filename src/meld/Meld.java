@@ -50,6 +50,7 @@ public class Meld extends Mod{
     }
     private static final StringBuilder b = new StringBuilder();
 
+    //Thanks smolkey
     public static String gradient(String in, Color... colors){
         if(colors.length == 1) return "[#" + colors[0].toString().substring(0, 6) + "]" + in + "[]";
 

@@ -18,6 +18,7 @@ import meld.world.blocks.*;
 import meld.world.blocks.consumers.StupidConsumeAspects;
 import meld.world.blocks.crafting.ModularCrafter;
 import meld.world.blocks.crafting.RecipeCrafter;
+import meld.world.blocks.crafting.StorageIncinerator;
 import meld.world.blocks.crafting.recipe.ItemRecipe;
 import meld.world.blocks.crafting.recipe.SpoolRecipe;
 import meld.world.blocks.crafting.modules.*;
@@ -29,6 +30,7 @@ import meld.world.blocks.items.PriorityInputSplitter;
 import meld.world.blocks.production.SingleBeamDrill;
 import meld.world.meta.*;
 import mindustry.Vars;
+import mindustry.content.Blocks;
 import mindustry.content.Fx;
 import mindustry.content.StatusEffects;
 import mindustry.entities.bullet.*;
@@ -80,7 +82,14 @@ public class MeldBlocks {
             //Suture shoots healing needles in a cone at the closest damaged block. Impales enemies, causing them to take constant chip damage and be sedated.
             bruisekit, gauze, suture;
 
-    public static Block coreRaft, aetherAccumulator, elementalBlaster, pneumaticPulsear,
+    //Core Blocks
+    public static Block coreRaft;
+
+    //Core Incinerator does what core incinerator does... it core incinerator
+
+    public static ItemIncinerator aspectIncinerator;
+
+    public static Block aetherAccumulator, elementalBlaster, pneumaticPulsear,
             earthboundInfuser, fumehood, sharkFactory;
 
     public static ModularCrafter gasKiln, rotaryKiln, pneumaticExtruder;
@@ -999,8 +1008,7 @@ public class MeldBlocks {
             consume(new ConsumeAspects(outletRate/2, MeldLiquids.aspectEfficiencies, MeldLiquids.aspectDensities));
         }};
 
-        coreRaft = new CoreRaft("core-raft"){
-            {
+        coreRaft = new CoreRaft("core-raft"){{
             requirements(Category.effect, with(
                     MeldItems.debris, 900
             ));
@@ -1012,7 +1020,16 @@ public class MeldBlocks {
             unitCapModifier = 6;
 
             unitType = MeldUnits.bulbhead;
-            solid = true;
+            solid = false;
+        }};
+
+        aspectIncinerator = new StorageIncinerator("aspect-incinerator"){{
+            requirements(Category.effect, with(MeldItems.debris, 40));
+            health = 120;
+            liquidCapacity = 10;
+            itemCapacity = 10;
+
+            consume(new StupidConsumeAspects(outletRate/10, AspectGroup.aspect));
         }};
 
         aetherAccumulator = new AttributeCrafter("aether-accumulator"){{
@@ -1088,9 +1105,19 @@ public class MeldBlocks {
 
             optionalBoostIntensity = 2;
 
-            consume(new ConsumeAspects(
-                    outletRate, MeldLiquids.aspectEfficiencies, MeldLiquids.aspectDensities
-            ));
+            drillMultipliers.put(
+                    MeldItems.clayMallows, 0.5f
+            );
+            drillMultipliers.put(
+                    MeldItems.resonarum, 0.5f
+            );
+
+            consume(new StupidConsumeAspects(
+                    outletRate, AspectGroup.aspect
+                    ){{
+                        optional = booster = false;
+                    }}
+            );
 
             consume(new ConsumeLiquid(
                     MeldLiquids.meld, 1
@@ -1610,7 +1637,7 @@ public class MeldBlocks {
 
         carbonicBarrier = new Wall("stone-blocker"){{
             requirements(Category.defense, with(MeldItems.stonyParticulate, 15));
-            health = 400;
+            health = 650;
             armor = 85;
 
             customShadow = true;
@@ -1621,7 +1648,7 @@ public class MeldBlocks {
         carbonicBarrierLarge = new Wall("stone-blocker-large"){{
             requirements(Category.defense, with(MeldItems.stonyParticulate, 60));
             size = 2;
-            health = 400;
+            health = 2600;
             armor = 85;
 
             customShadow = true;
@@ -1666,6 +1693,8 @@ public class MeldBlocks {
             liquidCapacity = 100;
             liquidPressure = 4;
             range = 8;
+
+            ((Conduit) pipeline).rotBridgeReplacement = this;
         }};
 
         meldCultivator = new AttributeCrafter("meld-cultivator"){{
