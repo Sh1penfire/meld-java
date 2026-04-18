@@ -217,7 +217,7 @@ public class MeldBullets {
             fragRandomSpread = 5;
             fragBullets = 3;
 
-            fragBullet = new BasicBulletType(12, 1, Meld.prefix("clump")){{
+            fragBullet = new BasicBulletType(12, 6, Meld.prefix("clump")){{
                 lifetime = 21;
                 drag = 0.01f;
                 width = 6;
@@ -225,8 +225,6 @@ public class MeldBullets {
                 shrinkX = 0.7f;
                 shrinkY = 0.2f;
 
-                splashDamage = 1;
-                splashDamageRadius = 20;
                 knockback = 0.25f;
                 impact = true;
 
@@ -244,7 +242,7 @@ public class MeldBullets {
 
                 bulletInterval = 2;
 
-                fragBullet = new BasicBulletType(9, 2, Meld.prefix("clump")){{
+                fragBullet = new BasicBulletType(9, 4, Meld.prefix("clump")){{
                     speed = 9;
                     damage = 0.5f;
                     lifetime = 8;
@@ -261,7 +259,7 @@ public class MeldBullets {
                     despawnHit = false;
 
                     sticky = true;
-                    stickyExtraLifetime = 60;
+                    stickyExtraLifetime = 120;
 
                     status = MeldStatusEffects.impaled;
                     statusDuration = 5;

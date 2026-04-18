@@ -15,7 +15,7 @@ import mindustry.world.blocks.environment.*;
 // TODO: fix melting stopping when leaving world
 // TODO: make a way to add more melting patterns
 public class Melting implements Runnable{
-    private static final Floor stable = MeldEnvironment.meldCrystal;
+    private static final Floor stable = MeldEnvironment.meldCrystalFloor;
     private static final Floor unstable = MeldEnvironment.meldCrystalScattered;
     private static final Floor melted = MeldEnvironment.meldSwampland;
     

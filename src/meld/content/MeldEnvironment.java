@@ -2,6 +2,7 @@ package meld.content;
 
 import arc.graphics.Color;
 import meld.world.blocks.AetherCluster;
+import mindustry.content.Blocks;
 import mindustry.content.Fx;
 import mindustry.graphics.CacheLayer;
 import mindustry.type.Category;
@@ -13,15 +14,16 @@ import mindustry.world.meta.BuildVisibility;
 
 public class MeldEnvironment {
 
-    //Ore deposits
+    //Ore deposits & overlays
     public static Block
 
     //Marsh pt1
         debrisDeposit, debrisDepositLarge, debrisNodule,
+        metalPebbles, metalPebblesDense, metalSheeting,
     //Barrens
         carbolithDeposit, carbolithDepositDepleted, tenbrisMix, tenbrisRidges, elnarSilt, embeddedElnar, embeddedElnarOverflowing,
     //Badlands
-        silverDeposit,
+        silverDeposit, silverDepositDepleted, electrumDeposit, iampsiSpecks, quartzFlakes,
     //Storm Planes
         resonarumDeposit, resonarumCrystal, resonarumOutcrop,
 
@@ -31,6 +33,9 @@ public class MeldEnvironment {
     //Badlands
     pillowWall, sandstoneWall,
     mallowWall, crackstoneWall,
+    likesandWall, likestoneWall, likesaltWall,
+
+    polishedSandstoneWall,
     //Barrens
     carbonicWall, earthenWall
     //Storm Planes
@@ -40,25 +45,43 @@ public class MeldEnvironment {
     public static Floor
             metalWeave, metalWeaveHole, metalWeaveGlow,
     //Badlands
-            sandMeld, softSand, sandstone,
-            redsandMeld, redSand, aspectSoil, redSandWeave, crackstone,
+        polishedSandstoneTile,
+
+        sandMeld, softSand, sandstone,
+        redsandMeld, redSand, redSilt, aspectSoil, redSandWeave, crackstone,
+        likesand, likestone, likesalt,
+        goldSand, goldSlurry,
+
     //Barrens
-            bedrock, bedrockMeld,
-            slate, slateMeld,
-            runicSlate, runicSlateMeld,
-            literallyCarbonStoneFromMindustryButSlightlyDifferent, carbonicPlates, carbonicVent,
-            earthenStone, mixtureStone,
-            resonantStone,
+        bedrock, bedrockMeld,
+        slate, slateMeld,
+        runicSlate, runicSlateMeld,
+        literallyCarbonStoneFromMindustryButSlightlyDifferent, carbonicPlates, carbonicVent,
+        earthenStone, mixtureStone,
+        resonantStone,
     //Marsh
-    meldPlates, meldHadaland, meldTrenchland, meldSwampland, meldCrystalScattered, meldCrystal, meldCrystalHard;
+    meldPlates, meldHadaland, meldTrenchland, meldSwampland, meldCrystalScattered, meldCrystalFloor, meldCrystalHardFloor;
 
-    public static Block aetherGrowth, metalWeaveAether;
+    public static SteamVent aetherGrowth, metalWeaveAether;
 
-    public static Prop meldCluster;
+    public static Prop meldCluster, meldPools, meldProtrusion, meldMetalStick, meldCrystal, iampsiGemstone, quartzSpikes;
+    public static TallBlock meldCrystalLarge, meldSupportFrame;
     public static AetherCluster meldClusterLarge;
 
     public static void load(){
 
+        metalPebbles = new OverlayFloor("metal-pebbles"){{
+            variants = 3;
+            needsSurface = false;
+        }};
+        metalSheeting = new OverlayFloor("metal-sheeting"){{
+            variants = 3;
+            needsSurface = false;
+        }};
+        metalPebblesDense = new OverlayFloor("metal-pebbles-dense"){{
+            variants = 3;
+            needsSurface = false;
+        }};
 
         debrisNodule = new OreBlock("debris-nodule"){{
             variants = 3;
@@ -114,6 +137,15 @@ public class MeldEnvironment {
         silverDeposit = new StaticWall("silver-deposit"){{
             variants = 3;
             itemDrop = MeldItems.silver;
+        }};
+
+        silverDepositDepleted = new StaticWall("silver-deposit-depleted"){{
+            variants = 3;
+        }};
+
+        electrumDeposit = new StaticWall("electrum-deposit"){{
+            variants = 3;
+            itemDrop = MeldItems.electrumSheets;
         }};
 
         resonarumDeposit = new SeaBush("resonarum-deposit"){{
@@ -207,29 +239,35 @@ public class MeldEnvironment {
             isLiquid = true;
 
             cacheLayer = CacheLayer.water;
+            supportsOverlay = true;
         }};
 
         meldPlates = new Floor("meld-plates", 2){{
             isLiquid = true;
             cacheLayer = CacheLayer.water;
+            supportsOverlay = true;
         }};
 
         meldCrystalScattered = new Floor("meld-crystal-scattered", 3){{
             isLiquid = true;
             cacheLayer = CacheLayer.water;
+            supportsOverlay = true;
         }};
 
         sandMeld = new Floor("sand-meld", 3){{
             isLiquid = true;
             cacheLayer = CacheLayer.water;
+            supportsOverlay = true;
         }};
         redsandMeld = new Floor("red-sand-meld", 3){{
             isLiquid = true;
             cacheLayer = CacheLayer.water;
+            supportsOverlay = true;
         }};
         slateMeld = new Floor("slate-meld", 3){{
             isLiquid = true;
             cacheLayer = CacheLayer.water;
+            supportsOverlay = true;
         }};
 
         bedrockMeld = new Floor("bedrock-meld", 3){{
@@ -238,13 +276,14 @@ public class MeldEnvironment {
 
             status = MeldStatusEffects.drenched;
             statusDuration = 25;
+            supportsOverlay = true;
         }};
 
 
-        meldCrystal = new Floor("meld-crystal-floor", 3){{
+        meldCrystalFloor = new Floor("meld-crystal-floor", 3){{
         }};
 
-        meldCrystalHard = new Floor("meld-hard-crystal-floor", 3){{
+        meldCrystalFloor = new Floor("meld-hard-crystal-floor", 3){{
         }};
 
         carbonicVent = new SteamVent("carbonic-vent"){{
@@ -277,12 +316,47 @@ public class MeldEnvironment {
             variants = 2;
         }};
 
+        polishedSandstoneTile = new Floor("polished-sandstone-tile", 3);
+
+        likesand = new Floor("likesand", 3);
+        likestone = new Floor("likestone", 3);
+        likesalt = new Floor("likesalt", 3);
+        redSilt = new Floor("red-silt", 3);
+        aspectSoil = new Floor("aspect-soil", 3);
         softSand = new Floor("soft-sand", 3);
         sandstone = new Floor("hard-sand", 3);
-        redSandWeave = new Floor("red-sand-weave", 3);
         redSand = new Floor("red-sand", 3);
-        aspectSoil = new Floor("aspect-soil", 3);
+        redSandWeave = new Floor("red-sand-weave", 3);
         crackstone = new Floor("cracked-sand", 4);
+
+        goldSand = new Floor("gold-sand", 3){{
+            isLiquid = true;
+            cacheLayer = CacheLayer.water;
+
+            status = MeldStatusEffects.drenched;
+            statusDuration = 25;
+            supportsOverlay = true;
+        }};
+        goldSlurry = new Floor("gold-slurry", 4){{
+            isLiquid = true;
+            cacheLayer = CacheLayer.water;
+
+            status = MeldStatusEffects.drenched;
+            statusDuration = 45;
+            supportsOverlay = true;
+        }};
+
+        iampsiSpecks = new OreBlock("iampsi-specks"){{
+            variants = 4;
+            itemDrop = MeldItems.iampsi;
+            needsSurface = false;
+        }};
+
+        quartzFlakes = new OreBlock("quartz-flakes"){{
+            variants = 4;
+            itemDrop = MeldItems.quartzStrata;
+            needsSurface = false;
+        }};
 
         meldWall = new StaticWall("meld-wall"){{
             variants = 3;
@@ -313,12 +387,28 @@ public class MeldEnvironment {
             variants = 2;
         }};
 
+        polishedSandstoneWall = new StaticWall("polished-sandstone-wall"){{
+            variants = 2;
+        }};
+
         mallowWall = new StaticWall("mallow-wall"){{
             variants = 2;
             itemDrop = MeldItems.clayMallows;
         }};
 
         crackstoneWall = new StaticWall("crackstone-wall"){{
+            variants = 2;
+        }};
+
+        likesandWall = new StaticTree("likesand-wall"){{
+            variants = 2;
+        }};
+
+        likestoneWall = new StaticTree("likestone-wall"){{
+            variants = 2;
+        }};
+
+        likesaltWall= new StaticTree("likesalt-wall"){{
             variants = 2;
         }};
 
@@ -345,6 +435,36 @@ public class MeldEnvironment {
             buildTime = 10;
             variants = 2;
         }};
+        meldMetalStick = new WobbleProp("meld-metal-stick"){{
+            requirements(Category.effect, ItemStack.with(MeldItems.debris, 15));
+
+            buildVisibility = BuildVisibility.sandboxOnly;
+
+            instantDeconstruct = false;
+            buildTime = 10;
+            variants = 3;
+        }};
+        meldProtrusion = new Prop("meld-protrusion"){{
+            requirements(Category.effect, ItemStack.with(MeldItems.debris, 35));
+
+            buildVisibility = BuildVisibility.sandboxOnly;
+
+            solid = true;
+            instantDeconstruct = false;
+            buildTime = 10;
+            variants = 2;
+        }};
+        meldPools = new Prop("meld-pools"){{
+            requirements(Category.effect, ItemStack.with(MeldItems.debris, 25));
+
+            buildVisibility = BuildVisibility.sandboxOnly;
+
+            solid = true;
+            customShadow = true;
+            instantDeconstruct = false;
+            buildTime = 45;
+            variants = 3;
+        }};
 
         meldClusterLarge = new AetherCluster("meld-cluster-large"){{
             requirements(Category.effect, ItemStack.with(MeldItems.debris, 300));
@@ -352,6 +472,51 @@ public class MeldEnvironment {
 
             buildVisibility = BuildVisibility.sandboxOnly;
 
+        }};
+
+        meldCrystal = new WobbleProp("meld-crystal"){{
+            requirements(Category.effect, ItemStack.with(MeldItems.meldShard, 25));
+
+            buildVisibility = BuildVisibility.sandboxOnly;
+
+            instantDeconstruct = false;
+            buildTime = 10;
+            variants = 3;
+        }};
+
+
+        iampsiGemstone = new Prop("iampsi-gemstone"){{
+            requirements(Category.effect, ItemStack.with(MeldItems.silver, 25, MeldItems.iampsi, 45, MeldItems.quartzStrata, 25));
+            solid = true;
+            alwaysReplace = false;
+
+            buildVisibility = BuildVisibility.sandboxOnly;
+
+            instantDeconstruct = false;
+            buildTime = 35;
+            variants = 4;
+        }};
+
+        quartzSpikes = new Prop("quartz-spikes"){{
+            requirements(Category.effect, ItemStack.with(MeldItems.quartzStrata, 15));
+            solid = false;
+            alwaysReplace = true;
+
+            buildVisibility = BuildVisibility.sandboxOnly;
+
+            customShadow = true;
+            instantDeconstruct = false;
+            buildTime = 5;
+            variants = 5;
+        }};
+
+        meldCrystalLarge = new TallBlock("meld-crystal-large"){{
+            variants = 1;
+            customShadow = true;
+        }};
+        meldSupportFrame = new TallBlock("meld-support-frame"){{
+            variants = 2;
+            customShadow = true;
         }};
     }
 }

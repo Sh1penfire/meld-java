@@ -122,7 +122,7 @@ public class MeldBlocks {
 
     public static void load(){
 
-        int channelHealth = 120;
+        int channelHealth = 100;
 
         channelFace = new FlexibleSizeJunction("channel-face"){{
             requirements(Category.liquid, with(
@@ -172,6 +172,9 @@ public class MeldBlocks {
                     new DrawLiquidTile(){{
                         drawLiquid = MeldLiquids.boundAspect;
                     }},
+                    new DrawLiquidTile(){{
+                        drawLiquid = MeldLiquids.stormingAspect;
+                    }},
                     new DrawRegion(),
                     new DrawSideRegion()
             );
@@ -187,31 +190,31 @@ public class MeldBlocks {
             recipes.addAll(
                     new TimedRecipe(){{
                         craftTime = 10;
-                        float multi = MeldLiquids.aetherEfficiencies.get(MeldLiquids.aether, 1);
-                        float density = MeldLiquids.aetherDensities.get(MeldLiquids.aether, 1);
+                        float multi = AspectGroup.aether.getEfficiency(MeldLiquids.aether);
+                        float density = AspectGroup.aether.getDensity(MeldLiquids.aether);
                         inputLiquids = LiquidStack.with(MeldLiquids.aether, outletRate/density);
-                        outputLiquids = LiquidStack.with(MeldLiquids.aspect, outletRate * multi * 10);
+                        outputLiquids = LiquidStack.with(MeldLiquids.aspect, outletRate * multi * 10 * density);
                     }},
                     new TimedRecipe(){{
                         craftTime = 10;
-                        float multi = MeldLiquids.aetherEfficiencies.get(MeldLiquids.pollutantMixture, 1);
-                        float density = MeldLiquids.aetherDensities.get(MeldLiquids.pollutantMixture, 1);
-                        inputLiquids = LiquidStack.with(MeldLiquids.pollutantMixture, outletRate/density);
-                        outputLiquids = LiquidStack.with(MeldLiquids.boundAspect, outletRate * multi * 10);
+                        float multi = AspectGroup.aether.getEfficiency(MeldLiquids.pollutantMixture);
+                        float density = AspectGroup.aether.getDensity(MeldLiquids.pollutantMixture);
+                        inputLiquids = LiquidStack.with(MeldLiquids.pollutantMixture, outletRate);
+                        outputLiquids = LiquidStack.with(MeldLiquids.boundAspect, outletRate * multi * 10 * density);
                     }},
                     new TimedRecipe(){{
                         craftTime = 10;
-                        float multi = MeldLiquids.aetherEfficiencies.get(MeldLiquids.thunderingAether, 1);
-                        float density = MeldLiquids.aetherDensities.get(MeldLiquids.thunderingAether, 1);
+                        float multi = AspectGroup.aether.getEfficiency(MeldLiquids.thunderingAether);
+                        float density = AspectGroup.aether.getDensity(MeldLiquids.thunderingAether);
                         inputLiquids = LiquidStack.with(MeldLiquids.thunderingAether, outletRate/density);
-                        outputLiquids = LiquidStack.with(MeldLiquids.stormingAspect, outletRate * multi * 10);
+                        outputLiquids = LiquidStack.with(MeldLiquids.stormingAspect, outletRate * multi * 10 * density);
                     }}
             );
         }};
 
         aspectChannel = new VisualAspectPipe("aspect-channel"){{
             requirements(Category.liquid, with(
-                    MeldItems.annealedSilver, 5, MeldItems.glassMallows, 2
+                    MeldItems.annealedSilver, 5, MeldItems.aspectPipe, 2
             ));
             underBullets = false;
             leaks = false;
@@ -408,7 +411,7 @@ public class MeldBlocks {
                 shotDelay = 0;
                 shots = 7;
 
-                float[] spreadCone = new float[]{0, 3, 6, 15};
+                float[] spreadCone = new float[]{0, 3, 12, 25};
                 barrels = new float[]{
                         0, 0, spreadCone[0],
                         0, 0, -spreadCone[2],
@@ -636,7 +639,7 @@ public class MeldBlocks {
             );
 
             consume(
-                    new ConsumeAspects(outletRate, MeldLiquids.aspectEfficiencies, MeldLiquids.aspectDensities)
+                    new StupidConsumeAspects(outletRate, AspectGroup.aspect)
             );
         }};
 
@@ -669,7 +672,7 @@ public class MeldBlocks {
                 firstShotDelay = 60;
             }};
 
-            consume(new ConsumeAspects(outletRate * 3, MeldLiquids.aspectEfficiencies, MeldLiquids.aspectDensities));
+            consume(new StupidConsumeAspects(outletRate * 3, AspectGroup.aspect));
 
             drawer = new DrawTurret(){{
 
@@ -1005,7 +1008,7 @@ public class MeldBlocks {
                 new DrawDefault()
             );
 
-            consume(new ConsumeAspects(outletRate/2, MeldLiquids.aspectEfficiencies, MeldLiquids.aspectDensities));
+            consume(new StupidConsumeAspects(outletRate/2, AspectGroup.aspect));
         }};
 
         coreRaft = new CoreRaft("core-raft"){{
@@ -1105,11 +1108,21 @@ public class MeldBlocks {
 
             optionalBoostIntensity = 2;
 
+            sparkColor = Color.valueOf("8cc7ee");
+            boostHeatColor = Color.valueOf("ecb6eb");
+
+            sparks = 24;
+            sparkLife = 15;
+            sparkSpread = 25;
+
             drillMultipliers.put(
                     MeldItems.clayMallows, 0.5f
             );
             drillMultipliers.put(
                     MeldItems.resonarum, 0.5f
+            );
+            drillMultipliers.put(
+                    MeldItems.electrumSheets, 2
             );
 
             consume(new StupidConsumeAspects(
@@ -1250,7 +1263,7 @@ public class MeldBlocks {
                             b.setPin(ModOUT.FIVE, a);
                         };
                     }},
-                    new ConsumeAspectModule(outletRate * 2, MeldLiquids.aspectEfficiencies, MeldLiquids.aspectDensities, ModIN.FIVE, ModOUT.SIX),
+                    new ConsumeAspectModule(outletRate * 2, AspectGroup.aspect, ModIN.FIVE, ModOUT.SIX),
                     new RecipeCraftingModule(){{
                         recipe = shadesteel;
                         efficiencyPins = new int[]{ModIN.SIX, ModIN.ZERO};
@@ -1311,7 +1324,7 @@ public class MeldBlocks {
 
             modules.addAll(
                     //Set the base rate based on aspect intake
-                    new ConsumeAspectModule(outletRate * 8, MeldLiquids.aspectEfficiencies, MeldLiquids.aspectDensities, 0, 1),
+                    new ConsumeAspectModule(outletRate * 8, AspectGroup.aspect, 0, 1),
                     //Setup the flags for possible recipies
                     new GateModule(
                             ModOUT.TWO,
@@ -1456,9 +1469,9 @@ public class MeldBlocks {
             size = 5;
             health = 2500;
 
-            consume(new ConsumeLiquid(MeldLiquids.aspect, outletRate * 12));
+            consume(new StupidConsumeAspects(outletRate * 12, AspectGroup.aspect));
             plans.addAll(
-                    new UnitPlan(MeldUnits.shark, 60 * 5, with(MeldItems.silver, 80, MeldItems.carbolith, 60))
+                    new UnitPlan(MeldUnits.shark, 60 * 5, with(MeldItems.annealedSilver, 120, MeldItems.carbolith, 60))
             );
         }};
 
@@ -1493,7 +1506,7 @@ public class MeldBlocks {
             health = 1200;
             range = 22 * Vars.tilesize;
 
-            consume(new ConsumeAspects(outletRate * 3, MeldLiquids.aspectEfficiencies, MeldLiquids.aspectDensities));
+            consume(new StupidConsumeAspects(outletRate * 3, AspectGroup.aspect));
         }};
 
         nullifier = new Nullifier("nullifier"){{

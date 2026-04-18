@@ -41,12 +41,12 @@ public class AspectGroup {
 
     public float getDensity(Liquid liquid){
         AspectStats stat = stats.get(liquid);
-        return stat == null ? 0 : stat.density;
+        return stat == null ? 1 : stat.density;
     }
 
     public float getEfficiency(Liquid liquid){
         AspectStats stat = stats.get(liquid);
-        return stat == null ? 0 : stat.efficiency;
+        return stat == null ? 1 : stat.efficiency;
     }
 
     public static class AspectStats{

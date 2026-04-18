@@ -3,22 +3,21 @@ package meld.world.blocks.crafting.modules;
 import arc.math.Mathf;
 import arc.struct.ObjectFloatMap;
 import arc.struct.ObjectMap;
+import meld.fluid.AspectGroup;
 import meld.world.blocks.crafting.ModularCrafter;
 import mindustry.type.Liquid;
 import mindustry.type.LiquidStack;
 
 public class ConsumeAspectModule extends ModularCrafter.CrafterModule{
-    public ObjectFloatMap<Liquid> efficiencyMap;
-    public ObjectFloatMap<Liquid> densityMap;
+    public AspectGroup group;
 
-    float consumeRate;
+    public float consumeRate;
     public int efficiencyPin;
     public int outputEfficiencyPin;
 
-    public ConsumeAspectModule(float consumeRate, ObjectFloatMap<Liquid> efficiencyMap, ObjectFloatMap<Liquid> densityMap, int efficiencyPin, int outputEfficiencyPin) {
+    public ConsumeAspectModule(float consumeRate, AspectGroup group, int efficiencyPin, int outputEfficiencyPin) {
         this.consumeRate = consumeRate;
-        this.efficiencyMap = efficiencyMap;
-        this.densityMap = densityMap;
+        this.group = group;
         this.efficiencyPin = efficiencyPin;
         this.outputEfficiencyPin = outputEfficiencyPin;
     }
@@ -30,9 +29,10 @@ public class ConsumeAspectModule extends ModularCrafter.CrafterModule{
 
         float highest = 0;
         Liquid liquid = null;
-        for(Liquid aspect: efficiencyMap.keys()){
+
+        for(Liquid aspect: group.stats.keys()){
             if(!Mathf.zero(build.liquids.get(aspect))){
-                float current = efficiencyMap.get(aspect, 1);
+                float current = group.getEfficiency(aspect);
                 if(current > highest){
                     liquid = aspect;
                     highest = current;
@@ -46,13 +46,13 @@ public class ConsumeAspectModule extends ModularCrafter.CrafterModule{
         }
 
         float amount = build.liquids.get(liquid);
-        float consumeAmount = consumeRate * efficiency/densityMap.get(liquid, 1);
+        float consumeAmount = consumeRate * efficiency/group.getDensity(liquid);
         float maxEfficiency = Math.min(amount/consumeAmount, 1);
 
         consumeAmount *= maxEfficiency;
 
         build.liquids.remove(liquid, consumeAmount);
 
-        build.setPin(outputEfficiencyPin, efficiency * maxEfficiency * efficiencyMap.get(liquid, 1));
+        build.setPin(outputEfficiencyPin, efficiency * maxEfficiency * group.getEfficiency(liquid));
     }
 }

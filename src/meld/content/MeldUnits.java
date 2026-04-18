@@ -292,9 +292,9 @@ public class MeldUnits {
             fogRadius = IR/ Vars.tilesize;
 
             canBoost = true;
-            boostMultiplier = 0.5f;
+            boostMultiplier = 0.1f;
             shadowElevation = 0;
-            shadowElevationScl = 0.5f;
+            shadowElevationScl = 0f;
 
             weapons.add(
                     new RepairBeamWeapon("meld-bulbhead-healer"){{
@@ -492,7 +492,7 @@ public class MeldUnits {
                         y = -2;
                         reload = 180;
                         rotateSpeed = 3.5f;
-                        recoil = 1.25f;
+                        recoil = 3.25f;
                         inaccuracy = 15;
                         velocityRnd = 0.05f;
                         shoot.shots = 5;
@@ -509,7 +509,7 @@ public class MeldUnits {
 
                             lifetime = 30;
                             damage = 1;
-                            splashDamage = 15;
+                            splashDamage = 5;
                             splashDamageRadius = 25;
 
                             homingDelay = 10;
@@ -547,7 +547,7 @@ public class MeldUnits {
                             fragSpread = 15;
                             fragRandomSpread = 0;
                             fragBullet = new SapBulletType(){{
-                                damage = 5;
+                                damage = 10;
                                 sapStrength = 1;
                                 length = 15;
                                 pierce = true;
@@ -1417,7 +1417,7 @@ public class MeldUnits {
             accel = 0.35f;
             speed = 1.5f;
 
-            hitSize = 32;
+            hitSize = 16;
             rotateSpeed = 8;
             faceTarget = true;
 

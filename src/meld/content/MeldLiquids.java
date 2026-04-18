@@ -16,12 +16,6 @@ public class MeldLiquids {
     pollutantMixture, boundAspect,
     thunderingAether, stormingAspect;
 
-    public static ObjectFloatMap<Liquid> aetherEfficiencies = new ObjectFloatMap<>();
-    public static ObjectFloatMap<Liquid> aetherDensities = new ObjectFloatMap<>();
-
-    public static ObjectFloatMap<Liquid> aspectEfficiencies = new ObjectFloatMap<>();
-    public static ObjectFloatMap<Liquid> aspectDensities = new ObjectFloatMap<>();
-
     public static ObjectFloatMap<Liquid> outletEfficiencies = new ObjectFloatMap<>();
     public static ObjectFloatMap<Liquid> outletDensities = new ObjectFloatMap<>();
 
@@ -83,8 +77,7 @@ public class MeldLiquids {
         }};
 
         put(aether, AspectGroup.aether, new AspectStats(1, 1));
-        put(pollutantMixture, AspectGroup.aether, new AspectStats(1, 0.5f));
-        put(pollutantMixture, AspectGroup.aether, new AspectStats(1, 0.5f));
+        put(pollutantMixture, AspectGroup.aether, new AspectStats(0.5f, 0.5f));
         put(thunderingAether, AspectGroup.aether, new AspectStats(2, 0.5f));
 
         put(aspect, AspectGroup.aspect, new AspectStats(1, 1));
@@ -100,21 +93,6 @@ public class MeldLiquids {
                 thunderingAether, stormingAspect
         );
 
-        aetherEfficiencies.put(aether, 1);
-        aetherEfficiencies.put(pollutantMixture, 1);
-        aetherEfficiencies.put(thunderingAether, 2);
-
-        aetherDensities.put(aether, 1);
-        aetherDensities.put(pollutantMixture, 1/5f);
-        aetherDensities.put(thunderingAether, 0.5f);
-
-        aspectEfficiencies.put(aspect, 1);
-        aspectEfficiencies.put(boundAspect, 1);
-        aspectEfficiencies.put(stormingAspect, 2);
-
-        aspectDensities.put(aspect, 1);
-        aspectDensities.put(boundAspect, 2.5f);
-        aspectDensities.put(stormingAspect, 1f);
 
         aether.databaseTag = pollutantMixture.databaseTag = thunderingAether.databaseTag =
         aspect.databaseTag = boundAspect.databaseTag = stormingAspect.databaseTag = "aspect-powergen";
@@ -129,8 +107,8 @@ public class MeldLiquids {
     public static void mapOutlet(Liquid input, Liquid output){
         outletMapping.putAll(input, output);
 
-        outletEfficiencies.put(input, aetherEfficiencies.get(input, 1) * aspectEfficiencies.get(output, 1));
+        outletEfficiencies.put(input, AspectGroup.aether.getEfficiency(input) * AspectGroup.aspect.getEfficiency(output));
 
-        outletDensities.put(input, aetherDensities.get(input, 1) * aspectDensities.get(output, 1));
+        outletDensities.put(input, AspectGroup.aether.getDensity(input) * AspectGroup.aspect.getDensity(output));
     }
 }
