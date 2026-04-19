@@ -44,15 +44,6 @@ public class BulbheadEntity extends UnitWaterMove {
     //Actually counts upwards... kinda counter intuitively named
     public float corelinkGrace = 0;
 
-
-    @Override
-    public EntityCollisions.SolidPred solidity() {
-        return (x, y) -> {
-            Tile tile = Vars.world.tile(x, y);
-            return tile == null || tile.solid();
-        };
-    }
-
     //skip all the logic involved and just give rotation
     @Override
     public float prefRotation() {
