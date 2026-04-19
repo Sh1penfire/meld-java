@@ -101,7 +101,7 @@ public class MeldStatusEffects {
         }};
 
         sentry = new StatusEffect("sentry"){{
-            damage = 0.1f;
+            damage = 0.2f;
             reloadMultiplier = 2;
             speedMultiplier = 0.15f;
         }};

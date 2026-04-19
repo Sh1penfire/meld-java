@@ -1,11 +1,18 @@
 package meld.content;
 
 import arc.struct.Seq;
+import mindustry.content.Items;
 import mindustry.type.Item;
 
 public class MeldItems {
     public static Item
-    debris, carbolith, silver, resonarum, clayMallows,
+    debris, carbolith,
+
+    //The badlands hall of shame
+    silver, clayMallows, electrumSheets,
+
+    //The storm planes hall of shame...
+    resonarum, dissonitre, vitricMesh,
 
             meldShard;
 
@@ -14,7 +21,9 @@ public class MeldItems {
 
     //Heavy industry content
     public static Item
-    tenbris, motis, shadesteel, elnarDust, annealedSilver, glassMallows, cruciblePlating, aspectPipe;
+    tenbris, motis, shadesteel, elnarDust,
+    annealedSilver, glassMallows, iampsi, quartzStrata, likestoneSediments,
+    cruciblePlating, aspectPipe;
 
     public static void load(){
 
@@ -31,7 +40,21 @@ public class MeldItems {
             cost = 0.2f;
         }};
 
+        electrumSheets = new Item("electrum-sheets"){{
+            cost = 0.2f;
+        }};
+
         resonarum = new Item("resonarum");
+
+        dissonitre = new Item("dissonitre"){{
+            cost = 0.05f;
+        }};
+
+        vitricMesh = new Item("vitric-mesh"){{
+            cost = 0.25f;
+        }};
+
+        meldShard = new Item("meld-shard");
 
         stonyParticulate = new Item("stony-particulate"){{
 
@@ -64,6 +87,14 @@ public class MeldItems {
 
         glassMallows = new Item("glass-mallow");
 
+        iampsi = new Item("iampsi"){{
+
+        }};
+
+        quartzStrata = new Item("quartz-strata"){{}};
+
+        likestoneSediments = new Item("likestone-sediments"){{}};
+
         aspectPipe = new Item("aspect-pipe"){{
 
         }};
@@ -72,7 +103,7 @@ public class MeldItems {
 
         }};
 
-        Seq<Item> heavyIndustry = Seq.with(tenbris, motis, shadesteel, elnarDust, annealedSilver, glassMallows, cruciblePlating, aspectPipe);
+        Seq<Item> heavyIndustry = Seq.with(tenbris, motis, shadesteel, elnarDust, annealedSilver, glassMallows, iampsi, quartzStrata, likestoneSediments, cruciblePlating, aspectPipe);
         heavyIndustry.each(i -> i.databaseTag = "heavy-industry");
     };
 }

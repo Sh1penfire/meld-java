@@ -5,6 +5,7 @@ import arc.math.geom.Geometry;
 import arc.struct.Seq;
 import arc.util.Log;
 import meld.content.MeldLiquids;
+import meld.fluid.AspectGroup;
 import meld.world.blocks.crafting.ModularCrafter;
 import meld.world.blocks.crafting.RecipeCrafter;
 import mindustry.Vars;
@@ -89,6 +90,8 @@ public class AspectPipe extends Conduit {
                 }
 
                 Liquid outletProduct = outletMapping.get(liquid);
+
+                //TODO: Horridly jank, please redo.
                 //At the same time try dumping aspect
                 if(outletProduct != null && !(other instanceof ConduitBuild || other instanceof LiquidRouter.LiquidRouterBuild) && this.canDumpLiquid(other, outletProduct)) {
                     Liquid original = liquid;
@@ -103,7 +106,7 @@ public class AspectPipe extends Conduit {
                         float flow = Math.min(other.block.liquidCapacity - other.liquids.get(liquid), amount) * 10;
                         if (other.acceptLiquid(this, liquid)) {
                             other.handleLiquid(this, liquid, flow);
-                            this.liquids.remove(original, flow/aetherDensities.get(liquid, 1)/10);
+                            this.liquids.remove(original, flow/AspectGroup.aether.getDensity(liquid)/10/AspectGroup.aether.getEfficiency(liquid));
                             total += amount;
                         }
 
