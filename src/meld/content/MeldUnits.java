@@ -291,7 +291,6 @@ public class MeldUnits {
             mineRange = IR;
             fogRadius = IR/ Vars.tilesize;
 
-            canBoost = true;
             boostMultiplier = 0.1f;
             shadowElevation = 0;
             shadowElevationScl = 0f;
