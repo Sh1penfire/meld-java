@@ -17,7 +17,7 @@ description: "Meld Java.\n\n[[]accent]Only has custom game content! (play the in
 version: gameplay test v3
 
 #the minimum game build required to run this mod
-minGameVersion: 154
+minGameVersion: 157
 
 #this is a java mod
 java: true

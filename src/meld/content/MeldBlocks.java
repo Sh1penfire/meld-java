@@ -6,14 +6,12 @@ import arc.math.Angles;
 import arc.math.Interp;
 import arc.math.Mathf;
 import arc.math.geom.Vec2;
-import arc.util.Log;
 import arc.util.Tmp;
 import meld.*;
 import meld.entities.bullet.OutflowBulletType;
 import meld.entities.bullet.TransitionBulletType;
 import meld.fluid.AspectGroup;
 import meld.graphics.*;
-import meld.world.blocks.consumers.ConsumeAspects;
 import meld.world.blocks.*;
 import meld.world.blocks.consumers.StupidConsumeAspects;
 import meld.world.blocks.crafting.ModularCrafter;
@@ -22,19 +20,17 @@ import meld.world.blocks.crafting.StorageIncinerator;
 import meld.world.blocks.crafting.recipe.ItemRecipe;
 import meld.world.blocks.crafting.recipe.SpoolRecipe;
 import meld.world.blocks.crafting.modules.*;
-import meld.world.blocks.crafting.modules.GateModule.ConsumeCondition;
-import meld.world.blocks.crafting.modules.GateModule.OutputCondition;
 import meld.world.blocks.crafting.recipe.TimedRecipe;
 import meld.world.blocks.fluid.*;
 import meld.world.blocks.items.PriorityInputSplitter;
+import meld.world.blocks.producer.ProduceItem;
+import meld.world.blocks.producer.ProduceLiquid;
 import meld.world.blocks.production.SingleBeamDrill;
 import meld.world.meta.*;
 import mindustry.Vars;
-import mindustry.content.Blocks;
 import mindustry.content.Fx;
 import mindustry.content.StatusEffects;
 import mindustry.entities.bullet.*;
-import mindustry.entities.effect.MultiEffect;
 import mindustry.entities.effect.ParticleEffect;
 import mindustry.entities.part.DrawPart;
 import mindustry.entities.part.HaloPart;
@@ -56,13 +52,13 @@ import mindustry.world.blocks.defense.Wall;
 import mindustry.world.blocks.defense.turrets.ItemTurret;
 import mindustry.world.blocks.defense.turrets.LiquidTurret;
 import mindustry.world.blocks.distribution.*;
-import mindustry.world.blocks.liquid.ArmoredConduit;
 import mindustry.world.blocks.liquid.Conduit;
 import mindustry.world.blocks.liquid.LiquidJunction;
 import mindustry.world.blocks.liquid.LiquidRouter;
 import mindustry.world.blocks.production.*;
 import mindustry.world.blocks.storage.Unloader;
 import mindustry.world.blocks.units.UnitFactory;
+import mindustry.world.consumers.ConsumeItems;
 import mindustry.world.consumers.ConsumeLiquid;
 import mindustry.world.draw.*;
 import mindustry.world.meta.Attribute;
@@ -92,7 +88,7 @@ public class MeldBlocks {
     public static Block aetherAccumulator, elementalBlaster, pneumaticPulsear,
             earthboundInfuser, fumehood, sharkFactory;
 
-    public static ModularCrafter gasKiln, rotaryKiln, pneumaticExtruder;
+    public static Block gasKiln, metalworks, rotaryKiln, pneumaticExtruder;
 
     public static Block channelNode, channelHub, channelFace, aspectOutlet, aspectChannel, channelDirector, channelVent, manualValve, intakeValve, valveController, pipebox;
 
@@ -121,7 +117,6 @@ public class MeldBlocks {
     }
 
     public static void load(){
-
         int channelHealth = 100;
 
         channelFace = new FlexibleSizeJunction("channel-face"){{
@@ -179,42 +174,44 @@ public class MeldBlocks {
                     new DrawSideRegion()
             );
 
-            //consumeLiquid(MeldLiquids.aether, outletRate/10);
-
-
-
             liquidCapacity = 100;
+
+            //Bit sloppy but it'll work
+            Vars.content.liquids().each(l -> {
+                if(AspectGroup.aether.stats.containsKey(l)) inputLiquids.add(l);
+            });
+            Vars.content.liquids().each(l -> {
+                if(AspectGroup.aspect.stats.containsKey(l)) outputLiquids.add(l);
+            });
 
             inputLiquidSlots = 1;
             outputLiquidSlots = 1;
+
             recipes.addAll(
                     new TimedRecipe(){{
-                        craftTime = 10;
                         float multi = AspectGroup.aether.getEfficiency(MeldLiquids.aether);
                         float density = AspectGroup.aether.getDensity(MeldLiquids.aether);
-                        inputLiquids = LiquidStack.with(MeldLiquids.aether, outletRate/density);
-                        outputLiquids = LiquidStack.with(MeldLiquids.aspect, outletRate * multi * 10 * density);
+                        consumers.add(new ConsumeLiquid(MeldLiquids.aether, outletRate/density/10));
+                        producers.add(new ProduceLiquid(MeldLiquids.aspect, outletRate * multi * density));
                     }},
                     new TimedRecipe(){{
-                        craftTime = 10;
                         float multi = AspectGroup.aether.getEfficiency(MeldLiquids.pollutantMixture);
                         float density = AspectGroup.aether.getDensity(MeldLiquids.pollutantMixture);
-                        inputLiquids = LiquidStack.with(MeldLiquids.pollutantMixture, outletRate);
-                        outputLiquids = LiquidStack.with(MeldLiquids.boundAspect, outletRate * multi * 10 * density);
+                        consumers.add(new ConsumeLiquid(MeldLiquids.pollutantMixture, outletRate/density/10));
+                        producers.add(new ProduceLiquid(MeldLiquids.boundAspect, outletRate * multi * density));
                     }},
                     new TimedRecipe(){{
-                        craftTime = 10;
                         float multi = AspectGroup.aether.getEfficiency(MeldLiquids.thunderingAether);
                         float density = AspectGroup.aether.getDensity(MeldLiquids.thunderingAether);
-                        inputLiquids = LiquidStack.with(MeldLiquids.thunderingAether, outletRate/density);
-                        outputLiquids = LiquidStack.with(MeldLiquids.stormingAspect, outletRate * multi * 10 * density);
+                        consumers.add(new ConsumeLiquid(MeldLiquids.thunderingAether, outletRate/density/10));
+                        producers.add(new ProduceLiquid(MeldLiquids.stormingAspect, outletRate * multi * density));
                     }}
             );
         }};
 
         aspectChannel = new VisualAspectPipe("aspect-channel"){{
             requirements(Category.liquid, with(
-                    MeldItems.annealedSilver, 5, MeldItems.aspectPipe, 2
+                    MeldItems.aspectPipe, 4
             ));
             underBullets = false;
             leaks = false;
@@ -330,6 +327,8 @@ public class MeldBlocks {
             range = 200;
             fogRadiusMultiplier = 0.25f;
 
+            buildTime = 45;
+
             reload = 30;
             shootEffect = Fx.shootBig;
             shootWarmupSpeed = 0.09f;
@@ -390,6 +389,8 @@ public class MeldBlocks {
             size = 2;
             health = 450;
             range = 200;
+
+            buildTime = 30;
 
             fogRadiusMultiplier = 0.25f;
             reload = 120;
@@ -1124,6 +1125,9 @@ public class MeldBlocks {
             drillMultipliers.put(
                     MeldItems.electrumSheets, 2
             );
+            drillMultipliers.put(
+                    MeldItems.likestoneSediments, 0.5f
+            );
 
             consume(new StupidConsumeAspects(
                     outletRate, AspectGroup.aspect
@@ -1150,6 +1154,7 @@ public class MeldBlocks {
             baseProductivity = 50;
             drillTime = 360;
             range = 8;
+            selfDamage = 250;
 
             transformItems.putAll(
                     MeldItems.clayMallows, MeldItems.glassMallows,
@@ -1159,7 +1164,7 @@ public class MeldBlocks {
             liquidCapacity = 50;
 
 
-            consume(new ConsumeAspects(outletRate/2, MeldLiquids.outletEfficiencies, MeldLiquids.outletDensities));
+            consume(new StupidConsumeAspects(outletRate/2, AspectGroup.outlet));
         }};
 
         earthboundInfuser = new ModularCrafter("earthbound-infuser"){{
@@ -1212,7 +1217,7 @@ public class MeldBlocks {
              */
         }};
 
-        gasKiln = new ModularCrafter("gas-kiln"){{
+        gasKiln = new RecipeCrafter("gas-kiln"){{
             requirements(Category.crafting, with(MeldItems.debris, 80));
             size = 3;
 
@@ -1222,82 +1227,22 @@ public class MeldBlocks {
 
             itemCapacity = 10;
 
-            acceptedLiquids.addAll(MeldLiquids.aspect, MeldLiquids.boundAspect);
-            acceptedItems.addAll(MeldItems.tenbris, MeldItems.clayMallows, MeldItems.carbolith, MeldItems.debris, MeldItems.shadesteel, MeldItems.glassMallows, MeldItems.silver);
-            dumpedItems.addAll(MeldItems.cruciblePlating, MeldItems.shadesteel, MeldItems.glassMallows, MeldItems.annealedSilver);
-            dumpedLiquids.addAll(MeldLiquids.fumes);
+            inputLiquids.addAll(MeldLiquids.aspect, MeldLiquids.boundAspect, MeldLiquids.stormingAspect);
+            inputItems.addAll(MeldItems.tenbris, MeldItems.clayMallows, MeldItems.carbolith, MeldItems.debris, MeldItems.shadesteel, MeldItems.glassMallows, MeldItems.silver, MeldItems.likestoneSediments, MeldItems.quartzStrata);
+            outputItems.addAll(MeldItems.cruciblePlating, MeldItems.shadesteel, MeldItems.glassMallows, MeldItems.annealedSilver);
+            outputLiquids.addAll(MeldLiquids.fumes);
 
-            ItemRecipe
-            shadesteel = new ItemRecipe(with(MeldItems.tenbris, 2, MeldItems.carbolith, 2), with(MeldItems.shadesteel, 2)).output(LiquidStack.with(MeldLiquids.fumes, 60)),
-            glass = new ItemRecipe(with(MeldItems.clayMallows, 2), with(MeldItems.glassMallows, 2)),
-            silver = new ItemRecipe(with(MeldItems.silver, 1), with(MeldItems.annealedSilver, 2)),
-            platings1 = new ItemRecipe(with(MeldItems.shadesteel, 4, MeldItems.debris, 2), with(MeldItems.cruciblePlating, 4)),
-            platings2 = new ItemRecipe(with(MeldItems.glassMallows, 4, MeldItems.debris, 2), with(MeldItems.cruciblePlating, 4));
-
-            float produceTime = 60;
-
-            modules.addAll(
-                    new GateModule(
-                            ModOUT.ZERO, new GateModule.RecipeCondition(shadesteel)
-                    ),
-                    new GateModule(
-                            ModOUT.ONE, new GateModule.RecipeCondition(glass)
-                    ),
-                    new GateModule(
-                            ModOUT.TWO, new GateModule.RecipeCondition(silver)
-                    ),
-                    new GateModule(
-                            ModOUT.THREE, new GateModule.RecipeCondition(platings1)
-                    ),
-                    new GateModule(
-                            ModOUT.FOUR, new GateModule.RecipeCondition(platings2)
-                    ),
-                    new LambdaModule(){{
-                        //Set every pin after the first one found as 1 to zero
-                        updater = b -> {
-                            int a = 0;
-                            for(int i = 0; i < 5; i++){
-                                b.setPin(i, Math.max(b.getPin(i) - a, 0));
-                                a = (int)Math.max(a, b.getPin(i));
-                            }
-                            b.setPin(ModOUT.FIVE, a);
-                        };
-                    }},
-                    new ConsumeAspectModule(outletRate * 2, AspectGroup.aspect, ModIN.FIVE, ModOUT.SIX),
-                    new RecipeCraftingModule(){{
-                        recipe = shadesteel;
-                        efficiencyPins = new int[]{ModIN.SIX, ModIN.ZERO};
-                        progressPin = ModOUT.SEVEN;
-                        craftTime = produceTime;
-                    }},
-                    new RecipeCraftingModule(){{
-                        recipe = glass;
-                        efficiencyPins = new int[]{ModIN.SIX, ModIN.ONE};
-                        progressPin = ModOUT.EIGHT;
-                        craftTime = produceTime;
-                    }},
-                    new RecipeCraftingModule(){{
-                        recipe = silver;
-                        efficiencyPins = new int[]{ModIN.SIX, ModIN.TWO};
-                        progressPin = ModOUT.NINE;
-                        craftTime = produceTime;
-                    }},
-                    new RecipeCraftingModule(){{
-                        recipe = platings1;
-                        efficiencyPins = new int[]{ModIN.SIX, ModIN.THREE};
-                        progressPin = ModOUT.TEN;
-                        craftTime = produceTime;
-                    }},
-                    new RecipeCraftingModule(){{
-                        recipe = platings2;
-                        efficiencyPins = new int[]{ModIN.SIX, ModIN.FOUR};
-                        progressPin = ModOUT.ELEVEN;
-                        craftTime = produceTime;
-                    }}
-            );
+            inputLiquidSlots = 1;
+            outputLiquidSlots = 1;
+            recipes = MeldRecipes.kilnRecipies(2, 1);
+        }};
+        /*
+        metalworks = new RecipeCrafter("metalworks"){{
+            requirements(Category.crafting, with(MeldItems.debris, 350, MeldItems.cruciblePlating, 150));
         }};
 
-        rotaryKiln = new ModularCrafter("rotary-kiln"){{
+         */
+        rotaryKiln = new RecipeCrafter("rotary-kiln"){{
             requirements(Category.crafting, with(MeldItems.debris, 350, MeldItems.cruciblePlating, 150));
             size = 5;
 
@@ -1306,101 +1251,18 @@ public class MeldBlocks {
             liquidCapacity = outletRate * 60 * 2;
 
             itemCapacity = 48;
+            inputLiquidSlots = 1;
+            outputLiquidSlots = 1;
 
-            acceptedLiquids.addAll(MeldLiquids.aspect, MeldLiquids.boundAspect);
-            acceptedItems.addAll(MeldItems.tenbris, MeldItems.clayMallows, MeldItems.carbolith, MeldItems.debris, MeldItems.shadesteel, MeldItems.glassMallows, MeldItems.silver);
-            dumpedItems.addAll(MeldItems.cruciblePlating, MeldItems.shadesteel, MeldItems.glassMallows, MeldItems.annealedSilver);
+            inputLiquids.addAll(MeldLiquids.aspect, MeldLiquids.boundAspect, MeldLiquids.stormingAspect);
+            inputItems.addAll(MeldItems.tenbris, MeldItems.clayMallows, MeldItems.carbolith, MeldItems.debris, MeldItems.shadesteel, MeldItems.glassMallows, MeldItems.silver, MeldItems.likestoneSediments, MeldItems.quartzStrata);
+            outputItems.addAll(MeldItems.cruciblePlating, MeldItems.shadesteel, MeldItems.glassMallows, MeldItems.annealedSilver);
+            outputLiquids.addAll(MeldLiquids.fumes);
 
-            defaultData.put(0, 1);
-
-            ItemRecipe shadesteel = new ItemRecipe(with(MeldItems.tenbris, 12), with(MeldItems.shadesteel, 12));
-            ItemRecipe glass = new ItemRecipe(with(MeldItems.clayMallows, 12), with(MeldItems.glassMallows, 12));
-            ItemRecipe silver = new ItemRecipe(with(MeldItems.silver, 1), with(MeldItems.annealedSilver, 2));
-            ItemRecipe platings1 = new ItemRecipe(with(MeldItems.shadesteel, 4, MeldItems.debris, 2), with(MeldItems.cruciblePlating, 4));
-            ItemRecipe platings2 = new ItemRecipe(with(MeldItems.glassMallows, 4, MeldItems.debris, 2), with(MeldItems.cruciblePlating, 4));
-
-            //The max crafting speed when boosted
-            float craftingTime = 120;
-
-            modules.addAll(
-                    //Set the base rate based on aspect intake
-                    new ConsumeAspectModule(outletRate * 8, AspectGroup.aspect, 0, 1),
-                    //Setup the flags for possible recipies
-                    new GateModule(
-                            ModOUT.TWO,
-                            new ConsumeCondition(shadesteel.inputItems),
-                            new OutputCondition(shadesteel.outputItems)
-                    ),
-                    new GateModule(
-                            ModOUT.THREE,
-                            new ConsumeCondition(glass.inputItems),
-                            new OutputCondition(glass.outputItems)
-                    ),
-                    new GateModule(
-                            ModOUT.FOUR,
-                            new ConsumeCondition(platings1.inputItems),
-                            new OutputCondition(platings1.outputItems)
-                    ),
-                    new GateModule(
-                            ModOUT.FIVE,
-                            new ConsumeCondition(platings2.inputItems),
-                            new OutputCondition(platings2.outputItems)
-                    ),
-                    new GateModule(
-                            ModOUT.SIX,
-                            new ConsumeCondition(silver.inputItems),
-                            new OutputCondition(silver.outputItems)
-                    ),
-                    //Take the average efficiency
-                    new LambdaModule(){{
-                        int[] gatePins = new int[]{2, 3, 4, 5, 6};
-                        float drums = 3;
-                        int outPin = 7;
-
-                        updater = build -> {
-                            float total = 0;
-                            for(int i: gatePins){
-                                total += build.data.get(i);
-                            }
-                            float out = drums/Math.max(total, 1);
-                            build.setPin(outPin, out);
-                        };
-                    }},
-                    //Recipies
-                    new RecipeCraftingModule(){{
-                        recipe = shadesteel;
-                        efficiencyPins = new int[]{1, 2, 7};
-                        progressPin = 8;
-                        craftTime = craftingTime;
-                    }},
-                    new RecipeCraftingModule(){{
-                        recipe = glass;
-                        efficiencyPins = new int[]{1, 3, 7};
-                        progressPin = 9;
-                        craftTime = craftingTime;
-                    }},
-                    new RecipeCraftingModule(){{
-                        recipe = platings1;
-                        efficiencyPins = new int[]{1, 4, 7};
-                        progressPin = 10;
-                        craftTime = craftingTime;
-                    }},
-                    new RecipeCraftingModule(){{
-                        recipe = platings2;
-                        efficiencyPins = new int[]{1, 5, 7};
-                        progressPin = 11;
-                        craftTime = craftingTime;
-                    }},
-                    new RecipeCraftingModule(){{
-                        recipe = silver;
-                        efficiencyPins = new int[]{1, 6, 7};
-                        progressPin = 12;
-                        craftTime = craftingTime/8f;
-                    }}
-            );
+            recipes = MeldRecipes.kilnRecipies(12, 8);
         }};
 
-        pneumaticExtruder = new ModularCrafter("pneumatic-extruder"){{
+        pneumaticExtruder = new RecipeCrafter("pneumatic-extruder"){{
             requirements(Category.crafting, with(MeldItems.debris, 120));
             size = 3;
 
@@ -1410,56 +1272,39 @@ public class MeldBlocks {
 
             itemCapacity = 10;
 
-            acceptedLiquids.addAll(MeldLiquids.aspect, MeldLiquids.boundAspect);
-            acceptedItems.addAll(MeldItems.shadesteel, MeldItems.elnarDust, MeldItems.debris, MeldItems.silver, MeldItems.annealedSilver);
-            dumpedItems.addAll(MeldItems.aspectPipe);
+            inputLiquids.addAll(MeldLiquids.aspect, MeldLiquids.boundAspect, MeldLiquids.stormingAspect);
+            inputItems.addAll(MeldItems.shadesteel, MeldItems.elnarDust, MeldItems.debris, MeldItems.silver, MeldItems.annealedSilver);
+            outputItems.addAll(MeldItems.aspectPipe);
 
-            ItemRecipe
-                    aspectPipe1 = new ItemRecipe(with(MeldItems.shadesteel, 2, MeldItems.elnarDust, 4), with(MeldItems.aspectPipe, 2)),
-                    aspectPipe2 = new ItemRecipe(with(MeldItems.debris, 1, MeldItems.annealedSilver, 2), with(MeldItems.aspectPipe, 2)),
-                    aspectPipe3 = new ItemRecipe(with(MeldItems.debris, 1, MeldItems.silver, 2), with(MeldItems.aspectPipe, 2));;
+            inputLiquidSlots = 1;
 
-            float produceTime = 30;
-
-            modules.addAll(
-                    new GateModule(
-                            ModOUT.ZERO, new GateModule.RecipeCondition(aspectPipe1)
-                    ),
-                    new GateModule(
-                            ModOUT.ONE, new GateModule.RecipeCondition(aspectPipe2)
-                    ),
-                    new GateModule(
-                            ModOUT.TWO, new GateModule.RecipeCondition(aspectPipe3)
-                    ),
-                    new LambdaModule(){{
-                        //Set every ping after the first one found as 1 to zero
-                        updater = b -> {
-                            int a = 0;
-                            for(int i = 0; i < 3; i++){
-                                b.setPin(i, Math.max(b.getPin(i) - a, 0));
-                                a = (int)Math.max(a, b.getPin(i));
-                            }
-                            b.setPin(ModOUT.THREE, a);
-                        };
+            recipes.addAll(
+                    new TimedRecipe(){{
+                        consumers.addAll(
+                                new ConsumeItems(with(MeldItems.annealedSilver, 2, MeldItems.debris, 2)),
+                                new StupidConsumeAspects(outletRate * 2, AspectGroup.aspect)
+                        );
+                        producers.addAll(
+                                new ProduceItem(new ItemStack(MeldItems.aspectPipe, 2))
+                        );
                     }},
-                    new ConsumeLiquidModule(LiquidStack.with(MeldLiquids.aspect, outletRate * 2), ModIN.THREE, ModOUT.FOUR),
-                    new RecipeCraftingModule(){{
-                        recipe = aspectPipe1;
-                        efficiencyPins = new int[]{ModIN.FOUR, ModIN.ZERO};
-                        progressPin = ModOUT.FOUR;
-                        craftTime = produceTime;
+                    new TimedRecipe(){{
+                        consumers.addAll(
+                                new ConsumeItems(with(MeldItems.silver, 2, MeldItems.debris, 2)),
+                                new StupidConsumeAspects(outletRate * 2, AspectGroup.aspect)
+                        );
+                        producers.addAll(
+                                new ProduceItem(new ItemStack(MeldItems.aspectPipe, 2))
+                        );
                     }},
-                    new RecipeCraftingModule(){{
-                        recipe = aspectPipe2;
-                        efficiencyPins = new int[]{ModIN.FOUR, ModIN.ONE};
-                        progressPin = ModOUT.FIVE;
-                        craftTime = produceTime;
-                    }},
-                    new RecipeCraftingModule(){{
-                        recipe = aspectPipe3;
-                        efficiencyPins = new int[]{ModIN.FOUR, ModIN.TWO};
-                        progressPin = ModOUT.SIX;
-                        craftTime = produceTime;
+                    new TimedRecipe(){{
+                        consumers.addAll(
+                                new ConsumeItems(with(MeldItems.elnarDust, 2, MeldItems.debris, 2)),
+                                new StupidConsumeAspects(outletRate * 2, AspectGroup.aspect)
+                        );
+                        producers.addAll(
+                                new ProduceItem(new ItemStack(MeldItems.aspectPipe, 2))
+                        );
                     }}
             );
         }};

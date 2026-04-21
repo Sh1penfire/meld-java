@@ -143,6 +143,8 @@ public class MeldBullets {
             collidesGround = true;
             scaleLife = true;
 
+            ammoMultiplier = 1;
+
             reloadMultiplier = 2;
             rangeChange = -80;
 
@@ -270,11 +272,11 @@ public class MeldBullets {
         shredSilver = new TransitionBulletType(){{
 
             fragLifeMin = 0.8f;
-            ammoMultiplier = 2;
             reloadMultiplier = 2f;
 
             fragRandomSpread = 5;
             fragBullets = 1;
+            ammoMultiplier = 1;
 
             fragBullet = new RicochetBulletType(8, 10, "shell"){{
                 frontColor = Color.white;

@@ -12,6 +12,7 @@ import arc.math.Mathf;
 import arc.math.geom.Geometry;
 import arc.math.geom.Point2;
 import arc.math.geom.Position;
+import arc.math.geom.Vec2;
 import arc.util.*;
 import meld.content.MeldUnits;
 import meld.graphics.Draww;
@@ -44,12 +45,68 @@ public class BulbheadEntity extends UnitWaterMove {
     //Actually counts upwards... kinda counter intuitively named
     public float corelinkGrace = 0;
 
+    //Goes up to 1 and once it's at one, well... stuck...
+    public float beached = 0;
 
+    public float standstillDrag = 1;
+    public boolean controllerMoved = false;
+
+    public Vec2 lastSafe = new Vec2();
+
+    //It's a d8 but I shoved several hamburgors in it
+    public final static Point2[] d8Expanded = {
+            new Point2(1, 0),
+            new Point2(1, 1),
+            new Point2(0, 1),
+            new Point2(-1, 1),
+            new Point2(-1, 0),
+            new Point2(-1, -1),
+            new Point2(0, -1),
+            new Point2(1, -1),
+
+            new Point2(2, 0),
+            new Point2(2, 1),
+            new Point2(2, -1),
+            new Point2(2, 2),
+            new Point2(2, -2),
+
+            new Point2(-2, 0),
+            new Point2(-2, 1),
+            new Point2(-2, -1),
+            new Point2(-2, 2),
+            new Point2(-2, -2),
+
+            new Point2(0, 2),
+            new Point2(1, 2),
+            new Point2(-1, 2),
+
+            new Point2(0, -2),
+            new Point2(1, -2),
+            new Point2(-1, -2),
+    };
     @Override
     public EntityCollisions.SolidPred solidity() {
         return (x, y) -> {
             Tile tile = Vars.world.tile(x, y);
-            return tile == null || tile.solid();
+
+            //If the tile is out of bounds or solid, then yeah it's solid
+            if(tile == null || tile.solid()) return true;
+            return false;
+
+            /*
+            //If the current floor is a liquid then we're good
+            if(tile.floor().isLiquid) return false;
+
+            for(int i = 0; i < 24; i++){
+                Point2 offset = d8Expanded[i];
+                Tile other = tile.nearby(offset);
+                if(other != null && !other.solid() && other.floor().isLiquid) return false;
+            }
+
+            //If we can't find a nearby liquid tile, return true
+            return true;
+
+             */
         };
     }
 
@@ -70,6 +127,23 @@ public class BulbheadEntity extends UnitWaterMove {
 
         Tile tile = this.tileOn();
 
+
+        if(tile != null && !tile.floor().isLiquid){
+            if(Mathf.chance(vel.len()/speed())) Fx.unitLandSmall.at(x, y, type.hitSize/Vars.tilesize, tile.floor().mapColor);
+
+            beached = Mathf.approachDelta(beached, 1, 1/60f);
+
+            if(beached == 1){
+                float exitAngle = angleTo(lastSafe);
+                set(lastSafe);
+                rotation(exitAngle);
+            }
+        }
+        else {
+            beached = 0;
+            lastSafe.set(this);
+        }
+
         if (tile != null && !this.canPassOn()) {
             for(int i = 0; i < 4; i++){
                 Tile other = tile.nearby(i);
@@ -81,8 +155,26 @@ public class BulbheadEntity extends UnitWaterMove {
                 }
             }
         }
-        super.update();
 
+        super.update();
+        speedMultiplier *= Mathf.lerp(1, 0f, beached * beached);
+        if(beached > 0){
+            drag *= Mathf.clamp(Mathf.lerp(1, 10, beached * 5), 1, 10);
+
+            drag *= Mathf.lerp(1, 5, beached * beached);
+        }
+
+        if(!controllerMoved) standstillDrag = Mathf.approachDelta(standstillDrag, 10, 1);
+        else standstillDrag = 1;
+
+        drag *= standstillDrag;
+        controllerMoved = false;
+    }
+
+    @Override
+    public void rotateMove(Vec2 vec) {
+        super.rotateMove(vec);
+        controllerMoved = true;
     }
 
     public void getNearbyLink(){
@@ -254,8 +346,6 @@ public class BulbheadEntity extends UnitWaterMove {
 
     public void draw(){
         super.draw();
-        float actualElevation = elevation;
-        elevation /= 2;
 
         //Draww.drawChain(chain, x, y, Core.input.mouseWorldX(), Core.input.mouseWorldY(), 0);
 
@@ -279,7 +369,28 @@ public class BulbheadEntity extends UnitWaterMove {
             Draw.blend(Blending.normal);
         }
 
-        elevation = actualElevation;
+        if(beached > 0 && beached != 1){
+            float fout = 1 - beached;
+
+            Draw.alpha(beached * beached);
+            Draw.mixcol(Pal.accent, 1 - beached);
+
+            //Get the bloom, kinda crappy but this is a way of doing it
+            Draw.z(Layer.effect);
+            Draw.rect(type.fullIcon, lastSafe.x, lastSafe.y, angleTo(lastSafe) - 90);
+
+            Draw.z(Layer.weather + 1);
+            Draw.rect(type.fullIcon, lastSafe.x, lastSafe.y, angleTo(lastSafe) - 90);
+
+            Draw.reset();
+
+            if(Vars.player.unit() == this){
+                Lines.stroke(fout * 8);
+                Draw.color(Pal.accent);
+                Draw.alpha(beached);
+                Lines.circle(lastSafe.x, lastSafe.y, Vars.tilesize * 8 * (1 - beached * beached));
+            }
+        }
     }
 
     //Attempt to draw the build beam from the unit itself. If that fails, draw it to the core instead, then draw the build beam from the core

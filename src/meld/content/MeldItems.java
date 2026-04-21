@@ -28,10 +28,10 @@ public class MeldItems {
     public static void load(){
 
         debris = new Item("debris"){{
-            cost = 0.5f;
+            cost = 1;
         }};
         carbolith = new Item("carbolith"){{
-            cost = 0.8f;
+            cost = 1.2f;
         }};
         silver = new Item("silver"){{
             cost = 0.3f;

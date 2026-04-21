@@ -24,6 +24,8 @@ public class MeldStats {
             table.row();
 
             AspectGroup.groups.each(g -> {
+                if(g.hidden) return;
+
                 AspectGroup.AspectStats aspectStat = g.stats.get(aspect);
                 if(aspectStat == null) return;
                 table.table(Styles.grayPanel, pannel -> {

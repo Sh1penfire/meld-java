@@ -7,6 +7,7 @@ import arc.struct.IntFloatMap;
 import arc.struct.IntMap;
 import arc.struct.ObjectFloatMap;
 import arc.util.Log;
+import arc.util.Time;
 import meld.fluid.AspectGroup;
 import meld.world.blocks.crafting.MeldGenericCrafter;
 import mindustry.Vars;
@@ -68,20 +69,17 @@ public class StupidConsumeAspects extends ConsumeLiquidFilter implements MeldGen
     @Override
     public float efficiency(Building build) {
         Liquid liq = this.getConsumed(build);
-        float ed = build.edelta();
+        float ed = build.timeScale() * Time.delta;
         if(Mathf.zero(ed) || liq == null) return 0;
         else {
-
-            float multi = group.getEfficiency(liq);
-
-            return Math.min(build.liquids.get(liq) / (this.amount * ed * multi), multi);
+            return Math.min(build.liquids.get(liq) / (this.amount * ed), 1);
         }
     }
 
     @Override
     public float efficiencyMultiplier(Building build) {
         Liquid liq = this.getConsumed(build);
-        return liq == null ? 0.0f : group.getEfficiency(liq);
+        return liq == null ? 1 : group.getEfficiency(liq);
     }
 
     @Override

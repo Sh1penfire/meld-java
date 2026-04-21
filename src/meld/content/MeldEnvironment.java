@@ -283,7 +283,7 @@ public class MeldEnvironment {
         meldCrystalFloor = new Floor("meld-crystal-floor", 3){{
         }};
 
-        meldCrystalFloor = new Floor("meld-hard-crystal-floor", 3){{
+        meldCrystalHardFloor = new Floor("meld-hard-crystal-floor", 3){{
         }};
 
         carbonicVent = new SteamVent("carbonic-vent"){{
@@ -321,6 +321,10 @@ public class MeldEnvironment {
         likesand = new Floor("likesand", 3);
         likestone = new Floor("likestone", 3);
         likesalt = new Floor("likesalt", 3);
+
+        likesand.itemDrop = likestone.itemDrop = MeldItems.likestoneSediments;
+        likesand.playerUnmineable = likestone.playerUnmineable = true;
+
         redSilt = new Floor("red-silt", 3);
         aspectSoil = new Floor("aspect-soil", 3);
         softSand = new Floor("soft-sand", 3);
@@ -402,10 +406,12 @@ public class MeldEnvironment {
 
         likesandWall = new StaticTree("likesand-wall"){{
             variants = 2;
+            itemDrop = MeldItems.likestoneSediments;
         }};
 
         likestoneWall = new StaticTree("likestone-wall"){{
             variants = 2;
+            itemDrop = MeldItems.likestoneSediments;
         }};
 
         likesaltWall= new StaticTree("likesalt-wall"){{
@@ -472,6 +478,7 @@ public class MeldEnvironment {
 
             buildVisibility = BuildVisibility.sandboxOnly;
 
+            buildTime = 120;
         }};
 
         meldCrystal = new WobbleProp("meld-crystal"){{

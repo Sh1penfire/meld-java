@@ -38,7 +38,7 @@ public class SingleBeamDrill extends Block {
 
     //Additional items mined for each tile unused in the range
     public int distanceProductivity = 5;
-    public float selfDamage = 400;
+    public float selfDamage;
     public float targetDamage = 2400;
     public ObjectFloatMap<Item> itemMultipliers = new ObjectFloatMap<>();
     public ObjectMap<Item, Item> transformItems = new ObjectMap<>();
@@ -62,6 +62,7 @@ public class SingleBeamDrill extends Block {
         envEnabled |= 2;
         flags = EnumSet.of(new BlockFlag[]{BlockFlag.drill});
         bigExplosion = MeldBullets.pulsarBlast;
+        selfDamage = 400;
     }
 
     public class SingleBeamBuild extends Building{
@@ -75,7 +76,7 @@ public class SingleBeamDrill extends Block {
         @Override
         public void updateTile() {
             super.updateTile();
-            if(healthf() >= minHealthf) time += efficiency;
+            if(healthf() >= minHealthf) time += edelta();
             if(time >= drillTime){
                 drill();
                 time %= drillTime;
