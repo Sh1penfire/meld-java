@@ -105,6 +105,12 @@ public class MeldLiquids {
     }
 
     public static void mapOutlet(Liquid input, Liquid output){
+
+        put(input, AspectGroup.outlet, new AspectStats(
+                AspectGroup.aether.getEfficiency(input) * AspectGroup.aspect.getEfficiency(output),
+                        AspectGroup.aether.getDensity(input) * AspectGroup.aspect.getDensity(output)
+        ));
+
         outletMapping.putAll(input, output);
 
         outletEfficiencies.put(input, AspectGroup.aether.getEfficiency(input) * AspectGroup.aspect.getEfficiency(output));

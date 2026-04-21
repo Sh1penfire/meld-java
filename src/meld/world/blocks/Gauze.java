@@ -38,6 +38,7 @@ public class Gauze extends Block {
     public Gauze(String name) {
         super(name);
         update = true;
+        solid = true;
     }
 
     @Override

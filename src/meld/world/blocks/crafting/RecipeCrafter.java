@@ -81,23 +81,13 @@ public class RecipeCrafter extends Block {
     @Override
     public void init() {
         super.init();
+        //TODO: let the recipies tell the block which items and liquids can be used as I/O
 
-        //MeldBlocks.aspectOutlet.inputLiquids.add(MeldLiquids.aether);MeldBlocks.aspectOutlet.outputLiquids.add(MeldLiquids.aspect)
-        recipes.each(recipe -> {
-            if(recipe.inputItems != null) for(ItemStack item: recipe.inputItems){
-                inputItems.add(item.item);
-                itemFilter[item.item.id] = true;
-            }
-            if(recipe.outputItems != null) for(ItemStack item: recipe.outputItems){
-                outputItems.add(item.item);
-            }
-            if(recipe.inputLiquids != null) for(LiquidStack item: recipe.inputLiquids){
-                inputLiquids.add(item.liquid);
-                liquidFilter[item.liquid.id] = true;
-            }
-            if(recipe.outputLiquids != null) for(LiquidStack item: recipe.outputLiquids){
-                outputLiquids.add(item.liquid);
-            }
+        inputItems.each(i -> {
+            itemFilter[i.id] = true;
+        });
+        inputLiquids.each(i -> {
+            liquidFilter[i.id] = true;
         });
     }
 
@@ -218,24 +208,33 @@ public class RecipeCrafter extends Block {
 
             if(recipe != null && recipe.valid(block, this)){
                 recipe.update(block, this);
+
                 float time = times[last];
                 time += efficiency;
+
                 if(time >= recipe.craftTime){
                     recipe.apply(crafter, this);
                     time %= recipe.craftTime;
+                    findRecipe();
                 }
                 times[last] = time;
             }
             else {
-                recipe = recipes.find(r -> r.valid(crafter, this));
-                if(recipe != null) last = recipes.indexOf(recipe);
+                findRecipe();
             }
 
             dumpOutputs();
         }
 
+        public void findRecipe(){
+            recipe = recipes.find(r -> r.valid(crafter, this));
+            if(recipe != null) last = recipes.indexOf(recipe);
+        }
+
 
         public void dumpOutputs(){
+            outputItems.each(this::dump);
+
             if(outputSlots.size > 0){
 
                 for(Liquid output: outputSlots){

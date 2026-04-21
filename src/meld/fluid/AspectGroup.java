@@ -12,6 +12,8 @@ public class AspectGroup {
     public static Seq<AspectGroup> groups = new Seq<>();
     public String name, localizedName;
 
+    public boolean hidden = false;
+
     public AspectGroup(String name){
         //hgjkgvjgfh
         this.name = Vars.content.transformName(name);
@@ -31,6 +33,11 @@ public class AspectGroup {
 
     public static void put(Liquid liquid, AspectGroup group, AspectStats stats){
         group.stats.put(liquid, stats);
+    }
+
+    public AspectGroup hide(){
+        hidden = true;
+        return this;
     }
 
     public static AspectGroup

@@ -262,15 +262,16 @@ public class MeldUnits {
 
         bulbhead = new UnitType("bulbhead"){{
             float IR = 120;
+            outlineColor = Color.clear;
 
             health = 290;
 
-            speed = 2.55f;
-            drag = 0.15f;
-            accel = 0.8f;
+            speed = 4.55f;
+            drag = 0.1f;
+            accel = 0.09f;
 
-            rotateSpeed = 9;
-            trailLength = 18;
+            rotateSpeed = 7;
+            trailLength = 80;
             trailScl = 1.2f;
 
             hitSize = 10;
@@ -291,7 +292,7 @@ public class MeldUnits {
             mineRange = IR;
             fogRadius = IR/ Vars.tilesize;
 
-            boostMultiplier = 0.1f;
+            canBoost = false;
             shadowElevation = 0;
             shadowElevationScl = 0f;
 
@@ -444,7 +445,8 @@ public class MeldUnits {
                     new StatusFieldAbility(MeldStatusEffects.rally, 120, 5, IR){{
                         activeEffect = Fx.none;
                     }},
-                    new SlipstreamHullAbility()
+                    new SlipstreamHullAbility(),
+                    new BeachedAbility()
             );
             //can't rally yourself goober >w<
             immunities.addAll(
