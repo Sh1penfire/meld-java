@@ -109,6 +109,7 @@ public class Meld extends Mod{
         MeldLiquids.load();
         MeldBlocks.load();
         MeldEnvironment.load();
+        MeldMappings.load();
 
         //Just loads localised names
         AspectGroup.loadAll();

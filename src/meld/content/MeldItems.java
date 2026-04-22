@@ -1,7 +1,6 @@
 package meld.content;
 
 import arc.struct.Seq;
-import mindustry.content.Items;
 import mindustry.type.Item;
 
 public class MeldItems {
@@ -9,14 +8,14 @@ public class MeldItems {
     debris, carbolith,
 
     //The badlands hall of shame
-    silver, clayMallows, electrumSheets,
+    silver, clayMallows, electrumSheet,
 
     //The storm planes hall of shame...
     resonarum, dissonitre, vitricMesh,
 
             meldShard;
 
-    //Items that meld mostly uses
+    //ItemLogic that meld mostly uses
     public static Item stonyParticulate, larvalPlating;
 
     //Heavy industry content
@@ -40,7 +39,7 @@ public class MeldItems {
             cost = 0.2f;
         }};
 
-        electrumSheets = new Item("electrum-sheets"){{
+        electrumSheet = new Item("electrum-sheet"){{
             cost = 0.2f;
         }};
 

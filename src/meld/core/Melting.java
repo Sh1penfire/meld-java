@@ -39,7 +39,6 @@ public class Melting implements Runnable{
     
     @Override
     public void run(){
-        Log.info("ticking");
         toMelt
             // TODO: this check might not be necessary
             .select(it -> it.floor() != melted)

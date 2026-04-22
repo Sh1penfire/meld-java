@@ -145,6 +145,7 @@ public class MeldUnits {
             shadowElevation = 0;
             drawCell = drawBody = false;
             drawSoftShadow = false;
+            fullOverride = "clear";
 
             weapons.addAll(
                     new RepairBeamWeapon(){{
@@ -446,7 +447,8 @@ public class MeldUnits {
                         activeEffect = Fx.none;
                     }},
                     new SlipstreamHullAbility(),
-                    new BeachedAbility()
+                    new BeachedAbility(),
+                    new FabricatorBatteryAbility()
             );
             //can't rally yourself goober >w<
             immunities.addAll(
@@ -667,6 +669,7 @@ public class MeldUnits {
             shadowElevation = 0;
             drawCell = drawBody = false;
             drawSoftShadow = false;
+            fullOverride = "clear";
 
             weapons.addAll(
                     new RepairBeamWeapon(){{
@@ -1680,6 +1683,7 @@ public class MeldUnits {
                             width = 1.7f;
                             knockback = 1;
                             pierceCap = 2;
+                            pierceBuilding = true;
 
                             colors = new Color[]{
                                     Color.valueOf("f9e1f343"),

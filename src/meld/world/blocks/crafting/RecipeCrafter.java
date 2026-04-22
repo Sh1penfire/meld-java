@@ -16,6 +16,7 @@ import meld.world.blocks.crafting.recipe.TimedRecipe;
 import mindustry.Vars;
 import mindustry.entities.units.BuildPlan;
 import mindustry.gen.Building;
+import mindustry.graphics.Drawf;
 import mindustry.type.Item;
 import mindustry.type.ItemStack;
 import mindustry.type.Liquid;
@@ -23,6 +24,7 @@ import mindustry.type.LiquidStack;
 import mindustry.ui.Bar;
 import mindustry.world.Block;
 import mindustry.world.blocks.production.GenericCrafter;
+import mindustry.world.consumers.ConsumePower;
 import mindustry.world.draw.DrawBlock;
 import mindustry.world.draw.DrawDefault;
 
@@ -134,6 +136,8 @@ public class RecipeCrafter extends Block {
 
     public class RecipeCrafterBuild extends Building{
 
+        public ConsumePower consPower;
+
         RecipeCrafter crafter;
         public TimedRecipe recipe = null;
 
@@ -227,8 +231,13 @@ public class RecipeCrafter extends Block {
         }
 
         public void findRecipe(){
+            consPower = null;
+
             recipe = recipes.find(r -> r.valid(crafter, this));
-            if(recipe != null) last = recipes.indexOf(recipe);
+            if(recipe != null) {
+                last = recipes.indexOf(recipe);
+                consPower = (ConsumePower) recipe.consumers.find(r -> r instanceof ConsumePower);
+            }
         }
 
 

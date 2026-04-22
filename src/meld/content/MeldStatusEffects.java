@@ -2,14 +2,17 @@ package meld.content;
 
 import arc.math.Interp;
 import arc.math.Mathf;
+import mindustry.content.Fx;
 import mindustry.entities.units.StatusEntry;
 import mindustry.gen.Unit;
 import mindustry.type.StatusEffect;
 
 public class MeldStatusEffects {
-    public static StatusEffect amplified, rally, anchored, aspectBurn, sentry, spurting, newborn, interference, drenched, stunned;
+    public static StatusEffect amplified, rally, anchored, aspectBurn, sentry, spurting, newborn, interference, drenched, stuck, stunned;
     public static StatusEffect lacerated, impaled;
     public static StatusEffect rush;
+
+    public static StatusEffect boosting, boostingIframes;
 
 
     public static void load(){
@@ -78,6 +81,29 @@ public class MeldStatusEffects {
                 speedMultiplier = 2;
                 disarm = true;
             }};
+
+        boosting = new StatusEffect("boosting"){
+
+            @Override
+            public void onRemoved(Unit unit) {
+                super.onRemoved(unit);
+                unit.apply(rush, 15);
+            }
+
+            @Override
+            public void update(Unit unit, StatusEntry entry) {
+                unit.vel.trns(unit.rotation, 7);
+                Fx.explosion.at(unit.x, unit.y);
+            }
+
+            {
+                disarm = true;
+                speedMultiplier = 0;
+                dragMultiplier = 0;
+            }
+        };
+
+        boostingIframes = new StatusEffect("boosting-iframes");
 
         anchored = new StatusEffect("anchored"){
 
@@ -177,6 +203,18 @@ public class MeldStatusEffects {
                 speedMultiplier = 0.5f;
 
         }};
+
+        stuck = new StatusEffect("stuck"){
+            @Override
+            public void update(Unit unit, StatusEntry entry) {
+                super.update(unit, entry);
+                unit.dragMultiplier /= dragMultiplier;
+
+                //Speed multiplier based on duration. 10 ticks -> 0.1 less multi
+                unit.dragMultiplier *= Mathf.clamp(3 - entry.time/300, 1f, 3);
+            }{
+                dragMultiplier = 3;
+            }};
 
         //Only affects unarmored
         lacerated = new StatusEffect("lacerated"){{

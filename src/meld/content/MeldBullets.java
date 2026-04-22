@@ -18,7 +18,8 @@ public class MeldBullets {
 
             pulsarBlast, pulsarShrapnel,
             sunderDebris, sunderGlass,
-            shredDebris, shredSilver;
+            shredDebris, shredSilver,
+            vincaQuartz;
 
     public static void load(){
 
@@ -302,6 +303,66 @@ public class MeldBullets {
                 hitEffect = Fx.none;
                 despawnEffect = Fx.none;
                 setDefaults = false;
+            }};
+        }};
+
+        vincaQuartz = new RailBulletType(){{
+            hitShake = 0.5f;
+            length = 120;
+
+            lifetime = 10;
+            damage = 12;
+            pierceArmor = true;
+            pierceDamageFactor = 1;
+
+            setDefaults = false;
+            despawnHit = false;
+            hittable = absorbable = false;
+            pointEffectSpace = 8;
+            hitEffect = Fx.none;
+            pierceEffect = Fx.none;
+
+            status = MeldStatusEffects.impaled;
+            statusDuration = 5;
+
+            fragBullets = 2;
+            fragRandomSpread = 35;
+            fragVelocityMin = 0.9f;
+
+            fragBullet = new BasicBulletType(){{
+                speed = 8;
+
+                shrinkX = shrinkY = 1;
+                lightRadius = 0;
+                damage = 5;
+                splashDamage = 8;
+                splashDamageRadius = 8;
+
+                sprite = Meld.prefix("diamond");
+                sticky = true;
+
+                knockback = 2;
+                impact = true;
+                hitEffect = despawnEffect = Fx.none;
+
+                fragBullets = 3;
+                fragBullet = new BasicBulletType(){{
+                    pierce = true;
+                    pierceCap = 2;
+                    speed = 8;
+                    lifetime = 10;
+
+                    shrinkX = shrinkY = 1;
+                    lightRadius = 0;
+                    damage = 5;
+
+                    sprite = Meld.prefix("diamond");
+
+                    knockback = 2;
+                    impact = true;
+                    hitEffect = despawnEffect = Fx.none;
+
+                }};
             }};
         }};
     }

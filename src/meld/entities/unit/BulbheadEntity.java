@@ -14,6 +14,7 @@ import arc.math.geom.Point2;
 import arc.math.geom.Position;
 import arc.math.geom.Vec2;
 import arc.util.*;
+import meld.content.MeldStatusEffects;
 import meld.content.MeldUnits;
 import meld.graphics.Draww;
 import meld.graphics.MeldRegions;
@@ -31,6 +32,7 @@ import mindustry.gen.*;
 import mindustry.graphics.Drawf;
 import mindustry.graphics.Layer;
 import mindustry.graphics.Pal;
+import mindustry.type.StatusEffect;
 import mindustry.world.Build;
 import mindustry.world.Tile;
 import mindustry.world.blocks.ConstructBlock;
@@ -53,37 +55,6 @@ public class BulbheadEntity extends UnitWaterMove {
 
     public Vec2 lastSafe = new Vec2();
 
-    //It's a d8 but I shoved several hamburgors in it
-    public final static Point2[] d8Expanded = {
-            new Point2(1, 0),
-            new Point2(1, 1),
-            new Point2(0, 1),
-            new Point2(-1, 1),
-            new Point2(-1, 0),
-            new Point2(-1, -1),
-            new Point2(0, -1),
-            new Point2(1, -1),
-
-            new Point2(2, 0),
-            new Point2(2, 1),
-            new Point2(2, -1),
-            new Point2(2, 2),
-            new Point2(2, -2),
-
-            new Point2(-2, 0),
-            new Point2(-2, 1),
-            new Point2(-2, -1),
-            new Point2(-2, 2),
-            new Point2(-2, -2),
-
-            new Point2(0, 2),
-            new Point2(1, 2),
-            new Point2(-1, 2),
-
-            new Point2(0, -2),
-            new Point2(1, -2),
-            new Point2(-1, -2),
-    };
     @Override
     public EntityCollisions.SolidPred solidity() {
         return (x, y) -> {
@@ -92,21 +63,6 @@ public class BulbheadEntity extends UnitWaterMove {
             //If the tile is out of bounds or solid, then yeah it's solid
             if(tile == null || tile.solid()) return true;
             return false;
-
-            /*
-            //If the current floor is a liquid then we're good
-            if(tile.floor().isLiquid) return false;
-
-            for(int i = 0; i < 24; i++){
-                Point2 offset = d8Expanded[i];
-                Tile other = tile.nearby(offset);
-                if(other != null && !other.solid() && other.floor().isLiquid) return false;
-            }
-
-            //If we can't find a nearby liquid tile, return true
-            return true;
-
-             */
         };
     }
 
@@ -119,6 +75,12 @@ public class BulbheadEntity extends UnitWaterMove {
     @Override
     public boolean canShoot() {
         return super.canShoot();
+    }
+
+    @Override
+    public void apply(StatusEffect effect, float duration) {
+        if(effect == MeldStatusEffects.boosting && !hasEffect(MeldStatusEffects.boosting)) beached = 0;
+        super.apply(effect, duration);
     }
 
     @Override
@@ -137,6 +99,9 @@ public class BulbheadEntity extends UnitWaterMove {
                 float exitAngle = angleTo(lastSafe);
                 set(lastSafe);
                 rotation(exitAngle);
+                apply(MeldStatusEffects.boostingIframes, 60);
+                unapply(MeldStatusEffects.rush);
+                unapply(MeldStatusEffects.boosting);
             }
         }
         else {

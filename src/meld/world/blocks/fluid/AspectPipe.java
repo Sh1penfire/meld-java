@@ -9,6 +9,7 @@ import meld.fluid.AspectGroup;
 import meld.world.blocks.crafting.ModularCrafter;
 import meld.world.blocks.crafting.RecipeCrafter;
 import mindustry.Vars;
+import mindustry.content.Fx;
 import mindustry.game.Team;
 import mindustry.gen.Building;
 import mindustry.type.Liquid;
@@ -47,11 +48,10 @@ public class AspectPipe extends Conduit {
                 lastMoved = moveLiquidForward(leaks, this.liquids.current());
                 this.noSleep();
 
-                //Attempt to push liquids to the sides
-                for(int i = 0; i < 2; i++){
-                    //get the tile above and below the current pipe, accounting for rotation
-                    Tile t = Vars.world.tile(tile.x + Geometry.d4(1 + i * 2 + rotation).x, tile.y + Geometry.d4(1 + i * 2 + rotation).y);
-
+                //Attempt to push liquids to the sides & back
+                for(int i = 0; i < 3; i++){
+                    //get the tile above, below and behind the current pipe, accounting for rotation
+                    Tile t = Vars.world.tile(tile.x + Geometry.d4(1 + i + rotation).x, tile.y + Geometry.d4(1 + i + rotation).y);
                     if(t == null || t.build == null || !t.build.block.hasLiquids || t.build.liquids == null || (!(t.build.block instanceof RecipeCrafter || t.build.block instanceof ModularCrafter) && t.build.block.consumers.length == 0)) continue;
                     moveLiquid(t.build, liquids.current());
                 }

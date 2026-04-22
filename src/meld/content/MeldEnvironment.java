@@ -2,7 +2,7 @@ package meld.content;
 
 import arc.graphics.Color;
 import meld.world.blocks.AetherCluster;
-import mindustry.content.Blocks;
+import meld.world.blocks.defense.TreeWall;
 import mindustry.content.Fx;
 import mindustry.graphics.CacheLayer;
 import mindustry.type.Category;
@@ -31,7 +31,7 @@ public class MeldEnvironment {
     meldWall, meldCrystalWall,
     metalMeshWall, metalMeshWallMeld, metalAetherWall,
     //Badlands
-    pillowWall, sandstoneWall,
+    pillowWall, sandstoneWall, softDune,
     mallowWall, crackstoneWall,
     likesandWall, likestoneWall, likesaltWall,
 
@@ -145,7 +145,7 @@ public class MeldEnvironment {
 
         electrumDeposit = new StaticWall("electrum-deposit"){{
             variants = 3;
-            itemDrop = MeldItems.electrumSheets;
+            itemDrop = MeldItems.electrumSheet;
         }};
 
         resonarumDeposit = new SeaBush("resonarum-deposit"){{
@@ -322,14 +322,16 @@ public class MeldEnvironment {
         likestone = new Floor("likestone", 3);
         likesalt = new Floor("likesalt", 3);
 
-        likesand.itemDrop = likestone.itemDrop = MeldItems.likestoneSediments;
-        likesand.playerUnmineable = likestone.playerUnmineable = true;
-
         redSilt = new Floor("red-silt", 3);
-        aspectSoil = new Floor("aspect-soil", 3);
+        aspectSoil = new Floor("aspect-soil", 3){{
+            attributes.set(MeldAttributes.soilAttr, 0.25f);
+        }};
         softSand = new Floor("soft-sand", 3);
         sandstone = new Floor("hard-sand", 3);
-        redSand = new Floor("red-sand", 3);
+        redSand = new Floor("red-sand", 3){{
+            itemDrop = MeldItems.clayMallows;
+            playerUnmineable = true;
+        }};
         redSandWeave = new Floor("red-sand-weave", 3);
         crackstone = new Floor("cracked-sand", 4);
 
@@ -393,6 +395,12 @@ public class MeldEnvironment {
 
         polishedSandstoneWall = new StaticWall("polished-sandstone-wall"){{
             variants = 2;
+        }};
+
+        softDune = new TreeWall("soft-dune"){{
+            variants = 2;
+            solid = false;
+            hasShadow = false;
         }};
 
         mallowWall = new StaticWall("mallow-wall"){{

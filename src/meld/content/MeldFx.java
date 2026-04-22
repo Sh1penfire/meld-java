@@ -29,6 +29,72 @@ public class MeldFx {
 
     public static Effect
 
+        waterShear = new Effect(35, e -> {
+            Draw.color(Color.white, e.color, e.finpow());
+
+            e.scaled(15, e1 -> {
+
+                Draw.z(Layer.groundUnit - 1);
+                Draw.alpha(Mathf.clamp(e1.finpow() * 5));
+
+                for(int i = 0; i < 2; i++){
+                    Angles.randLenVectors(e1.id, 3, e1.fin() * Vars.tilesize * 8, e.rotation + 180 + 25 * Mathf.signs[i], 15, 4, (x, y) -> {
+                        Fill.circle(e.x + x, e.y + y, 1.5f * e1.foutpowdown());
+                    });
+                }
+            });
+
+            Draw.z(Layer.groundUnit - 1);
+
+            Draw.alpha(Mathf.clamp(e.finpow() * 5));
+            for(int i = 0; i < 2; i++){
+                Angles.randLenVectors(e.id, 3, e.fin() * Vars.tilesize * 6, e.rotation + 180 + 35 * Mathf.signs[i], 5, 4, (x, y) -> {
+                    Fill.circle(e.x + x, e.y + y, 3 * e.foutpowdown());
+                });
+            }
+    }){{
+        followParent = false;
+    }},
+
+    waterShearFollow = new Effect(35, e -> {
+        Draw.color(Color.white, e.color, Color.clear, e.finpowdown());
+
+        e.scaled(25, e1 -> {
+
+            Draw.z(Layer.groundUnit - 1);
+            Draw.alpha(Draw.getColorAlpha() * e1.finpow() * 5);
+
+            for(int i = 0; i < 2; i++){
+                Angles.randLenVectors(e1.id, 6, e1.fin() * Vars.tilesize * 3, e.rotation + 180 + 35 * Mathf.signs[i], 0, 4, (x, y) -> {
+                    Fill.circle(e.x + x, e.y + y, 1.5f * e1.foutpowdown());
+                });
+            }
+        });
+
+        Draw.z(Layer.groundUnit - 1);
+
+        Draw.color(Color.white, e.color, e.finpowdown());
+        Draw.alpha(e.finpow() * 5);
+
+        for(int i = 0; i < 2; i++){
+            Angles.randLenVectors(e.id, 3, e.fin() * Vars.tilesize * 3, e.rotation + 180 + 25 * Mathf.signs[i], 5, 4, (x, y) -> {
+                Fill.circle(e.x + x, e.y + y, 3 * e.foutpowdown());
+            });
+        }
+
+        e.scaled(15, e1 -> {;
+            Draw.z(Layer.groundUnit + 1);
+            Draw.alpha(Mathf.clamp(e1.finpow() * 5)/10);
+            for(int i = 0; i < 2; i++){
+                Angles.randLenVectors(e.id, 16, e1.fin() * Vars.tilesize * 3, e.rotation + 180 + 35 * Mathf.signs[i], 2, 3, (x, y) -> {
+                    Fill.circle(e.x + x, e.y + y, 1.5f * e1.foutpowdown());
+                });
+            }
+        });
+    }){{
+        rotWithParent = true;
+    }},
+
     chainLightning = new Effect(15, 500 * 500/2 * Vars.tilesize, e -> {
         if(!(e.data instanceof VisualLightningHolder)) return;
         VisualLightningHolder p = (VisualLightningHolder) e.data;
