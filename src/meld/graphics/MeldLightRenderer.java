@@ -15,6 +15,7 @@ import arc.struct.Seq;
 import arc.util.Tmp;
 import meld.Meld;
 import mindustry.Vars;
+import mindustry.core.Renderer;
 import mindustry.graphics.LightRenderer;
 import mindustry.graphics.Shaders;
 
@@ -35,13 +36,20 @@ public class MeldLightRenderer extends LightRenderer {
 
     private float[] vertices = new float[24];
     public static FrameBuffer buffer = new FrameBuffer();
-    private Seq<Runnable> lights = new Seq<>();
+    private Seq<Runnable> lights = new Seq<>(), shadows = new Seq<>();
+
     private Seq<CircleLight> circles = new Seq<>(CircleLight.class);
 
     private Seq<CircleLight> shadowCircles = new Seq<>(CircleLight.class);
 
-    private int circleIndex = 0, shadowCircleIndex;
+    private int circleIndex = 0, shadowCircleIndex = 0;
     private TextureRegion circleRegion;
+
+    public void shadow(Runnable run){
+        if(!enabled()) return;
+
+        shadows.add(run);
+    }
 
     public void add(Runnable run){
         if(!enabled()) return;
@@ -243,14 +251,13 @@ public class MeldLightRenderer extends LightRenderer {
         Gl.blendEquationSeparate(Gl.funcAdd, Gl.funcAdd);
         Draw.color();
 
-
         MeldShaders.light.ambient.set(state.rules.ambientLight);
         MeldShaders.light.lights = lightTex;
 
         lightBuffer.blit(MeldShaders.light);
 
         lights.clear();
-        circleIndex = 0;
+        circleIndex = shadowCircleIndex = 0;
     }
 
     static class CircleLight{
