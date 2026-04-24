@@ -3,32 +3,21 @@ package meld;
 import arc.*;
 import arc.graphics.Color;
 import arc.graphics.Colors;
-import arc.math.geom.Geometry;
-import arc.math.geom.Point2;
-import arc.struct.IntSeq;
+import arc.graphics.gl.FrameBuffer;
 import arc.struct.Seq;
-import arc.util.Log;
-import arc.util.Time;
+import arc.util.Reflect;
 import arc.util.Tmp;
 import meld.content.*;
 import meld.core.*;
-import meld.entities.unit.abilities.BezerkAbility;
 import meld.fluid.AspectGroup;
+import meld.graphics.MeldLightRenderer;
 import meld.graphics.MeldRegions;
+import meld.graphics.MeldShaders;
 import meld.meta.MeldStatUnit;
 import mindustry.Vars;
-import mindustry.content.Blocks;
-import mindustry.content.Bullets;
-import mindustry.content.Fx;
-import mindustry.content.UnitTypes;
-import mindustry.ctype.UnlockableContent;
 import mindustry.game.EventType;
-import mindustry.game.EventType.*;
 import mindustry.mod.*;
-import mindustry.world.Tile;
-import mindustry.world.blocks.environment.Floor;
 import mindustry.world.meta.Stat;
-import mindustry.world.meta.StatUnit;
 import rhino.ImporterTopLevel;
 import rhino.NativeJavaPackage;
 
@@ -43,6 +32,10 @@ public class Meld extends Mod{
     public Meld(){
         Events.on(EventType.ClientLoadEvent.class, e -> {
             MeldRegions.load();
+        });
+
+        Events.on(EventType.FileTreeInitEvent.class, e -> {
+            Core.app.post(MeldShaders::load);
         });
     }
 
@@ -76,9 +69,11 @@ public class Meld extends Mod{
     @Override
     public void init() {
         super.init();
-        
+
         melting = new Melting();
-        
+
+        Reflect.set(Vars.renderer, "lights", new MeldLightRenderer());
+
         Vars.mods.getScripts().runConsole(
                 "function buildWorldP(){return Vars.world.buildWorld(Vars.player.x, Vars.player.y)}");
         ImporterTopLevel scope = (ImporterTopLevel) Vars.mods.getScripts().scope;
@@ -87,7 +82,8 @@ public class Meld extends Mod{
                 "meld",
                 "meld.content",
                 "meld.world",
-                "meld.fluid"
+                "meld.fluid",
+                "meld.graphics"
         );
 
         packages.each(name -> {

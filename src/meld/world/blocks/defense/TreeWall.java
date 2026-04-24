@@ -19,7 +19,14 @@ public class TreeWall extends Wall {
         drawTeamOverlay = false;
     }
 
+    @Override
+    public int minimapColor(Tile tile) {
+        return mapColor.rgba();
+    }
+
     public class TreeBuild extends WallBuild{
+
+
 
         @Override
         public void unitOn(Unit unit) {

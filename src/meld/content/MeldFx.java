@@ -185,9 +185,9 @@ public class MeldFx {
     });
 
     public interface VisualLightningHolder{
-        Vec2 start();
+        Position start();
 
-        Vec2 end();
+        Position end();
 
         float width();
 

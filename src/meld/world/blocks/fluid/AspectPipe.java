@@ -106,7 +106,7 @@ public class AspectPipe extends Conduit {
                         float flow = Math.min(other.block.liquidCapacity - other.liquids.get(liquid), amount) * 10;
                         if (other.acceptLiquid(this, liquid)) {
                             other.handleLiquid(this, liquid, flow);
-                            this.liquids.remove(original, flow/AspectGroup.aether.getDensity(liquid)/10/AspectGroup.aether.getEfficiency(liquid));
+                            this.liquids.remove(original, flow/AspectGroup.aether.getDensity(liquid)/10);
                             total += amount;
                         }
 

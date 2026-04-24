@@ -2,6 +2,7 @@ package meld.graphics;
 
 import arc.graphics.Color;
 import arc.graphics.g2d.Draw;
+import arc.graphics.g2d.Fill;
 import arc.graphics.g2d.Lines;
 import arc.graphics.g2d.TextureRegion;
 import arc.math.Interp;
@@ -14,6 +15,24 @@ import mindustry.graphics.Pal;
 import mindustry.world.Block;
 
 public class Draww {
+
+    public static void drawSonar(float x, float y, float radius, float thickness){
+        drawSonar(x, y, radius, thickness, MeldLayers.sonar, Pal.accent);
+    }
+
+    public static void drawSonar(float x, float y, float radius, float thickness, float layer, Color color){
+        float z = Draw.z();
+        Draw.z(layer);
+
+        Draw.color(color);
+        Fill.light(x, y, (int) (radius/4) + 12, radius + thickness/2, Tmp.c1.set(color).a(0), Tmp.c1.a(1));
+        //ill.circle(x, y, radius);
+
+        Draw.z(layer + 0.01f);
+        Fill.light(x, y, (int) (radius/4) + 12, radius - thickness/2, Tmp.c1.set(Color.red), Tmp.c1);
+        Draw.z(z);
+    }
+
     public static Vec2 tv1 = new Vec2(), tv2 = new Vec2(), tv3 = new Vec2();
     //draws a chain of sprites
     public static void drawChain(TextureRegion region, float x, float y, float endx, float endy, float drawRotation){

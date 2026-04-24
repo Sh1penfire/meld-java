@@ -5,6 +5,10 @@ import arc.struct.IntMap;
 import arc.struct.IntSeq;
 import arc.struct.ObjectFloatMap;
 import arc.struct.ObjectMap;
+import arc.util.Time;
+import arc.util.io.Reads;
+import arc.util.io.Writes;
+import meld.world.blocks.io.BlockIO;
 import meld.world.util.ItemLogic;
 import mindustry.Vars;
 import mindustry.content.Blocks;
@@ -15,6 +19,7 @@ import mindustry.type.weapons.BuildWeapon;
 import mindustry.world.Block;
 import mindustry.world.Tile;
 import mindustry.world.blocks.environment.Floor;
+import mindustry.world.consumers.Consume;
 
 public class GrindingQuary extends Block {
 
@@ -23,6 +28,8 @@ public class GrindingQuary extends Block {
     public static ObjectFloatMap<Item> drillMultipliers = new ObjectFloatMap<>();
 
     public int targetTimer = timers++;
+
+    public float itemDuration = 60;
 
     public GrindingQuary(String name) {
         super(name);
@@ -68,6 +75,10 @@ public class GrindingQuary extends Block {
         public float time = 0;
         public Tile target = null;
         public GrinderEntry entry;
+        public float boostAmount = 1;
+
+        //Timer used to determine when the current batch of items expires
+        public float progress = 0;
 
         public ObjectFloatMap<Item> drillTimers = new ObjectFloatMap<>(), itemRates = new ObjectFloatMap<>();
 
@@ -81,6 +92,16 @@ public class GrindingQuary extends Block {
             super.update();
             updateDrilling();
             dump();
+
+            progress += Time.delta/itemDuration;
+            if(progress >= 1){
+                progress %= 1;
+                boostAmount = 1;
+                for (Consume consumer : consumers) {
+                    if(consumer.booster && consumer.optional && consumer.efficiency(this) > 0) boostAmount *= consumer.efficiencyMultiplier(this);
+                    consumer.trigger(this);
+                }
+            }
         }
 
         @Override
@@ -112,7 +133,7 @@ public class GrindingQuary extends Block {
             for(Item item: itemRates.keys().toArray()){
                 float current = drillTimers.get(item, 0);
                 //Note that productionRates is in items/SECCOND, not tick, so we divide by 60
-                current = Mathf.clamp(current + itemRates.get(item, 0)/60f * drillMultipliers.get(item, 1) * edelta(), 0, 1);
+                current = Mathf.clamp(current + itemRates.get(item, 0)/60f * drillMultipliers.get(item, 1) * edelta() * boostAmount, 0, 1);
 
                 if(current >= 1 && items.get(item) < itemCapacity){
                     current = 0;
@@ -152,6 +173,22 @@ public class GrindingQuary extends Block {
                 entry = tileEntry;
             });
             return target;
+        }
+
+        @Override
+        public void write(Writes write) {
+            super.write(write);
+            write.f(progress);
+            write.f(time);
+            BlockIO.writeItemMap(drillTimers, write);
+        }
+
+        @Override
+        public void read(Reads read, byte revision) {
+            super.read(read, revision);
+            progress = read.f();
+            time = read.f();
+            drillTimers = BlockIO.readItemMap(read);
         }
     }
 }

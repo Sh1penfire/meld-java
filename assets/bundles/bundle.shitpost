@@ -2,13 +2,24 @@ item.meld-glass-mallow.name = Pan-fried Plates
 
 item.meld-crucible-plating.name = Boiled Plates
 
+item.meld-dissonitre.name = Crystal Crack
+
+item.meld-gunpowder.name = Crack on crack (going through rehab)
+
 block.meld-sonar-spire.name = Slay the Sonar Spire
 
 block.meld-manual-valve.name = Gabe Nuel's Wife
 block.meld-pressure-vent.name = Amogus Escape route
 
+block.meld-crystal-cracker.name = Tasty Wafer
+block.meld-crystal-cracker.description = ...you know you wana\n\njust a lil nibble
+
 block.meld-overflow-chute.name = Smart Router
 block.meld-overflow-chute.description = Smart Router
+
+liquid.meld-aspect.name = Outdated Ass Destroyer
+liquid.meld-storming-aspect.name = Bombspect
+liquid.meld-bound-aspect.name = Leanspect
 
 unit.meld-bulbhead.name = Bulbster
 unit.meld-bulbhead.description = Meldieps the allied blocks as it Meldarras.io the enemies

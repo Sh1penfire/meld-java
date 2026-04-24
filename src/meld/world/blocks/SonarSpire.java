@@ -3,10 +3,13 @@ package meld.world.blocks;
 import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.Lines;
 import arc.math.Interp;
+import meld.graphics.Draww;
+import meld.graphics.MeldLayers;
 import mindustry.Vars;
 import mindustry.content.StatusEffects;
 import mindustry.entities.Units;
 import mindustry.graphics.Layer;
+import mindustry.graphics.Pal;
 import mindustry.type.StatusEffect;
 
 import static mindustry.Vars.tilesize;
@@ -48,7 +51,16 @@ public class SonarSpire extends FieldPulsar {
 
         @Override
         public void draw() {
-            super.draw();
+            Draw.rect(region, x, y);
+            //I literally slapped this in
+            //Draww.drawChain(chain, x, y, Core.input.mouseWorldX(), Core.input.mouseWorldY(), 0);
+
+            Draww.drawSonar(x, y, smoothRadius, 2, MeldLayers.sonar, ringColor);
+
+            //Charge visuals, not sure if im keeping them or not
+            Lines.arc(x, y, range, uptime/pulseDuration);
+
+            Draw.color(Pal.accent);
             float charge = duration/pulseDuration;
             float chargeInv = 1 - charge;
 

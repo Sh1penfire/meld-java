@@ -401,6 +401,7 @@ public class MeldEnvironment {
             variants = 2;
             solid = false;
             hasShadow = false;
+            mapColor = Color.valueOf("f3e1af");
         }};
 
         mallowWall = new StaticWall("mallow-wall"){{

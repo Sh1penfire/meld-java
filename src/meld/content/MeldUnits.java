@@ -212,19 +212,6 @@ public class MeldUnits {
                     //Sonar
                     new ShapePart(){{
                         x = y = 0;
-                        progress = PartProgress.life;
-                        circle = true;
-                        hollow = true;
-                        radius = 0;
-                        radiusTo = IR;
-                        stroke = 6;
-                        strokeTo = 0;
-                        layer = Layer.buildBeam;
-                        color = Pal.accent;
-                    }},
-
-                    new ShapePart(){{
-                        x = y = 0;
                         progress = PartProgress.life.curve(Interp.pow10Out);
                         circle = true;
                         hollow = true;
@@ -236,17 +223,19 @@ public class MeldUnits {
                         color = Pal.accent;
                     }},
 
-                    new ShapePart(){{
-                        x = y = 0;
-                        progress = PartProgress.life.curve(Interp.pow10In);
-                        circle = true;
-                        hollow = true;
+                    new SonarPart(){{
                         radius = IR;
+                    }},
+
+                    new SonarPart(){{
+                        x = y = 0;
+                        progress = PartProgress.life;
+                        radius = 0;
                         radiusTo = IR;
-                        stroke = 4;
+                        stroke = 6;
                         strokeTo = 0;
-                        layer = Layer.buildBeam;
                         color = Pal.accent;
+                        layer = MeldLayers.sonarInside;
                     }}
             );
 
@@ -335,18 +324,6 @@ public class MeldUnits {
                         parts.addAll(
                                 new ShapePart(){{
                                     circle = hollow = true;
-                                    radius = 120;
-                                    radiusTo = 0;
-                                    layer = Layer.effect;
-                                    stroke = 6;
-                                    strokeTo = 10;
-                                    color = MeldPal.accentClear;
-                                    colorTo = Pal.accent;
-                                    progress = mixedProg.compress(0.1f, 0.9f).curve(Interp.pow2In);
-                                }},
-
-                                new ShapePart(){{
-                                    circle = hollow = true;
                                     radius = 45;
                                     radiusTo = 0;
                                     layer = Layer.effect;
@@ -415,26 +392,17 @@ public class MeldUnits {
             );
 
             parts.addAll(
-                    new HoverPart(){{
-                        x = y = 0;
-                        phase = 420;
-                        sides = 60;
-                        mirror = false;
+                    new SonarPart(){{
                         radius = IR;
-                        stroke = 3;
-                        circles = 2;
-                        minStroke = 0.5f;
-                        layer = Layer.buildBeam;
-                        color = Pal.accent;
-                    }},
-                    new ShapePart(){{
-                        x = y = 0;
-                        circle = true;
-                        hollow = true;
                         stroke = 4;
-                        radius = IR - 2;
-                        layer = Layer.buildBeam;
-                        color = Pal.accent;
+                    }},
+                    new SonarPart(){{
+                        radius = 0;
+                        radiusTo = IR;
+                        stroke = 0.5f;
+                        strokeTo = 2;
+                        layer = MeldLayers.sonarInside;
+                        progress = PartProgress.time.mul(1f/420).mod(1);
                     }}
             );
             constructor = BulbheadEntity::new;

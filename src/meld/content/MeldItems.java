@@ -21,7 +21,10 @@ public class MeldItems {
     //Heavy industry content
     public static Item
     tenbris, motis, shadesteel, elnarDust,
-    annealedSilver, glassMallows, iampsi, quartzStrata, likestoneSediments,
+    annealedSilver, glassMallows,
+    aspectBomb,
+    iampsi, quartzStrata, likestoneSediments,
+    gunpowder,
     cruciblePlating, aspectPipe;
 
     public static void load(){
@@ -86,6 +89,11 @@ public class MeldItems {
 
         glassMallows = new Item("glass-mallow");
 
+        aspectBomb = new Item("aspect-bomb"){{
+            explosiveness = 1;
+            flammability = 0;
+        }};
+
         iampsi = new Item("iampsi"){{
 
         }};
@@ -93,6 +101,8 @@ public class MeldItems {
         quartzStrata = new Item("quartz-strata"){{}};
 
         likestoneSediments = new Item("likestone-sediments"){{}};
+
+        gunpowder = new Item("gunpowder");
 
         aspectPipe = new Item("aspect-pipe"){{
 

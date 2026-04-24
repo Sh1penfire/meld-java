@@ -9,6 +9,8 @@ import arc.math.Mathf;
 import arc.util.Eachable;
 import arc.util.Log;
 import arc.util.Tmp;
+import arc.util.io.Reads;
+import arc.util.io.Writes;
 import meld.content.MeldStatusEffects;
 import meld.world.blocks.SonarSpire;
 import mindustry.Vars;
@@ -157,6 +159,20 @@ public class LaunchStation extends Block {
             Draw.rect(glowRegion, x, y, drawrot());
 
             Draw.blend();
+        }
+
+        @Override
+        public void write(Writes write) {
+            super.write(write);
+            write.f(charge);
+            write.f(warmup);
+        }
+
+        @Override
+        public void read(Reads read, byte revision) {
+            super.read(read, revision);
+            charge = read.f();
+            warmup = read.f();
         }
     }
 }

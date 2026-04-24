@@ -9,6 +9,7 @@ public class MeldPal {
     shark = Color.valueOf("a393feff"),
     darkShark = Color.valueOf("665c9f"),
     accentClear = Pal.accent.cpy().a(0),
+    accentTranslucent = Pal.accent.cpy().a(0.01f),
     blobPink = Color.valueOf("e5aed7"),
     blobPinkClear = blobPink.cpy().a(0),
     flamePink = Color.valueOf("feafea"),

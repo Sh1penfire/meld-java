@@ -37,7 +37,7 @@ public class MeldLiquids {
 
         thunderingAether = new Aspect("thundering-aether"){{
             gas = true;
-            color = Color.valueOf("f99b76");
+            color = Color.valueOf("f35430");
             temperature = 0.6f;
             explosiveness = 0.1f;
         }};
@@ -86,6 +86,8 @@ public class MeldLiquids {
 
         put(fumes, AspectGroup.fumes, new AspectStats(1, 1));
         put(pollutantMixture, AspectGroup.fumes, new AspectStats(1, 0.5f));
+
+        put(meld, aqua, new AspectStats(1/3f, 0.25f));
 
         outletMapping.putAll(
                 aether, aspect,
