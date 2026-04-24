@@ -27,5 +27,7 @@ void main(){
 
     gl_FragColor = background * color;
 
-    gl_FragColor = floor(gl_FragColor * 100)/100;
+    //gl_FragColor = floor(gl_FragColor * 100)/100;
+
+    //gl_FragColor = exclusion;
 }

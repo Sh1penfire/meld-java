@@ -1141,6 +1141,9 @@ public class MeldBlocks {
             size = 3;
             health = 4000;
 
+            lightRadius = 360;
+            fogRadius = 40;
+
             itemCapacity = 900;
 
             unitCapModifier = 6;
@@ -1567,7 +1570,7 @@ public class MeldBlocks {
             );
 
             craftTime = 60;
-            consume(new ConsumeLiquid(MeldLiquids.aether, outletRate/10f));
+            consume(new StupidConsumeAspects(outletRate/10f, AspectGroup.aether));
             consumePower(2);
             outputItems = with(MeldItems.dissonitre, 1);
         }};
@@ -1618,7 +1621,7 @@ public class MeldBlocks {
         }};
 
         substation = new PowerNode("substation"){{
-            requirements(Category.power, with(MeldItems.annealedSilver, 450, MeldItems.electrumSheet, 600, MeldItems.dissonitre, 150));
+            requirements(Category.power, with(MeldItems.annealedSilver, 450, MeldItems.electrumSheet, 600, MeldItems.dissonitre, 150, MeldItems.vitricMesh, 300));
             size = 5;
             health = 2100;
             armor = 15;
@@ -1708,6 +1711,7 @@ public class MeldBlocks {
             shrinkSpeed = 16/60f;
 
             range = 220;
+            clipSize = 220;
 
             liquidCapacity = 1 * outletRate * 60;
             hasLiquids = true;

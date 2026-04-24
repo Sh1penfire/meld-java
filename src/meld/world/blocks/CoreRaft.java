@@ -52,22 +52,27 @@ public class CoreRaft extends CoreBlock {
     public CoreRaft(String name) {
         super(name);
         fogRadius = 40;
+        lightRadius = 720;
+        clipSize = 720;
         Events.on(EventType.WorldLoadEvent.class, e -> {
             rafts.clear();
             Team.sharded.cores().each(c -> {
                 if(c instanceof CoreRaftBuild raft) rafts.add(raft);
             });
         });
+        emitLight = true;
     }
 
     @Override
     public void init() {
         //Yknow I wish we had like a set defaults for this but nvm
         int f = fogRadius;
+        float l = lightRadius;
 
         super.init();
 
         fogRadius = f;
+        lightRadius = l;
     }
 
     //Allow spawning at an offset

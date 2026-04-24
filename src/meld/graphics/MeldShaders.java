@@ -26,7 +26,7 @@ public class MeldShaders {
     public static NamedShader sonar;
     public static LightShaderMeld light;
 
-    public static FrameBuffer lightBuffer = new FrameBuffer();
+    public static FrameBuffer lightBuffer = new FrameBuffer(), sonarBuffer = new FrameBuffer();
 
     public static boolean loaded = false;
 
@@ -40,6 +40,7 @@ public class MeldShaders {
 
 
         Events.run(EventType.Trigger.draw, () -> {
+            sonarBuffer.resize(Core.graphics.getWidth(), Core.graphics.getHeight());
 
             if(Vars.state.rules.lighting){
                 lightBuffer.resize(Core.graphics.getWidth(), Core.graphics.getHeight());
@@ -50,10 +51,10 @@ public class MeldShaders {
             }
 
             Draw.drawRange(MeldLayers.sonar, 0.1f, () -> {
-                renderer.effectBuffer.begin(Color.clear);
+                sonarBuffer.begin(Color.clear);
             }, () -> {
-                renderer.effectBuffer.end();
-                renderer.effectBuffer.blit(MeldShaders.sonar);
+                sonarBuffer.end();
+                sonarBuffer.blit(MeldShaders.sonar);
             });
 
             Draw.drawRange(MeldLayers.sonarInside, 0.1f, () -> {
@@ -107,6 +108,7 @@ public class MeldShaders {
     }
 
     public static class LightShaderMeld extends NamedShader{
+        public float thickness = 0;
         public Color ambient = new Color(0.01f, 0.01f, 0.04f, 0.99f);
         public Texture lights = null;
         public Texture exclusion = null;
@@ -125,6 +127,7 @@ public class MeldShaders {
              */
 
             setUniformf("u_ambient", ambient);
+            setUniformf("u_thickness", thickness);
 
             if(exclusion != null) exclusion.bind(2);
             if(lights != null) lights.bind(1);

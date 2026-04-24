@@ -21,6 +21,8 @@ import static mindustry.Vars.state;
 
 public class MeldLightRenderer extends LightRenderer {
 
+    public boolean invertAmbient = false;
+
     public MeldLightRenderer(){
         super();
         thingo = this;
@@ -237,14 +239,13 @@ public class MeldLightRenderer extends LightRenderer {
         for(int i = 0; i < circleIndex; i++){
             var cir = circles.items[i];
             Draw.color(cir.color);
-            Draw.rect(circleRegion, cir.x, cir.y, cir.radius, cir.radius);
+            Draw.rect(circleRegion, cir.x, cir.y, cir.radius * 2, cir.radius * 2);
         }
         Draw.reset();
         Blending.normal.apply();
         Draw.sort(true);
         Texture lightTex = buffer.getTexture();
         buffer.end();
-        Gl.blendEquationSeparate(Gl.funcAdd, Gl.funcAdd);
         Draw.color();
 
         //TODO: potential memory leak
@@ -252,6 +253,7 @@ public class MeldLightRenderer extends LightRenderer {
         shadowBuffer.begin(Color.clear);
         Draw.sort(false);
         Blending.additive.apply();
+        Gl.blendEquationSeparate(Gl.funcAdd, Gl.funcAdd);
         shadowBuffer.resize(Core.graphics.getWidth()/scaling, Core.graphics.getHeight()/scaling);
 
         for(Runnable run : shadows){
@@ -263,10 +265,13 @@ public class MeldLightRenderer extends LightRenderer {
         Draw.sort(true);
         Texture exclusionTex = shadowBuffer.getTexture();
         shadowBuffer.end();
-        Gl.blendEquationSeparate(Gl.funcAdd, Gl.funcAdd);
         Draw.color();
 
-        MeldShaders.light.ambient.set(state.rules.ambientLight);
+
+
+        if(invertAmbient) MeldShaders.light.ambient.set(Tmp.c1.set(Color.white)).sub(state.rules.ambientLight).a(1 - state.rules.ambientLight.a);
+        else MeldShaders.light.ambient.set(state.rules.ambientLight);
+
         MeldShaders.light.lights = lightTex;
         MeldShaders.light.exclusion = exclusionTex;
 

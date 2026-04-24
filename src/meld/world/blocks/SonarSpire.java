@@ -8,6 +8,7 @@ import meld.graphics.MeldLayers;
 import mindustry.Vars;
 import mindustry.content.StatusEffects;
 import mindustry.entities.Units;
+import mindustry.graphics.Drawf;
 import mindustry.graphics.Layer;
 import mindustry.graphics.Pal;
 import mindustry.type.StatusEffect;
@@ -56,6 +57,7 @@ public class SonarSpire extends FieldPulsar {
             //Draww.drawChain(chain, x, y, Core.input.mouseWorldX(), Core.input.mouseWorldY(), 0);
 
             Draww.drawSonar(x, y, smoothRadius, 2, MeldLayers.sonar, ringColor);
+            Drawf.light(x, y, smoothRadius, Pal.accent, 1);
 
             //Charge visuals, not sure if im keeping them or not
             Lines.arc(x, y, range, uptime/pulseDuration);

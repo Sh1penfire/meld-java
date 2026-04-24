@@ -3,6 +3,7 @@ package meld.content;
 import arc.graphics.Color;
 import meld.world.blocks.AetherCluster;
 import meld.world.blocks.defense.TreeWall;
+import meld.world.blocks.env.SupportPillar;
 import mindustry.content.Fx;
 import mindustry.graphics.CacheLayer;
 import mindustry.type.Category;
@@ -31,7 +32,8 @@ public class MeldEnvironment {
     meldWall, meldCrystalWall,
     metalMeshWall, metalMeshWallMeld, metalAetherWall,
     //Badlands
-    pillowWall, sandstoneWall, softDune,
+    pillowWall, sandstoneWall,
+    softDune, sandstonePillar,
     mallowWall, crackstoneWall,
     likesandWall, likestoneWall, likesaltWall,
 
@@ -58,15 +60,17 @@ public class MeldEnvironment {
         runicSlate, runicSlateMeld,
         literallyCarbonStoneFromMindustryButSlightlyDifferent, carbonicPlates, carbonicVent,
         earthenStone, mixtureStone,
+    //Storm Planes
+    dissonantShale, dissonantShaleStruck, dissonantShaleScorched, dissonantFragments,
         resonantStone,
     //Marsh
     meldPlates, meldHadaland, meldTrenchland, meldSwampland, meldCrystalScattered, meldCrystalFloor, meldCrystalHardFloor;
 
     public static SteamVent aetherGrowth, metalWeaveAether;
 
-    public static Prop meldCluster, meldPools, meldProtrusion, meldMetalStick, meldCrystal, iampsiGemstone, quartzSpikes;
+    public static Prop meldCluster, meldPools, meldProtrusion, meldMetalStick, meldCrystal, iampsiGemstone, quartzSpikes, vitricWeave, mallowCluster;
     public static TallBlock meldCrystalLarge, meldSupportFrame;
-    public static AetherCluster meldClusterLarge;
+    public static AetherCluster meldClusterLarge, dissonitreCluster;
 
     public static void load(){
 
@@ -316,8 +320,16 @@ public class MeldEnvironment {
             variants = 2;
         }};
 
+        //Start storm stuff before badlands since badlands should blend onto storm
+        resonantStone = new Floor("resonant-stone", 3);
+        dissonantShale = new Floor("dissonant-shale", 3);
+        dissonantShaleStruck = new Floor("dissonant-shale-struck", 3);
+        dissonantShaleScorched = new Floor("dissonant-shale-scorched", 3);
+        dissonantFragments = new Floor("dissonant-fragments", 0);
+
         polishedSandstoneTile = new Floor("polished-sandstone-tile", 3);
 
+        //Storm stuff
         likesand = new Floor("likesand", 3);
         likestone = new Floor("likestone", 3);
         likesalt = new Floor("likesalt", 3);
@@ -404,6 +416,11 @@ public class MeldEnvironment {
             mapColor = Color.valueOf("f3e1af");
         }};
 
+        sandstonePillar = new SupportPillar("sandstone-pillar"){{
+            requirements(Category.effect, ItemStack.with(MeldItems.debris, 500));
+            mapColor = Color.black;
+        }};
+
         mallowWall = new StaticWall("mallow-wall"){{
             variants = 2;
             itemDrop = MeldItems.clayMallows;
@@ -426,8 +443,6 @@ public class MeldEnvironment {
         likesaltWall= new StaticTree("likesalt-wall"){{
             variants = 2;
         }};
-
-        resonantStone = new Floor("resonant-stone", 3);
 
         aetherGrowth = new SteamVent("aether-growth"){{
             variants = 0;
@@ -490,6 +505,15 @@ public class MeldEnvironment {
             buildTime = 120;
         }};
 
+        dissonitreCluster = new AetherCluster("dissonitre-cluster"){{
+            requirements(Category.effect, ItemStack.with(MeldItems.dissonitre, 300));
+            size = 1;
+
+            buildVisibility = BuildVisibility.sandboxOnly;
+            instantDeconstruct = false;
+            buildTime = 10;
+        }};
+
         meldCrystal = new WobbleProp("meld-crystal"){{
             requirements(Category.effect, ItemStack.with(MeldItems.meldShard, 25));
 
@@ -524,6 +548,14 @@ public class MeldEnvironment {
             instantDeconstruct = false;
             buildTime = 5;
             variants = 5;
+        }};
+
+        vitricWeave = new Prop("vitric-weave"){{
+            requirements(Category.effect, ItemStack.with(MeldItems.dissonitre, 5, MeldItems.vitricMesh, 12));
+        }};
+
+        mallowCluster = new Prop("mallow-cluster"){{
+
         }};
 
         meldCrystalLarge = new TallBlock("meld-crystal-large"){{
