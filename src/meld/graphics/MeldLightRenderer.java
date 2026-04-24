@@ -1,21 +1,17 @@
 package meld.graphics;
 
 import arc.Core;
-import arc.graphics.Blending;
-import arc.graphics.Color;
-import arc.graphics.Gl;
-import arc.graphics.Texture;
+import arc.graphics.*;
 import arc.graphics.g2d.Draw;
-import arc.graphics.g2d.Fill;
 import arc.graphics.g2d.TextureRegion;
 import arc.graphics.gl.FrameBuffer;
 import arc.math.Mathf;
 import arc.math.geom.Vec2;
 import arc.struct.Seq;
+import arc.util.Log;
 import arc.util.Tmp;
-import meld.Meld;
 import mindustry.Vars;
-import mindustry.core.Renderer;
+import mindustry.content.Blocks;
 import mindustry.graphics.LightRenderer;
 import mindustry.graphics.Shaders;
 
@@ -35,7 +31,7 @@ public class MeldLightRenderer extends LightRenderer {
     private static final int scaling = 4;
 
     private float[] vertices = new float[24];
-    public static FrameBuffer buffer = new FrameBuffer();
+    public static FrameBuffer buffer = new FrameBuffer(), shadowBuffer = new FrameBuffer();
     private Seq<Runnable> lights = new Seq<>(), shadows = new Seq<>();
 
     private Seq<CircleLight> circles = new Seq<>(CircleLight.class);
@@ -251,12 +247,33 @@ public class MeldLightRenderer extends LightRenderer {
         Gl.blendEquationSeparate(Gl.funcAdd, Gl.funcAdd);
         Draw.color();
 
+        //TODO: potential memory leak
+        Draw.color();
+        shadowBuffer.begin(Color.clear);
+        Draw.sort(false);
+        Blending.additive.apply();
+        shadowBuffer.resize(Core.graphics.getWidth()/scaling, Core.graphics.getHeight()/scaling);
+
+        for(Runnable run : shadows){
+            run.run();
+        }
+
+        Draw.reset();
+        Blending.normal.apply();
+        Draw.sort(true);
+        Texture exclusionTex = shadowBuffer.getTexture();
+        shadowBuffer.end();
+        Gl.blendEquationSeparate(Gl.funcAdd, Gl.funcAdd);
+        Draw.color();
+
         MeldShaders.light.ambient.set(state.rules.ambientLight);
         MeldShaders.light.lights = lightTex;
+        MeldShaders.light.exclusion = exclusionTex;
 
         lightBuffer.blit(MeldShaders.light);
 
         lights.clear();
+        shadows.clear();
         circleIndex = shadowCircleIndex = 0;
     }
 

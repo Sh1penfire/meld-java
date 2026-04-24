@@ -126,7 +126,7 @@ public class MeldShaders {
 
             setUniformf("u_ambient", ambient);
 
-            if(exclusion != null) lights.bind(2);
+            if(exclusion != null) exclusion.bind(2);
             if(lights != null) lights.bind(1);
 
             setUniformi("u_exclusion", 2);
