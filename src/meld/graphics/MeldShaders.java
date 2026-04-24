@@ -41,20 +41,13 @@ public class MeldShaders {
 
         Events.run(EventType.Trigger.draw, () -> {
 
-            if(Vars.state.rules.lighting == true){
+            if(Vars.state.rules.lighting){
                 lightBuffer.resize(Core.graphics.getWidth(), Core.graphics.getHeight());
 
                 Draw.draw(0, () -> {
                     lightBuffer.begin();
                 });
-                /*
-                Draw.draw(Layer.light + 1, () -> {
-                    MeldLightRenderer.thingo.draw2();
-                });
-                 */
             }
-
-
 
             Draw.drawRange(MeldLayers.sonar, 0.1f, () -> {
                 renderer.effectBuffer.begin(Color.clear);
@@ -116,6 +109,7 @@ public class MeldShaders {
     public static class LightShaderMeld extends NamedShader{
         public Color ambient = new Color(0.01f, 0.01f, 0.04f, 0.99f);
         public Texture lights = null;
+        public Texture exclusion = null;
 
         public LightShaderMeld(String frag) {
             super(frag);
@@ -132,8 +126,14 @@ public class MeldShaders {
 
             setUniformf("u_ambient", ambient);
 
+            if(exclusion != null) lights.bind(2);
             if(lights != null) lights.bind(1);
+
+            setUniformi("u_exclusion", 2);
             setUniformi("u_lights", 1);
+
+            lightBuffer.getTexture().bind(0);
+
         }
     }
 }

@@ -37,7 +37,10 @@ public class MeldLightRenderer extends LightRenderer {
     public static FrameBuffer buffer = new FrameBuffer();
     private Seq<Runnable> lights = new Seq<>();
     private Seq<CircleLight> circles = new Seq<>(CircleLight.class);
-    private int circleIndex = 0;
+
+    private Seq<CircleLight> shadowCircles = new Seq<>(CircleLight.class);
+
+    private int circleIndex = 0, shadowCircleIndex;
     private TextureRegion circleRegion;
 
     public void add(Runnable run){
@@ -48,8 +51,6 @@ public class MeldLightRenderer extends LightRenderer {
 
     public void add(float x, float y, float radius, Color color, float opacity){
         if(!enabled() || radius <= 0f) return;
-
-        //TODO: clipping.
 
         float res = Color.toFloatBits(color.r, color.g, color.b, opacity);
 
@@ -226,7 +227,6 @@ public class MeldLightRenderer extends LightRenderer {
         Draw.sort(false);
         Gl.blendEquationSeparate(Gl.funcAdd, Gl.max);
         Blending.additive.apply();
-
         for(Runnable run : lights){
             run.run();
         }
@@ -234,8 +234,6 @@ public class MeldLightRenderer extends LightRenderer {
             var cir = circles.items[i];
             Draw.color(cir.color);
             Draw.rect(circleRegion, cir.x, cir.y, cir.radius, cir.radius);
-
-            //Fill.light(cir.x, cir.y, 100, cir.radius * 2 * Vars.tilesize, Tmp.c1.set((int)cir.color), Tmp.c1.a(0));
         }
         Draw.reset();
         Blending.normal.apply();
@@ -243,13 +241,13 @@ public class MeldLightRenderer extends LightRenderer {
         Texture lightTex = buffer.getTexture();
         buffer.end();
         Gl.blendEquationSeparate(Gl.funcAdd, Gl.funcAdd);
-
         Draw.color();
+
+
         MeldShaders.light.ambient.set(state.rules.ambientLight);
         MeldShaders.light.lights = lightTex;
 
         lightBuffer.blit(MeldShaders.light);
-
 
         lights.clear();
         circleIndex = 0;
