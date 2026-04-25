@@ -43,6 +43,8 @@ public class FabricatorBatteryAbility extends Ability {
 
     public float minCharge = 60;
 
+    Color[] colors = new Color[]{Color.red, Color.orange, Color.blue, Pal.accent};
+
     @Override
     public void update(Unit unit) {
         super.update(unit);
@@ -148,8 +150,6 @@ public class FabricatorBatteryAbility extends Ability {
         Lines.stroke(1.5f);
         Lines.arc(dx, dy, fullRad, fract);
 
-        Color[] colors = new Color[]{Color.red, Color.orange, Color.blue, Pal.accent};
-
         for(int i = 0; i < colors.length; i++){
             Draw.color(colors[i]);
             Draw.alpha(visualsWarmup);
@@ -166,10 +166,5 @@ public class FabricatorBatteryAbility extends Ability {
         Draw.color();
         Draw.alpha(visualsWarmup);
         Draw.rect(MeldRegions.chargeRegions[stage], dx - x * 2, dy);
-
-        /*
-        Draw.alpha(1 - visualsWarmup);
-        Lines.arc(unit.x, unit.y, Vars.tilesize * 3, charge/chargeCap);
-         */
     }
 }

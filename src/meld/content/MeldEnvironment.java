@@ -1,6 +1,7 @@
 package meld.content;
 
 import arc.graphics.Color;
+import meld.graphics.MeldPal;
 import meld.world.blocks.AetherCluster;
 import meld.world.blocks.defense.TreeWall;
 import meld.world.blocks.env.SupportPillar;
@@ -12,6 +13,8 @@ import mindustry.world.Block;
 import mindustry.world.blocks.environment.*;
 import mindustry.world.meta.Attribute;
 import mindustry.world.meta.BuildVisibility;
+
+import static meld.graphics.MeldPal.*;
 
 public class MeldEnvironment {
 
@@ -226,6 +229,13 @@ public class MeldEnvironment {
             statusDuration = 40;
 
             dragMultiplier = 2f;
+
+            /*
+            emitLight = true;
+            lightColor = meldFloorGlowHadal;
+            lightRadius = 15;
+
+             */
         }};
 
         meldTrenchland = new Floor("meld-trenchland", 3){{
@@ -237,6 +247,13 @@ public class MeldEnvironment {
 
             dragMultiplier = 1.5f;
             cacheLayer = CacheLayer.water;
+
+            /*
+            emitLight = true;
+            lightColor = meldFloorGlowDeep;
+            lightRadius = 15;
+
+             */
         }};
 
         meldSwampland = new Floor("meld-swampland", 3){{
@@ -244,6 +261,13 @@ public class MeldEnvironment {
 
             cacheLayer = CacheLayer.water;
             supportsOverlay = true;
+
+            /*
+            emitLight = true;
+            lightColor = meldFloorGlow;
+            lightRadius = 20;
+
+             */
         }};
 
         meldPlates = new Floor("meld-plates", 2){{

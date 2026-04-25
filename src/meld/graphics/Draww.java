@@ -1,6 +1,8 @@
 package meld.graphics;
 
+import arc.Core;
 import arc.graphics.Color;
+import arc.graphics.Gl;
 import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.Fill;
 import arc.graphics.g2d.Lines;
@@ -9,6 +11,7 @@ import arc.math.Interp;
 import arc.math.Mathf;
 import arc.math.geom.Vec2;
 import arc.util.Tmp;
+import meld.SettingKeys;
 import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.graphics.Pal;
@@ -26,7 +29,6 @@ public class Draww {
 
         Draw.color(color);
         Fill.light(x, y, (int) (radius/4) + 12, radius + thickness/2, Tmp.c1.set(color).a(0), Tmp.c1.a(1));
-        //ill.circle(x, y, radius);
 
         Draw.z(layer + 0.01f);
         Fill.light(x, y, (int) (radius/4) + 12, radius - thickness/2, Tmp.c1.set(Color.red), Tmp.c1);

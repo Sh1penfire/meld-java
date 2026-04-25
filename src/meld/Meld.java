@@ -72,7 +72,9 @@ public class Meld extends Mod{
 
         melting = new Melting();
 
-        Reflect.set(Vars.renderer, "lights", new MeldLightRenderer());
+        Core.settings.put(SettingKeys.lighting, true);
+
+        if(Core.settings.getBool(SettingKeys.lighting)) Reflect.set(Vars.renderer, "lights", new MeldLightRenderer());
 
         Vars.mods.getScripts().runConsole(
                 "function buildWorldP(){return Vars.world.buildWorld(Vars.player.x, Vars.player.y)}");

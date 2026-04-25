@@ -12,9 +12,12 @@ import arc.graphics.gl.Shader;
 import arc.scene.ui.layout.Scl;
 import arc.util.Log;
 import arc.util.Time;
+import meld.Meld;
+import meld.SettingKeys;
 import mindustry.Vars;
 import mindustry.game.EventType;
 import mindustry.graphics.Layer;
+import mindustry.graphics.LightRenderer;
 import mindustry.graphics.Pal;
 import mindustry.graphics.Shaders;
 
@@ -42,11 +45,14 @@ public class MeldShaders {
         Events.run(EventType.Trigger.draw, () -> {
             sonarBuffer.resize(Core.graphics.getWidth(), Core.graphics.getHeight());
 
-            if(Vars.state.rules.lighting){
+            if(Vars.state.rules.lighting && Core.settings.getBool(SettingKeys.lighting)){
                 lightBuffer.resize(Core.graphics.getWidth(), Core.graphics.getHeight());
-
-                Draw.draw(0, () -> {
+                Draw.draw(Layer.background, () -> {
                     lightBuffer.begin();
+                });
+                Draw.draw(Layer.light, () -> {
+                    lightBuffer.end();
+                    MeldLightRenderer.thingo.draw2();
                 });
             }
 

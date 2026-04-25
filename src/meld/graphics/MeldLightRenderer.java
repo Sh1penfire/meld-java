@@ -212,7 +212,6 @@ public class MeldLightRenderer extends LightRenderer {
     }
 
     public void draw(){
-        draw2();
     }
 
     public void draw2(){
