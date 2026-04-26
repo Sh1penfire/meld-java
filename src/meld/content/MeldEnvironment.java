@@ -1,11 +1,14 @@
 package meld.content;
 
 import arc.graphics.Color;
+import arc.struct.Seq;
 import meld.graphics.MeldPal;
 import meld.world.blocks.AetherCluster;
 import meld.world.blocks.defense.TreeWall;
+import meld.world.blocks.env.ModdedOreBlock;
 import meld.world.blocks.env.SupportPillar;
 import mindustry.content.Fx;
+import mindustry.content.Liquids;
 import mindustry.graphics.CacheLayer;
 import mindustry.type.Category;
 import mindustry.type.ItemStack;
@@ -90,9 +93,9 @@ public class MeldEnvironment {
             needsSurface = false;
         }};
 
-        debrisNodule = new OreBlock("debris-nodule"){{
+        debrisNodule = new ModdedOreBlock("debris-nodule", MeldItems.debris){{
             variants = 3;
-            itemDrop = MeldItems.debris;
+            mapColor = Color.valueOf("f4a462");
             needsSurface = false;
         }};
 
@@ -230,12 +233,10 @@ public class MeldEnvironment {
 
             dragMultiplier = 2f;
 
-            /*
             emitLight = true;
             lightColor = meldFloorGlowHadal;
             lightRadius = 15;
-
-             */
+            attributes.set(MeldAttributes.meld, 0.3f);
         }};
 
         meldTrenchland = new Floor("meld-trenchland", 3){{
@@ -248,12 +249,10 @@ public class MeldEnvironment {
             dragMultiplier = 1.5f;
             cacheLayer = CacheLayer.water;
 
-            /*
             emitLight = true;
             lightColor = meldFloorGlowDeep;
             lightRadius = 15;
-
-             */
+            attributes.set(MeldAttributes.meld, 0.2f);
         }};
 
         meldSwampland = new Floor("meld-swampland", 3){{
@@ -262,40 +261,43 @@ public class MeldEnvironment {
             cacheLayer = CacheLayer.water;
             supportsOverlay = true;
 
-            /*
             emitLight = true;
             lightColor = meldFloorGlow;
             lightRadius = 20;
-
-             */
+            attributes.set(MeldAttributes.meld, 0.1f);
         }};
 
         meldPlates = new Floor("meld-plates", 2){{
             isLiquid = true;
             cacheLayer = CacheLayer.water;
             supportsOverlay = true;
+            attributes.set(MeldAttributes.meld, 0.08f);
         }};
 
         meldCrystalScattered = new Floor("meld-crystal-scattered", 3){{
             isLiquid = true;
             cacheLayer = CacheLayer.water;
             supportsOverlay = true;
+            attributes.set(MeldAttributes.meld, 0.06f);
         }};
 
         sandMeld = new Floor("sand-meld", 3){{
             isLiquid = true;
             cacheLayer = CacheLayer.water;
             supportsOverlay = true;
+            attributes.set(MeldAttributes.meld, 0.05f);
         }};
         redsandMeld = new Floor("red-sand-meld", 3){{
             isLiquid = true;
             cacheLayer = CacheLayer.water;
             supportsOverlay = true;
+            attributes.set(MeldAttributes.meld, 0.08f);
         }};
         slateMeld = new Floor("slate-meld", 3){{
             isLiquid = true;
             cacheLayer = CacheLayer.water;
             supportsOverlay = true;
+            attributes.set(MeldAttributes.meld, 0.02f);
         }};
 
         bedrockMeld = new Floor("bedrock-meld", 3){{
@@ -305,6 +307,7 @@ public class MeldEnvironment {
             status = MeldStatusEffects.drenched;
             statusDuration = 25;
             supportsOverlay = true;
+            attributes.set(MeldAttributes.meld, 0.05f);
         }};
 
 
@@ -375,6 +378,8 @@ public class MeldEnvironment {
             isLiquid = true;
             cacheLayer = CacheLayer.water;
 
+            liquidDrop = MeldLiquids.ichor;
+
             status = MeldStatusEffects.drenched;
             statusDuration = 25;
             supportsOverlay = true;
@@ -383,20 +388,22 @@ public class MeldEnvironment {
             isLiquid = true;
             cacheLayer = CacheLayer.water;
 
+            liquidDrop = MeldLiquids.ichor;
+
             status = MeldStatusEffects.drenched;
             statusDuration = 45;
             supportsOverlay = true;
         }};
 
-        iampsiSpecks = new OreBlock("iampsi-specks"){{
+        iampsiSpecks = new ModdedOreBlock("iampsi-specks", MeldItems.iampsi){{
             variants = 4;
-            itemDrop = MeldItems.iampsi;
+            mapColor = Color.valueOf("a582f7");
             needsSurface = false;
         }};
 
-        quartzFlakes = new OreBlock("quartz-flakes"){{
+        quartzFlakes = new ModdedOreBlock("quartz-flakes", MeldItems.quartzStrata){{
             variants = 4;
-            itemDrop = MeldItems.quartzStrata;
+            mapColor = Color.valueOf("ef84fb");
             needsSurface = false;
         }};
 
@@ -590,5 +597,12 @@ public class MeldEnvironment {
             variants = 2;
             customShadow = true;
         }};
+
+        Seq<Floor> meldFloors = Seq.with(meldSwampland, meldTrenchland, meldHadaland,
+                meldCrystalScattered,
+                sandMeld, redsandMeld,
+                slateMeld, bedrockMeld);
+
+        meldFloors.each(m -> m.liquidDrop = MeldLiquids.meld);
     }
 }

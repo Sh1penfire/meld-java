@@ -14,8 +14,11 @@ import arc.util.Tmp;
 import meld.SettingKeys;
 import mindustry.Vars;
 import mindustry.content.Blocks;
+import mindustry.graphics.Layer;
 import mindustry.graphics.Pal;
 import mindustry.world.Block;
+
+import static meld.ui.MeldSettings.connectedSonar;
 
 public class Draww {
 
@@ -24,15 +27,23 @@ public class Draww {
     }
 
     public static void drawSonar(float x, float y, float radius, float thickness, float layer, Color color){
-        float z = Draw.z();
-        Draw.z(layer);
+        if(connectedSonar){
+            float z = Draw.z();
+            Draw.z(layer);
 
-        Draw.color(color);
-        Fill.light(x, y, (int) (radius/4) + 12, radius + thickness/2, Tmp.c1.set(color).a(0), Tmp.c1.a(1));
+            Draw.color(color);
+            Fill.light(x, y, (int) (radius/4) + 12, radius + thickness/2, Tmp.c1.set(color).a(0), Tmp.c1.a(1));
 
-        Draw.z(layer + 0.01f);
-        Fill.light(x, y, (int) (radius/4) + 12, radius - thickness/2, Tmp.c1.set(Color.red), Tmp.c1);
-        Draw.z(z);
+            Draw.z(layer + 0.01f);
+            Fill.light(x, y, (int) (radius/4) + 12, radius - thickness/2, Tmp.c1.set(Color.red), Tmp.c1);
+            Draw.z(z);
+        }
+        else {
+            Draw.color(color);
+            Draw.z(layer);
+            Lines.stroke(thickness);
+            Lines.circle(x, y, radius);
+        }
     }
 
     public static Vec2 tv1 = new Vec2(), tv2 = new Vec2(), tv3 = new Vec2();

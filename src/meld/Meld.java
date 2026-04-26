@@ -14,6 +14,7 @@ import meld.graphics.MeldLightRenderer;
 import meld.graphics.MeldRegions;
 import meld.graphics.MeldShaders;
 import meld.meta.MeldStatUnit;
+import meld.ui.MeldSettings;
 import mindustry.Vars;
 import mindustry.game.EventType;
 import mindustry.mod.*;
@@ -74,7 +75,8 @@ public class Meld extends Mod{
 
         Core.settings.put(SettingKeys.lighting, true);
 
-        if(Core.settings.getBool(SettingKeys.lighting)) Reflect.set(Vars.renderer, "lights", new MeldLightRenderer());
+        MeldSettings.loadSettings();
+        if(MeldSettings.replaceLighting) Reflect.set(Vars.renderer, "lights", new MeldLightRenderer());
 
         Vars.mods.getScripts().runConsole(
                 "function buildWorldP(){return Vars.world.buildWorld(Vars.player.x, Vars.player.y)}");

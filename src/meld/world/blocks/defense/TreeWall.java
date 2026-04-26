@@ -26,8 +26,6 @@ public class TreeWall extends Wall {
 
     public class TreeBuild extends WallBuild{
 
-
-
         @Override
         public void unitOn(Unit unit) {
             super.unitOn(unit);

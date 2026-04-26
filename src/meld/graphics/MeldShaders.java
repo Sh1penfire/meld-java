@@ -14,6 +14,7 @@ import arc.util.Log;
 import arc.util.Time;
 import meld.Meld;
 import meld.SettingKeys;
+import meld.ui.MeldSettings;
 import mindustry.Vars;
 import mindustry.game.EventType;
 import mindustry.graphics.Layer;
@@ -45,7 +46,7 @@ public class MeldShaders {
         Events.run(EventType.Trigger.draw, () -> {
             sonarBuffer.resize(Core.graphics.getWidth(), Core.graphics.getHeight());
 
-            if(Vars.state.rules.lighting && Core.settings.getBool(SettingKeys.lighting)){
+            if(Vars.state.rules.lighting && MeldSettings.replaceLighting){
                 lightBuffer.resize(Core.graphics.getWidth(), Core.graphics.getHeight());
                 Draw.draw(Layer.background, () -> {
                     lightBuffer.begin();

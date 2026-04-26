@@ -10,6 +10,7 @@ import arc.math.geom.Vec2;
 import arc.struct.Seq;
 import arc.util.Log;
 import arc.util.Tmp;
+import meld.ui.MeldSettings;
 import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.graphics.LightRenderer;
@@ -20,8 +21,6 @@ import static mindustry.Vars.renderer;
 import static mindustry.Vars.state;
 
 public class MeldLightRenderer extends LightRenderer {
-
-    public boolean invertAmbient = false;
 
     public MeldLightRenderer(){
         super();
@@ -268,7 +267,8 @@ public class MeldLightRenderer extends LightRenderer {
 
 
 
-        if(invertAmbient) MeldShaders.light.ambient.set(Tmp.c1.set(Color.white)).sub(state.rules.ambientLight).a(1 - state.rules.ambientLight.a);
+        if(MeldSettings.invertAmbient)
+            MeldShaders.light.ambient.set(Tmp.c1.set(Color.white)).sub(Tmp.c2.set(state.rules.ambientLight).mul(state.rules.ambientLight.a));
         else MeldShaders.light.ambient.set(state.rules.ambientLight);
 
         MeldShaders.light.lights = lightTex;

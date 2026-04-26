@@ -19,9 +19,17 @@ import mindustry.content.Fx;
 import mindustry.entities.abilities.Ability;
 import mindustry.gen.Sounds;
 import mindustry.gen.Unit;
+import mindustry.graphics.Drawf;
+import mindustry.graphics.Layer;
 import mindustry.graphics.Pal;
 
 public class FabricatorBatteryAbility extends Ability {
+
+    public float[] lightRadai = new float[]{
+            0, 80, 120, 240, 320
+    };
+
+    public float lightRadius = lightRadai[0];
 
     public Interp chargeInterp = Interp.pow2;
     public float lingerTime = 0;
@@ -51,12 +59,15 @@ public class FabricatorBatteryAbility extends Ability {
         boolean active = unit.activelyBuilding();
         boolean visualActive = unit.vel.len() > 1f && !active && lingerTime <= 0;
 
+        lightRadius = Mathf.lerp(lightRadius, lightRadai[Mathf.clamp(stage, 0, lightRadai.length)], 0.02f);
         if(!visualActive && visualsWarmup < 0.1f) stageMax = stage;
 
         visualsWarmup = Mathf.slerpDelta(visualsWarmup, visualActive ? 0 : 1, 0.08f);
         lingerTime -= Time.delta;
 
+        //5 stages
         int toStage = Mathf.floor(charge/chargeCap * 4);
+
         if(toStage != stage){
             if(toStage > stageMax){
                 Fx.coreExplosion.at(unit.x, unit.y);
@@ -121,7 +132,8 @@ public class FabricatorBatteryAbility extends Ability {
 
         if(charge >= chargeCap){
             unit.healthMultiplier *= 2;
-            unit.speedMultiplier *= 1.5f;
+            unit.speedMultiplier *= 1.15f;
+            unit.reloadMultiplier *= 4/3f;
         }
 
 
@@ -166,5 +178,9 @@ public class FabricatorBatteryAbility extends Ability {
         Draw.color();
         Draw.alpha(visualsWarmup);
         Draw.rect(MeldRegions.chargeRegions[stage], dx - x * 2, dy);
+
+        Vars.renderer.lights.add(() -> {
+            Fill.light(unit.x, unit.y, 4 + (int) lightRadius/4, lightRadius, Tmp.c1.set(unit.type.lightColor).a(1), Tmp.c2.set(unit.type.lightColor).a(0));
+        });
     }
 }

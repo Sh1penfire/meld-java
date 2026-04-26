@@ -5,8 +5,11 @@ import meld.world.blocks.production.GrindingQuary.GrinderEntry;
 import mindustry.type.ItemStack;
 
 import static meld.content.MeldEnvironment.*;
+import static meld.content.MeldLiquids.*;
+
 import static mindustry.type.ItemStack.with;
 
+//Handles mappings for content which depend on eachother so the main classes are not filled with hjbujgjmhbn bhjg
 public class MeldMappings {
     public static void load(){
         GrindingQuary.grinderMap.putAll(
@@ -21,5 +24,12 @@ public class MeldMappings {
 
                 meldCrystalFloor, new GrinderEntry(720, meldCrystalScattered, with(MeldItems.meldShard, 10))
         );
+
+
+        nectar.canStayOn.addAll(mercury, ichor, ooze);
+        mercury.canStayOn.addAll(mercury, ichor, ooze, blood);
+        blood.canStayOn.addAll(nectar, ichor, ooze);
+        ooze.canStayOn.addAll(meld, nectar, ichor, ooze);
+        ichor.canStayOn.addAll(nectar, ichor);
     }
 }

@@ -10,9 +10,19 @@ import mindustry.ctype.ContentType;
 import mindustry.type.Liquid;
 
 public class Aspect extends Liquid {
+
+    public boolean setDefaults = true;
+    public float lightOpacity = 0.5f;
+
     public Aspect(String name) {
         super(name, Color.white);
         databaseCategory = "aspect";
+    }
+
+    @Override
+    public void init() {
+        super.init();
+        if(lightColor.equals(Color.clear) && setDefaults) lightColor = new Color(color).a(lightOpacity);
     }
 
     @Override

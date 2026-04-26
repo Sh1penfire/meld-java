@@ -270,8 +270,8 @@ public class MeldUnits {
             range = 100;
 
 
-            lightRadius = IR;
-            lightOpacity = 1;
+            lightRadius = IR/2;
+            lightOpacity = 0.5f;
             buildSpeed = 1;
             mineTier = 2;
             mineSpeed = 8;

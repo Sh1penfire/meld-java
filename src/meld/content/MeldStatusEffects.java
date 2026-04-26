@@ -8,9 +8,17 @@ import mindustry.gen.Unit;
 import mindustry.type.StatusEffect;
 
 public class MeldStatusEffects {
-    public static StatusEffect amplified, rally, anchored, aspectBurn, sentry, spurting, newborn, interference, drenched, stuck, stunned;
+    public static StatusEffect interference, drenched, stuck, stunned;
     public static StatusEffect lacerated, impaled;
-    public static StatusEffect rush;
+
+    //Player effects
+    public static StatusEffect rally, anchored, aspectBurn;
+
+    //Meld effects
+    public static StatusEffect amplified, sentry, spurting, newborn, rush;
+
+    //Swamp effects
+    public static StatusEffect refreshed, slippery, infested, oozed;
 
     public static StatusEffect boosting, boostingIframes;
 
@@ -242,6 +250,29 @@ public class MeldStatusEffects {
             damage = 0.2f;
             speedMultiplier = 0.45f;
             buildSpeedMultiplier = 0.5f;
+        }};
+
+        //Swamp effects
+
+        refreshed = new StatusEffect("refreshed"){{
+            damage = -1;
+            reloadMultiplier = 2;
+        }};
+
+        slippery = new StatusEffect("slippery"){{
+            speedMultiplier = 1.25f;
+            dragMultiplier = 0.15f;
+        }};
+
+        infested = new StatusEffect("infested"){{
+            damage = 0.5f;
+            healthMultiplier = 0.5f;
+            reloadMultiplier = 2;
+        }};
+
+        oozed = new StatusEffect("oozed"){{
+            speedMultiplier = 0.75f;
+            dragMultiplier = 3;
         }};
     }
 }

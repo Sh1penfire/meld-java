@@ -99,7 +99,7 @@ public class MeldBlocks {
 
     public static ItemIncinerator aspectIncinerator;
 
-    public static Block aetherAccumulator, crystalCracker, elementalBlaster, excavationQuarry, pneumaticPulsear,
+    public static Block aetherAccumulator, crystalCracker, elementalBlaster, filtrativeFeeder, excavationQuarry, pneumaticPulsear,
             earthboundInfuser, fumehood, sharkFactory;
 
     public static LaunchStation launchStation;
@@ -107,7 +107,7 @@ public class MeldBlocks {
     //Crafters
     public static RecipeCrafter gasKiln, metalworks, rotaryKiln, pneumaticExtruder;
 
-    public static AttributeCrafter crushWeaver;
+    public static AttributeCrafter crushWeaver, amalgamDecomposer;
     public static RecipeCrafter stormIris;
 
     //power blocks
@@ -699,6 +699,8 @@ public class MeldBlocks {
             );
         }};
 
+        //TODO: Finish vivalo's... everything
+        /*
         vivalo = new ItemTurret("vivalo"){{
             requirements(Category.turret, with(MeldItems.debris, 20, MeldItems.electrumSheet, 45, MeldItems.vitricMesh, 12));
             size = 3;
@@ -734,7 +736,6 @@ public class MeldBlocks {
                 parts.addAll();
             }};
 
-            /*
             ammo(
                     MeldItems.resonarum, 1,
                     MeldItems.dissonitre, 1,
@@ -744,8 +745,8 @@ public class MeldBlocks {
                     MeldItems.glassMallows, 1
             );
 
-             */
         }};
+        */
 
         vivisection = new ItemTurret("vivisection"){{
             requirements(Category.turret, with(MeldItems.debris, 200, MeldItems.silver, 320, MeldItems.resonarum, 60));
@@ -1269,6 +1270,47 @@ public class MeldBlocks {
             }});
         }};
 
+        filtrativeFeeder = new AttributeCrafter("filtrative-feeder"){{
+            requirements(
+                    Category.production, with(
+                            MeldItems.debris, 80,
+                            MeldItems.annealedSilver, 60,
+                            MeldItems.vitricMesh, 240
+                    )
+            );
+            size = 5;
+
+            liquidCapacity = 300;
+            itemCapacity = 1;
+
+            hasLiquids = true;
+
+            health = 350;
+
+            baseEfficiency = 0;
+            boostScale = 2.49f/2.5f;
+            minEfficiency = 0.99f;
+            maxBoost = 10;
+
+            craftTime = 30;
+
+            attribute = MeldAttributes.meld;
+
+            drawer = new DrawMulti(
+                    new DrawLiquidTile(MeldLiquids.meld, 2),
+                    new DrawRegion(),
+                    new DrawLiquidRegion(MeldLiquids.ichor){{
+                        suffix = "-tanks-liquid";
+                    }}
+            );
+
+            consume(new ConsumeLiquid(MeldLiquids.ichor, 1));
+            outputItems = with(MeldItems.debris, 1);
+            outputLiquids = LiquidStack.with(MeldLiquids.meld, 2);
+
+            placeableLiquid = floating = true;
+        }};
+
         fumehood = new ModularCrafter("fumehood"){{
             requirements(Category.production, with(
                     MeldItems.debris, 80, MeldItems.shadesteel, 40
@@ -1575,6 +1617,44 @@ public class MeldBlocks {
             outputItems = with(MeldItems.dissonitre, 1);
         }};
 
+        amalgamDecomposer = new AttributeCrafter("amalgam-decomposer"){{
+            requirements(Category.production, with(
+                    MeldItems.debris, 45,
+                    MeldItems.annealedSilver, 80,
+                    MeldItems.dissonitre, 80
+            ));
+            size = 3;
+            health = 800;
+
+            itemCapacity = 40;
+
+            attribute = MeldAttributes.soilAttr;
+            baseEfficiency = 0;
+            minEfficiency = 1;
+
+            craftTime = 60;
+            consumeItem(MeldItems.electrumSheet, 20);
+            consume(new StupidConsumeAspects(outletRate * 2, AspectGroup.aspect));
+
+            outputItems = with(MeldItems.debris, 5);
+            outputLiquids = LiquidStack.with(MeldLiquids.ichor, 2);
+
+
+            drawer = new DrawMulti(
+                    new DrawRegion("-bottom"),
+                    new DrawLiquidTile(){{
+                        drawLiquid = MeldLiquids.aspect;
+                        padTop = 14.25f;
+                    }},
+                    new DrawLiquidTile(){{
+                        drawLiquid = MeldLiquids.ichor;
+                        padBottom = 8.25f;
+                    }},
+                    new DrawRegion(),
+                    new DrawGlowRegion()
+            );
+        }};
+
         stormIris = new RecipeCrafter("storm-iris"){{
             requirements(Category.crafting, with(MeldItems.debris, 350, MeldItems.annealedSilver, 300, MeldItems.electrumSheet, 300, MeldItems.quartzStrata, 250));
             size = 5;
@@ -1601,6 +1681,7 @@ public class MeldBlocks {
                 }}
             );
         }};
+
 
         //#Region Power
 
