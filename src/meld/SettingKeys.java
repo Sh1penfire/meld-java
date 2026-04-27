@@ -4,5 +4,9 @@ public class SettingKeys {
     public static String lighting = "meld.lighting",
     invertAmbient = "meld.invert-ambient",
     connectedSonar = "meld.connected-sonar",
-    unitLightScale = "meld.unit-light-scale";
+    unitLightScale = "meld.unit-light-scale",
+
+    //Expirimental- doesn't sync in multiplayer and off by default
+    bulbheadOmnimove = "meld.bulbhead-omnimove",
+    portSaves = "meld.port-saves";
 }

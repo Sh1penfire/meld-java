@@ -93,6 +93,15 @@ public class MeldUnits {
         return idMap.get(type, -1);
     }
 
+    public static void bulbheadOmnimove(boolean omniMovement){
+        bulbhead.omniMovement = omniMovement;
+
+        //TODO: stat tweaks?
+        if(omniMovement){
+            return;
+        }
+    }
+
     //player units
     public static UnitType
     bulbhead, shark,
@@ -250,7 +259,7 @@ public class MeldUnits {
             constructor = TimedKillUnit::create;
         }};
 
-        bulbhead = new UnitType("bulbhead"){{
+        bulbhead = new BulbheadUnitType("bulbhead"){{
             float IR = 120;
             outlineColor = Color.clear;
 

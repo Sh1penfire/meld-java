@@ -1,12 +1,18 @@
 package meld.ui;
 
 import arc.Core;
+import arc.util.Log;
 import meld.Meld;
 import meld.SettingKeys;
+import meld.content.MeldUnits;
 import mindustry.Vars;
+import mindustry.content.Blocks;
 
 public class MeldSettings {
-    public static boolean replaceLighting, invertAmbient, connectedSonar;
+    public static boolean replaceLighting, invertAmbient, connectedSonar,
+
+    //The expirimental settings
+    bulbheadOmnimove, portSaves;
     public static float lightScale = 1;
 
     public static void loadSettings(){
@@ -15,6 +21,10 @@ public class MeldSettings {
         invertAmbient = Core.settings.getBool(SettingKeys.invertAmbient, false);
         connectedSonar = Core.settings.getBool(SettingKeys.connectedSonar, true);
         lightScale = Core.settings.getFloat(SettingKeys.unitLightScale, 1);
+
+        bulbheadOmnimove = Core.settings.getBool(SettingKeys.bulbheadOmnimove, false);
+
+        portSaves = Core.settings.getBool(SettingKeys.portSaves, false);
 
         Vars.ui.settings.addCategory(Core.bundle.get("settings.meld-title"), Meld.prefix("icon"), t -> {
             t.checkPref(Core.bundle.get(SettingKeys.lighting), true, b -> {
@@ -38,6 +48,13 @@ public class MeldSettings {
                 });
 
                 return f + "%";
+            });
+        });
+        Vars.ui.settings.addCategory(Core.bundle.get("settings.meld-expirimental"), Meld.prefix("icon"), t -> {
+            t.checkPref(Core.bundle.get(SettingKeys.bulbheadOmnimove), false, MeldUnits::bulbheadOmnimove);
+
+            t.checkPref(Core.bundle.get(SettingKeys.portSaves), false, b -> {
+                portSaves = b;
             });
         });
 

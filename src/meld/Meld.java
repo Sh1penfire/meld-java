@@ -5,6 +5,7 @@ import arc.graphics.Color;
 import arc.graphics.Colors;
 import arc.graphics.gl.FrameBuffer;
 import arc.struct.Seq;
+import arc.util.Log;
 import arc.util.Reflect;
 import arc.util.Tmp;
 import meld.content.*;
@@ -16,7 +17,10 @@ import meld.graphics.MeldShaders;
 import meld.meta.MeldStatUnit;
 import meld.ui.MeldSettings;
 import mindustry.Vars;
+import mindustry.ctype.UnlockableContent;
 import mindustry.game.EventType;
+import mindustry.io.SaveFileReader;
+import mindustry.io.SaveVersion;
 import mindustry.mod.*;
 import mindustry.world.meta.Stat;
 import rhino.ImporterTopLevel;
@@ -24,7 +28,7 @@ import rhino.NativeJavaPackage;
 
 
 public class Meld extends Mod{
-    public static final String name = "meld";
+    public static final String name = "meld2";
 
     public static NativeJavaPackage p = null;
 
@@ -33,6 +37,24 @@ public class Meld extends Mod{
     public Meld(){
         Events.on(EventType.ClientLoadEvent.class, e -> {
             MeldRegions.load();
+
+            /*
+            Vars.content.each(c -> {
+                if(!(c instanceof UnlockableContent content) || content.minfo.mod == null) return;
+                String modified = content.name;
+                String[] bits = modified.split("meld2");
+
+                if(bits.length > 1){
+                    String oldName = "meld" + bits[1];
+                    Log.info(oldName);
+                    Log.info(modified);
+
+                    SaveFileReader.fallback.put(oldName, modified);
+                }
+            });
+
+             */
+
         });
 
         Events.on(EventType.FileTreeInitEvent.class, e -> {

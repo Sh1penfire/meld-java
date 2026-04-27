@@ -18,6 +18,7 @@ import meld.content.MeldStatusEffects;
 import meld.content.MeldUnits;
 import meld.graphics.Draww;
 import meld.graphics.MeldRegions;
+import meld.ui.MeldSettings;
 import meld.world.blocks.CoreRaft;
 import mindustry.Vars;
 import mindustry.content.Blocks;
@@ -41,6 +42,8 @@ import mindustry.world.blocks.storage.CoreBlock;
 //Bandaid fix for multiplayer units dying randomly because I legit have no idea how to fix it otherwise
 public class BulbheadEntity extends UnitWaterMove {
 
+    public boolean omniMove;
+
     @Nullable
     public CoreRaft.CoreRaftBuild nearbyRaft;
 
@@ -49,6 +52,8 @@ public class BulbheadEntity extends UnitWaterMove {
 
     //Goes up to 1 and once it's at one, well... stuck...
     public float beached = 0;
+    //How beached you can get while boosting
+    public float boostingBeachedCap = 0.5f;
 
     public float standstillDrag = 1;
     public boolean controllerMoved = false;
@@ -85,7 +90,15 @@ public class BulbheadEntity extends UnitWaterMove {
 
     @Override
     public void update() {
+        //TODO: Sync in multiplayer???
+        omniMove = type.omniMovement;
+
         getNearbyLink();
+
+        unapply(MeldStatusEffects.omnimoveCompensate);
+        if(omniMove){
+            apply(MeldStatusEffects.omnimoveCompensate, 1);
+        }
 
         Tile tile = this.tileOn();
 
@@ -93,7 +106,7 @@ public class BulbheadEntity extends UnitWaterMove {
         if(tile != null && !tile.floor().isLiquid){
             if(Mathf.chance(vel.len()/speed())) Fx.unitLandSmall.at(x, y, type.hitSize/Vars.tilesize, tile.floor().mapColor);
 
-            beached = Mathf.approachDelta(beached, 1, 1/60f);
+            beached = Mathf.approachDelta(beached, hasEffect(MeldStatusEffects.boosting) ? boostingBeachedCap : 1, 1/60f);
 
             if(beached == 1){
                 float exitAngle = angleTo(lastSafe);
@@ -129,7 +142,7 @@ public class BulbheadEntity extends UnitWaterMove {
             drag *= Mathf.lerp(1, 5, beached * beached);
         }
 
-        if(!controllerMoved) standstillDrag = Mathf.approachDelta(standstillDrag, 10, 1);
+        if(!controllerMoved && !omniMove) standstillDrag = Mathf.approachDelta(standstillDrag, 10, 1);
         else standstillDrag = 1;
 
         drag *= standstillDrag;

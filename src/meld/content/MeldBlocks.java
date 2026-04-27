@@ -1215,7 +1215,7 @@ public class MeldBlocks {
             consume(new ConsumeLiquid(MeldLiquids.thunderingAether, 0){{
                 optional = true;
             }});
-            outputLiquid = new LiquidStack(MeldLiquids.thunderingAether, 2/6f);
+            outputLiquid = new LiquidStack(MeldLiquids.thunderingAether, 4/6f);
         }};
 
         elementalBlaster = new BeamDrill("elemental-blaster"){{
@@ -1226,7 +1226,7 @@ public class MeldBlocks {
             health = 420;
             placeableLiquid = true;
 
-            drillTime = 90;
+            drillTime = 180;
             tier = 2;
 
             buildTime = 90;
@@ -1357,16 +1357,19 @@ public class MeldBlocks {
 
             consume(new StupidConsumeAspects(outletRate * 4, AspectGroup.aspect));
             consume(new ConsumeItemList(){{
-                optional = booster = true;
-                setMultipliers(
-                        MeldItems.quartzStrata, 1.5f,
-                        MeldItems.iampsi, 3f
-                );
-            }}
-            );
-            consume(
-                    new ConsumeItemsBoost(with(MeldItems.gunpowder, 10), 2){{
                         optional = booster = true;
+                        setMultipliers(
+                                MeldItems.quartzStrata, 1.5f,
+                                MeldItems.iampsi, 3f
+                        );
+                    }}
+            );
+            consume(new ConsumeItemList(){{
+                        optional = booster = true;
+                        setMultipliers(
+                                MeldItems.gunpowder, 3f,
+                                MeldItems.aspectBomb, 2f
+                        );
                     }}
             );
             consume(
@@ -1536,6 +1539,25 @@ public class MeldBlocks {
                         );
                         producers.addAll(
                                 new ProduceItem(new ItemStack(MeldItems.aspectPipe, 2))
+                        );
+                    }},
+
+                    new TimedRecipe(){{
+                        consumers.addAll(
+                                new ConsumeItems(with(MeldItems.glassMallows, 4, MeldItems.silver, 2)),
+                                new StupidConsumeAspects(outletRate * 4, AspectGroup.aspect)
+                        );
+                        producers.addAll(
+                                new ProduceItem(new ItemStack(MeldItems.aspectBomb, 2))
+                        );
+                    }},
+                    new TimedRecipe(){{
+                        consumers.addAll(
+                                new ConsumeItems(with(MeldItems.glassMallows, 4, MeldItems.annealedSilver, 2)),
+                                new StupidConsumeAspects(outletRate * 4, AspectGroup.aspect)
+                        );
+                        producers.addAll(
+                                new ProduceItem(new ItemStack(MeldItems.aspectBomb, 2))
                         );
                     }}
             );

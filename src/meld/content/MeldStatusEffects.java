@@ -12,7 +12,7 @@ public class MeldStatusEffects {
     public static StatusEffect lacerated, impaled;
 
     //Player effects
-    public static StatusEffect rally, anchored, aspectBurn;
+    public static StatusEffect rally, anchored, aspectBurn, omnimoveCompensate;
 
     //Meld effects
     public static StatusEffect amplified, sentry, spurting, newborn, rush;
@@ -250,6 +250,11 @@ public class MeldStatusEffects {
             damage = 0.2f;
             speedMultiplier = 0.45f;
             buildSpeedMultiplier = 0.5f;
+        }};
+
+        //For bulbhead when omni movement is turned on
+        omnimoveCompensate = new StatusEffect("omnimove-compensate"){{
+            dragMultiplier = 0.5f;
         }};
 
         //Swamp effects
