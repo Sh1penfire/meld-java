@@ -84,6 +84,12 @@ public class LaunchStation extends Block {
         Drawf.dashLine(Pal.accent, Tmp.v1.set(x, y).x, y, Tmp.v1.add(Tmp.v2.trns(rot, statusDuration * 7)).x, Tmp.v1.y, (int) Tmp.v2.len()/Vars.tilesize);
     }
 
+    @Override
+    public void drawOverlay(float x, float y, int rotation) {
+        super.drawOverlay(x, y, rotation);
+
+        Drawf.dashLine(Pal.accent, Tmp.v1.set(x, y).x, y, Tmp.v1.add(Tmp.v2.trns(rotation * 90, statusDuration * 7)).x, Tmp.v1.y, (int) Tmp.v2.len()/Vars.tilesize);
+    }
 
     @Override
     public void init() {

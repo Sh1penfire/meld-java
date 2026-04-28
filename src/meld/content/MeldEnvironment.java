@@ -74,7 +74,7 @@ public class MeldEnvironment {
 
     public static SteamVent aetherGrowth, metalWeaveAether;
 
-    public static Prop meldCluster, meldPools, meldProtrusion, meldMetalStick, meldCrystal, iampsiGemstone, quartzSpikes, vitricWeave, mallowCluster;
+    public static Prop meldCluster, meldPools, meldProtrusion, meldMetalStick, meldCrystal, mixedCarbonicBoulder, iampsiGemstone, quartzSpikes, vitricWeave, mallowCluster, pillowGlintCluster, earthenResonarumCluster;
     public static TallBlock meldCrystalLarge, meldSupportFrame;
     public static AetherCluster meldClusterLarge, dissonitreCluster;
 
@@ -129,9 +129,10 @@ public class MeldEnvironment {
             itemDrop = MeldItems.elnarDust;
         }};
 
-        elnarSilt = new OreBlock("elnar-silt"){{
+        elnarSilt = new ModdedOreBlock("elnar-silt", MeldItems.elnarDust){{
             variants = 4;
-            itemDrop = MeldItems.elnarDust;
+            mapColor = Color.valueOf("96ed45");
+            setDefaults = false;
             needsSurface = false;
         }};
 
@@ -217,6 +218,7 @@ public class MeldEnvironment {
         metalWeave = new Floor("metal-weave", 3);
         metalWeaveHole= new Floor("metal-weave-hole", 0);
         metalWeaveGlow = new Floor("metal-weave-glow", 0){{
+            emitLight = true;
             lightRadius = 16;
             lightColor = Color.orange.cpy().a(0.35f);
         }};
@@ -425,6 +427,10 @@ public class MeldEnvironment {
 
         metalAetherWall = new StaticWall("metal-aether-wall"){{
             variants = 3;
+
+            emitLight = true;
+            lightRadius = 48;
+            lightColor = Color.valueOf("e5932e").a(0.45f);
         }};
 
 
@@ -516,7 +522,7 @@ public class MeldEnvironment {
             variants = 2;
         }};
         meldPools = new Prop("meld-pools"){{
-            requirements(Category.effect, ItemStack.with(MeldItems.debris, 25));
+            requirements(Category.effect, ItemStack.with(MeldItems.debris, 65));
 
             buildVisibility = BuildVisibility.sandboxOnly;
 
@@ -554,7 +560,29 @@ public class MeldEnvironment {
             buildTime = 10;
             variants = 3;
         }};
+        mixedCarbonicBoulder = new Prop("mixed-carbonic-boulder"){{
+            requirements(Category.effect, ItemStack.with(MeldItems.carbolith, 35, MeldItems.stonyParticulate, 45));
+            solid = true;
+            alwaysReplace = false;
 
+            buildVisibility = BuildVisibility.sandboxOnly;
+
+            instantDeconstruct = false;
+            buildTime = 60;
+            variants = 3;
+        }};
+
+        pillowGlintCluster = new Prop("pillow-glint-cluster"){{
+            requirements(Category.effect, ItemStack.with(MeldItems.silver, 25, MeldItems.annealedSilver, 40));
+            solid = true;
+            alwaysReplace = false;
+
+            buildVisibility = BuildVisibility.sandboxOnly;
+
+            instantDeconstruct = false;
+            buildTime = 45;
+            variants = 2;
+        }};
 
         iampsiGemstone = new Prop("iampsi-gemstone"){{
             requirements(Category.effect, ItemStack.with(MeldItems.silver, 25, MeldItems.iampsi, 45, MeldItems.quartzStrata, 25));
@@ -564,14 +592,14 @@ public class MeldEnvironment {
             buildVisibility = BuildVisibility.sandboxOnly;
 
             instantDeconstruct = false;
-            buildTime = 35;
+            buildTime = 40;
             variants = 4;
         }};
 
         quartzSpikes = new Prop("quartz-spikes"){{
             requirements(Category.effect, ItemStack.with(MeldItems.quartzStrata, 15));
             solid = false;
-            alwaysReplace = true;
+            alwaysReplace = false;
 
             buildVisibility = BuildVisibility.sandboxOnly;
 
@@ -582,12 +610,31 @@ public class MeldEnvironment {
         }};
 
         vitricWeave = new Prop("vitric-weave"){{
-            requirements(Category.effect, ItemStack.with(MeldItems.dissonitre, 5, MeldItems.vitricMesh, 12));
+            requirements(Category.effect, ItemStack.with(MeldItems.dissonitre, 5, MeldItems.vitricMesh, 24));
+            solid = false;
+            alwaysReplace = false;
+
+            variants = 2;
+            buildTime = 5;
+            instantDeconstruct = false;
         }};
 
         mallowCluster = new Prop("mallow-cluster"){{
 
         }};
+
+        earthenResonarumCluster = new Prop("earthen-resonarum-cluster"){{
+            requirements(Category.effect, ItemStack.with(MeldItems.resonarum, 40));
+            solid = true;
+            alwaysReplace = false;
+
+            buildVisibility = BuildVisibility.sandboxOnly;
+
+            instantDeconstruct = false;
+            buildTime = 40;
+            variants = 2;
+        }};
+
 
         meldCrystalLarge = new TallBlock("meld-crystal-large"){{
             variants = 1;

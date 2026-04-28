@@ -176,7 +176,7 @@ public class BulbheadEntity extends UnitWaterMove {
     }
 
     public boolean withinBuildRange(Position p){
-        return Vars.state.rules.infiniteResources || within(p, type.buildRange) || nearbyRaft != null && nearbyRaft.within(p, nearbyRaft.fogRadius() * Vars.tilesize);
+        return Vars.state.rules.infiniteResources || lastSafe.within(p, type.buildRange) || nearbyRaft != null && nearbyRaft.within(p, nearbyRaft.fogRadius() * Vars.tilesize);
     }
 
     public float buildDistance(Position p){
@@ -348,6 +348,14 @@ public class BulbheadEntity extends UnitWaterMove {
         }
 
         if(beached > 0 && beached != 1){
+
+            Draw.draw(Layer.buildBeam, () -> {
+                Lines.stroke(4);
+                Draw.color(team.color);
+                Draw.alpha(beached * 5);
+                Lines.circle(lastSafe.x, lastSafe.y, type.buildRange);
+                Draw.reset();
+            });
             float fout = 1 - beached;
 
             Draw.alpha(beached * beached);
@@ -380,7 +388,7 @@ public class BulbheadEntity extends UnitWaterMove {
             Tile tile = plan.tile();
             CoreBlock.CoreBuild core = this.team.core();
 
-            Position origin = within(plan, type.buildRange) ? this : nearbyRaft;
+            Position origin = lastSafe.within(plan, type.buildRange) ? lastSafe : nearbyRaft;
             if (tile != null && origin != null) {
                 if (core != null && active && !this.isLocal() && !(tile.block() instanceof ConstructBlock)) {
                     Draw.z(84.0F);
@@ -393,14 +401,14 @@ public class BulbheadEntity extends UnitWaterMove {
                     float focusLen = type.buildBeamOffset + Mathf.absin(Time.time, 3.0F, 0.6F);
                     float px = origin.getX();
                     float py = origin.getY();
-                    if(origin == this){
+                    if(origin == lastSafe){
                         px += Angles.trnsx(rotation, focusLen);
                         py += Angles.trnsy(rotation, focusLen);
                     }
 
                     drawBuildingBeam(px, py);
 
-                    if(origin != this){
+                    if(origin != lastSafe){
                         Draw.z(122);
                         Drawf.buildBeam(origin.getX(), origin.getY(), x, y, 4);
                         Lines.stroke(2);

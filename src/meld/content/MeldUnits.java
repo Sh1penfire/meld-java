@@ -23,6 +23,7 @@ import meld.entities.unit.type.*;
 import meld.graphics.*;
 import meld.entities.unit.weapons.DeathWeapon;
 import meld.entities.unit.weapons.ShadowVisualWeapon;
+import meld.ui.MeldSettings;
 import mindustry.Vars;
 import mindustry.ai.types.HugAI;
 import mindustry.content.Blocks;
@@ -100,6 +101,17 @@ public class MeldUnits {
         if(omniMovement){
             return;
         }
+    }
+
+
+    public static void lightRadiusMultiplier(float newRad){
+
+        float prevScale = MeldSettings.lightScale;
+
+        float multi = newRad/prevScale;
+        Vars.content.units().each(u -> {
+            u.lightRadius *= multi;
+        });
     }
 
     //player units
@@ -452,8 +464,10 @@ public class MeldUnits {
             hitSize = 16;
             fogRadius = 24;
 
-            lightRadius = 85;
-            lightOpacity = 0.35f;
+            lightRadius = 35;
+            lightOpacity = 0.8f;
+            lightColor = Pal.sap;
+
             range = 145;
             rotateSpeed = 6;
 
@@ -479,6 +493,7 @@ public class MeldUnits {
                         shoot.shotDelay = 5;
 
                         bullet = new MissileBulletType(){{
+
                             sprite = "missile-large";
                             speed = 4.5f;
                             drag = -0.02f;
@@ -497,7 +512,7 @@ public class MeldUnits {
                             weaveScale = 5;
                             weaveMag = 1.5f;
 
-                            width = 3;
+                            width = 4.5f;
                             height = 8;
                             shrinkX = 0;
                             shrinkY = 0.2f;
@@ -506,6 +521,7 @@ public class MeldUnits {
                             backColor = trailColor = MeldPal.shark;
                             trailChance = 0.15f;
                             trailLength = 5;
+                            trailWidth = 1.5f;
 
                             despawnEffect = Fx.none;
                             hitEffect = new Effect(12, e -> {
@@ -527,7 +543,7 @@ public class MeldUnits {
                             fragSpread = 15;
                             fragRandomSpread = 0;
                             fragBullet = new SapBulletType(){{
-                                damage = 10;
+                                damage = 15;
                                 sapStrength = 1;
                                 length = 15;
                                 pierce = true;

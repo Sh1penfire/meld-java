@@ -145,9 +145,12 @@ public class MeldLiquids {
 
             spreadTarget = nectar;
 
+            color = Color.valueOf("7d312f");
+            colorFrom = Color.valueOf("602d2b");
+            colorTo = Color.valueOf("d78b65");
+
             moveThroughBlocks = true;
             incinerable = false;
-
         }};
 
         ooze = new CellLiquid("ooze"){{

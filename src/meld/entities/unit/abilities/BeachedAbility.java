@@ -8,7 +8,7 @@ public class BeachedAbility extends Ability {
     public void update(Unit unit) {
         super.update(unit);
         if(unit.tileOn() != null && !unit.tileOn().floor().isLiquid){
-            unit.reloadMultiplier = unit.buildSpeedMultiplier = 0;
+            unit.reloadMultiplier = 0;
         }
     }
 }

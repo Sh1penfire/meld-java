@@ -1,12 +1,17 @@
 package meld;
 
 public class SettingKeys {
-    public static String lighting = "meld.lighting",
-    invertAmbient = "meld.invert-ambient",
-    connectedSonar = "meld.connected-sonar",
-    unitLightScale = "meld.unit-light-scale",
+    public static String pref(String in){
+        return "setting.meld-" + in;
+    }
+
+    public static String lighting = pref("lighting"),
+    invertAmbient = pref("invert-ambient"),
+    connectedSonar = pref("connected-sonar"),
+    unitLightScale = pref("unit-light-scale"),
+    overlayOverFog = pref("highvis-overlay"),
 
     //Expirimental- doesn't sync in multiplayer and off by default
-    bulbheadOmnimove = "meld.bulbhead-omnimove",
-    portSaves = "meld.port-saves";
+    bulbheadOmnimove = pref("bulbhead-omnimove"),
+    portSaves = pref("port-saves");
 }

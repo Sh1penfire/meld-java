@@ -2,6 +2,9 @@ package meld.content;
 
 import arc.graphics.Blending;
 import arc.graphics.Color;
+import arc.graphics.g2d.Draw;
+import arc.graphics.g2d.Fill;
+import arc.graphics.g2d.Lines;
 import arc.math.Angles;
 import arc.math.Interp;
 import arc.math.Mathf;
@@ -14,6 +17,7 @@ import meld.fluid.AspectGroup;
 import meld.graphics.*;
 import meld.world.blocks.*;
 import meld.world.blocks.consumers.ConsumeItemsBoost;
+import meld.world.blocks.turrets.MeldItemTurret;
 import meld.world.blocks.consumers.ConsumePowerRecipe;
 import meld.world.blocks.consumers.StupidConsumeAspects;
 import meld.world.blocks.crafting.ModularCrafter;
@@ -37,7 +41,9 @@ import meld.world.meta.*;
 import mindustry.Vars;
 import mindustry.content.Fx;
 import mindustry.content.StatusEffects;
+import mindustry.entities.Effect;
 import mindustry.entities.bullet.*;
+import mindustry.entities.effect.MultiEffect;
 import mindustry.entities.effect.ParticleEffect;
 import mindustry.entities.part.DrawPart;
 import mindustry.entities.part.HaloPart;
@@ -49,6 +55,7 @@ import mindustry.entities.pattern.ShootSpread;
 import mindustry.gen.Bullet;
 import mindustry.gen.Sounds;
 import mindustry.gen.Statusc;
+import mindustry.graphics.Drawf;
 import mindustry.graphics.Layer;
 import mindustry.graphics.Pal;
 import mindustry.type.*;
@@ -57,13 +64,13 @@ import mindustry.world.blocks.defense.Door;
 import mindustry.world.blocks.defense.ForceProjector;
 import mindustry.world.blocks.defense.RegenProjector;
 import mindustry.world.blocks.defense.Wall;
-import mindustry.world.blocks.defense.turrets.ItemTurret;
 import mindustry.world.blocks.defense.turrets.LiquidTurret;
 import mindustry.world.blocks.distribution.*;
 import mindustry.world.blocks.liquid.Conduit;
 import mindustry.world.blocks.liquid.LiquidJunction;
 import mindustry.world.blocks.liquid.LiquidRouter;
 import mindustry.world.blocks.power.Battery;
+import mindustry.world.blocks.power.LightBlock;
 import mindustry.world.blocks.power.PowerNode;
 import mindustry.world.blocks.power.ThermalGenerator;
 import mindustry.world.blocks.production.*;
@@ -90,7 +97,8 @@ public class MeldBlocks {
             //Gauze chainheals smallest, lowest hp blocks, low target prio blocks first.
 
             //Suture shoots healing needles in a cone at the closest damaged block. Impales enemies, causing them to take constant chip damage and be sedated.
-            bruisekit, gauze, suture;
+            bruisekit, gauze, suture,
+            lampPsi;
 
     //Core Blocks
     public static Block coreRaft, buffer;
@@ -113,7 +121,7 @@ public class MeldBlocks {
     //power blocks
     public static Block conductivePile, substation, aspectDischarger;
 
-    public static Block channelNode, channelHub, channelFace, aspectOutlet, aspectChannel, channelDirector, channelVent, manualValve, intakeValve, valveController, pipebox;
+    public static Block channelNode, channelHub, channelFace, aspectOutlet, aspectChannel, aspectBomb, channelDirector, channelVent, manualValve, intakeValve, valveController, pipebox;
 
     public static Block sunder, shredstorm, molotov, vivisection, vinca, vivalo;
 
@@ -251,6 +259,24 @@ public class MeldBlocks {
             junctionReplacement = channelFace;
         }};
 
+        aspectBomb = new AspectBomb("aspect-bomb"){{
+            requirements(Category.liquid, with(
+                    MeldItems.aspectBomb, 50
+            ));
+            underBullets = false;
+            leaks = false;
+            health = (int)(channelHealth * 2.5f);
+            armor = 2;
+            insulated = true;
+
+            placeableLiquid = true;
+
+            liquidCapacity = 20;
+            size = 1;
+            botColor = Color.white;
+            junctionReplacement = channelFace;
+        }};
+
         channelHub = new LiquidRouter("channel-hub"){{
             requirements(Category.liquid, with(MeldItems.debris, 80, MeldItems.shadesteel, 120));
             size = 4;
@@ -341,7 +367,7 @@ public class MeldBlocks {
             placeableLiquid = true;
         }};
 
-        sunder = new ItemTurret("sunder"){{
+        sunder = new MeldItemTurret("sunder"){{
             requirements(Category.turret, with(
                     MeldItems.debris, 45,
                     MeldItems.carbolith, 60
@@ -405,7 +431,7 @@ public class MeldBlocks {
             );
         }};
 
-        shredstorm = new ItemTurret("shredstorm"){{
+        shredstorm = new MeldItemTurret("shredstorm"){{
             requirements(Category.turret, with(
                     MeldItems.debris, 35,
                     MeldItems.silver, 50
@@ -493,7 +519,7 @@ public class MeldBlocks {
             );
         }};
 
-        molotov = new ItemTurret("molotov"){{
+        molotov = new MeldItemTurret("molotov"){{
             requirements(Category.turret, with(
                     MeldItems.carbolith, 40,
                     MeldItems.silver, 70
@@ -668,7 +694,7 @@ public class MeldBlocks {
             );
         }};
 
-        vinca = new ItemTurret("vinca"){{
+        vinca = new MeldItemTurret("vinca"){{
             requirements(Category.turret, with(MeldItems.debris, 25, MeldItems.silver, 25, MeldItems.quartzStrata, 30));
             size = 2;
             health = 850;
@@ -701,7 +727,7 @@ public class MeldBlocks {
 
         //TODO: Finish vivalo's... everything
         /*
-        vivalo = new ItemTurret("vivalo"){{
+        vivalo = new MeldItemTurret("vivalo"){{
             requirements(Category.turret, with(MeldItems.debris, 20, MeldItems.electrumSheet, 45, MeldItems.vitricMesh, 12));
             size = 3;
             health = 520;
@@ -748,7 +774,7 @@ public class MeldBlocks {
         }};
         */
 
-        vivisection = new ItemTurret("vivisection"){{
+        vivisection = new MeldItemTurret("vivisection"){{
             requirements(Category.turret, with(MeldItems.debris, 200, MeldItems.silver, 320, MeldItems.resonarum, 60));
             size = 4;
             health = 2640;
@@ -1103,6 +1129,7 @@ public class MeldBlocks {
                 }},
                     new DrawLiquidTile(MeldLiquids.aspect),
                     new DrawLiquidTile(MeldLiquids.boundAspect),
+                    new DrawLiquidTile(MeldLiquids.stormingAspect),
                 new DrawDefault()
             );
 
@@ -1159,7 +1186,7 @@ public class MeldBlocks {
             health = 800;
             armor = 15;
 
-            itemCapacity = 150;
+            itemCapacity = 100;
         }};
 
         aspectIncinerator = new StorageIncinerator("aspect-incinerator"){{
@@ -1226,7 +1253,7 @@ public class MeldBlocks {
             health = 420;
             placeableLiquid = true;
 
-            drillTime = 180;
+            drillTime = 90;
             tier = 2;
 
             buildTime = 90;
@@ -1508,8 +1535,8 @@ public class MeldBlocks {
             itemCapacity = 10;
 
             inputLiquids.addAll(MeldLiquids.aspect, MeldLiquids.boundAspect, MeldLiquids.stormingAspect);
-            inputItems.addAll(MeldItems.shadesteel, MeldItems.elnarDust, MeldItems.debris, MeldItems.silver, MeldItems.annealedSilver);
-            outputItems.addAll(MeldItems.aspectPipe);
+            inputItems.addAll(MeldItems.shadesteel, MeldItems.elnarDust, MeldItems.debris, MeldItems.silver, MeldItems.annealedSilver, MeldItems.glassMallows);
+            outputItems.addAll(MeldItems.aspectPipe, MeldItems.aspectBomb);
 
             inputLiquidSlots = 1;
 
@@ -1542,22 +1569,22 @@ public class MeldBlocks {
                         );
                     }},
 
-                    new TimedRecipe(){{
+                    new TimedRecipe(30){{
                         consumers.addAll(
                                 new ConsumeItems(with(MeldItems.glassMallows, 4, MeldItems.silver, 2)),
-                                new StupidConsumeAspects(outletRate * 4, AspectGroup.aspect)
+                                new ConsumeLiquid(MeldLiquids.stormingAspect, outletRate * 4)
                         );
                         producers.addAll(
-                                new ProduceItem(new ItemStack(MeldItems.aspectBomb, 2))
+                                new ProduceItem(new ItemStack(MeldItems.aspectBomb, 10))
                         );
                     }},
-                    new TimedRecipe(){{
+                    new TimedRecipe(15){{
                         consumers.addAll(
                                 new ConsumeItems(with(MeldItems.glassMallows, 4, MeldItems.annealedSilver, 2)),
-                                new StupidConsumeAspects(outletRate * 4, AspectGroup.aspect)
+                                new ConsumeLiquid(MeldLiquids.stormingAspect, outletRate * 4)
                         );
                         producers.addAll(
-                                new ProduceItem(new ItemStack(MeldItems.aspectBomb, 2))
+                                new ProduceItem(new ItemStack(MeldItems.aspectBomb, 10))
                         );
                     }}
             );
@@ -1877,6 +1904,14 @@ public class MeldBlocks {
             consumeItem(MeldItems.resonarum, 2);
         }};
 
+        lampPsi = new LightBlock("lamp-psi"){{
+            requirements(Category.effect, with(MeldItems.iampsi, 30));
+            configurable = false;
+            radius = 32;
+
+            consume(new StupidConsumeAspects(outletRate/5, AspectGroup.aspect));
+        }};
+
         chute = new Duct("chute"){{
             requirements(Category.distribution, with(MeldItems.debris, 1));
             health = 90;
@@ -1895,7 +1930,6 @@ public class MeldBlocks {
             health = 90;
             speed = 4f;
             solid = false;
-            ((Duct) chute).bridgeReplacement = this;
         }};
 
         chuteOverflow = new PriorityInputSplitter("chute-overflow"){{
@@ -1929,8 +1963,11 @@ public class MeldBlocks {
             health = 90;
             speed = 4f;
             solid = false;
-            ((Duct) chute).junctionReplacement = this;
         }};
+        ((Duct) chute).bridgeReplacement = chuteBridge;
+        ((Duct) platedChute).bridgeReplacement = chuteBridge;
+        ((Duct) chute).junctionReplacement = chuteJunction;
+        ((Duct) platedChute).junctionReplacement = chuteJunction;
 
         //Meld blocks
         meldNode = new MeldNode("meld-node"){{

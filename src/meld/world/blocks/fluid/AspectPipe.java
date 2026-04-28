@@ -1,5 +1,7 @@
 package meld.world.blocks.fluid;
 
+import arc.Core;
+import arc.graphics.g2d.TextureRegion;
 import arc.math.Mathf;
 import arc.math.geom.Geometry;
 import arc.struct.Seq;
@@ -30,6 +32,11 @@ public class AspectPipe extends Conduit {
 
     public AspectPipe(String name) {
         super(name);
+    }
+
+    @Override
+    public TextureRegion[] icons(){
+        return new TextureRegion[]{botRegions[0], topRegions[0]};
     }
 
     @Override
