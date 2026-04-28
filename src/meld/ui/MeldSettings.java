@@ -59,7 +59,7 @@ public class MeldSettings {
 
         Vars.ui.settings.addCategory(Core.bundle.get("settings.meld-title"), Meld.prefix("icon"), t -> {
             check(t, SettingKeys.lighting, true, b -> replaceLighting = b);
-            check(t, SettingKeys.invertAmbient, true, b -> invertAmbient = b);
+            check(t, SettingKeys.invertAmbient, false, b -> invertAmbient = b);
             check(t, SettingKeys.connectedSonar, true, b -> connectedSonar = b);
             check(t, SettingKeys.overlayOverFog, true, b -> overlayOverFog = b);
 
