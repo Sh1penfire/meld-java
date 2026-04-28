@@ -14,9 +14,11 @@ import arc.math.geom.Point2;
 import arc.math.geom.Position;
 import arc.math.geom.Vec2;
 import arc.util.*;
+import meld.content.MeldStatusEffects;
 import meld.content.MeldUnits;
 import meld.graphics.Draww;
 import meld.graphics.MeldRegions;
+import meld.ui.MeldSettings;
 import meld.world.blocks.CoreRaft;
 import mindustry.Vars;
 import mindustry.content.Blocks;
@@ -31,6 +33,7 @@ import mindustry.gen.*;
 import mindustry.graphics.Drawf;
 import mindustry.graphics.Layer;
 import mindustry.graphics.Pal;
+import mindustry.type.StatusEffect;
 import mindustry.world.Build;
 import mindustry.world.Tile;
 import mindustry.world.blocks.ConstructBlock;
@@ -38,6 +41,8 @@ import mindustry.world.blocks.storage.CoreBlock;
 
 //Bandaid fix for multiplayer units dying randomly because I legit have no idea how to fix it otherwise
 public class BulbheadEntity extends UnitWaterMove {
+
+    public boolean omniMove;
 
     @Nullable
     public CoreRaft.CoreRaftBuild nearbyRaft;
@@ -47,43 +52,14 @@ public class BulbheadEntity extends UnitWaterMove {
 
     //Goes up to 1 and once it's at one, well... stuck...
     public float beached = 0;
+    //How beached you can get while boosting
+    public float boostingBeachedCap = 0.5f;
 
     public float standstillDrag = 1;
     public boolean controllerMoved = false;
 
     public Vec2 lastSafe = new Vec2();
 
-    //It's a d8 but I shoved several hamburgors in it
-    public final static Point2[] d8Expanded = {
-            new Point2(1, 0),
-            new Point2(1, 1),
-            new Point2(0, 1),
-            new Point2(-1, 1),
-            new Point2(-1, 0),
-            new Point2(-1, -1),
-            new Point2(0, -1),
-            new Point2(1, -1),
-
-            new Point2(2, 0),
-            new Point2(2, 1),
-            new Point2(2, -1),
-            new Point2(2, 2),
-            new Point2(2, -2),
-
-            new Point2(-2, 0),
-            new Point2(-2, 1),
-            new Point2(-2, -1),
-            new Point2(-2, 2),
-            new Point2(-2, -2),
-
-            new Point2(0, 2),
-            new Point2(1, 2),
-            new Point2(-1, 2),
-
-            new Point2(0, -2),
-            new Point2(1, -2),
-            new Point2(-1, -2),
-    };
     @Override
     public EntityCollisions.SolidPred solidity() {
         return (x, y) -> {
@@ -92,21 +68,6 @@ public class BulbheadEntity extends UnitWaterMove {
             //If the tile is out of bounds or solid, then yeah it's solid
             if(tile == null || tile.solid()) return true;
             return false;
-
-            /*
-            //If the current floor is a liquid then we're good
-            if(tile.floor().isLiquid) return false;
-
-            for(int i = 0; i < 24; i++){
-                Point2 offset = d8Expanded[i];
-                Tile other = tile.nearby(offset);
-                if(other != null && !other.solid() && other.floor().isLiquid) return false;
-            }
-
-            //If we can't find a nearby liquid tile, return true
-            return true;
-
-             */
         };
     }
 
@@ -122,8 +83,22 @@ public class BulbheadEntity extends UnitWaterMove {
     }
 
     @Override
+    public void apply(StatusEffect effect, float duration) {
+        if(effect == MeldStatusEffects.boosting && !hasEffect(MeldStatusEffects.boosting)) beached = 0;
+        super.apply(effect, duration);
+    }
+
+    @Override
     public void update() {
+        //TODO: Sync in multiplayer???
+        omniMove = type.omniMovement;
+
         getNearbyLink();
+
+        unapply(MeldStatusEffects.omnimoveCompensate);
+        if(omniMove){
+            apply(MeldStatusEffects.omnimoveCompensate, 1);
+        }
 
         Tile tile = this.tileOn();
 
@@ -131,12 +106,15 @@ public class BulbheadEntity extends UnitWaterMove {
         if(tile != null && !tile.floor().isLiquid){
             if(Mathf.chance(vel.len()/speed())) Fx.unitLandSmall.at(x, y, type.hitSize/Vars.tilesize, tile.floor().mapColor);
 
-            beached = Mathf.approachDelta(beached, 1, 1/60f);
+            beached = Mathf.approachDelta(beached, hasEffect(MeldStatusEffects.boosting) ? boostingBeachedCap : 1, 1/60f);
 
             if(beached == 1){
                 float exitAngle = angleTo(lastSafe);
                 set(lastSafe);
                 rotation(exitAngle);
+                apply(MeldStatusEffects.boostingIframes, 60);
+                unapply(MeldStatusEffects.rush);
+                unapply(MeldStatusEffects.boosting);
             }
         }
         else {
@@ -164,7 +142,7 @@ public class BulbheadEntity extends UnitWaterMove {
             drag *= Mathf.lerp(1, 5, beached * beached);
         }
 
-        if(!controllerMoved) standstillDrag = Mathf.approachDelta(standstillDrag, 10, 1);
+        if(!controllerMoved && !omniMove) standstillDrag = Mathf.approachDelta(standstillDrag, 10, 1);
         else standstillDrag = 1;
 
         drag *= standstillDrag;
@@ -198,7 +176,7 @@ public class BulbheadEntity extends UnitWaterMove {
     }
 
     public boolean withinBuildRange(Position p){
-        return Vars.state.rules.infiniteResources || within(p, type.buildRange) || nearbyRaft != null && nearbyRaft.within(p, nearbyRaft.fogRadius() * Vars.tilesize);
+        return Vars.state.rules.infiniteResources || lastSafe.within(p, type.buildRange) || nearbyRaft != null && nearbyRaft.within(p, nearbyRaft.fogRadius() * Vars.tilesize);
     }
 
     public float buildDistance(Position p){
@@ -370,6 +348,14 @@ public class BulbheadEntity extends UnitWaterMove {
         }
 
         if(beached > 0 && beached != 1){
+
+            Draw.draw(Layer.buildBeam, () -> {
+                Lines.stroke(4);
+                Draw.color(team.color);
+                Draw.alpha(beached * 5);
+                Lines.circle(lastSafe.x, lastSafe.y, type.buildRange);
+                Draw.reset();
+            });
             float fout = 1 - beached;
 
             Draw.alpha(beached * beached);
@@ -402,7 +388,7 @@ public class BulbheadEntity extends UnitWaterMove {
             Tile tile = plan.tile();
             CoreBlock.CoreBuild core = this.team.core();
 
-            Position origin = within(plan, type.buildRange) ? this : nearbyRaft;
+            Position origin = lastSafe.within(plan, type.buildRange) ? lastSafe : nearbyRaft;
             if (tile != null && origin != null) {
                 if (core != null && active && !this.isLocal() && !(tile.block() instanceof ConstructBlock)) {
                     Draw.z(84.0F);
@@ -415,14 +401,14 @@ public class BulbheadEntity extends UnitWaterMove {
                     float focusLen = type.buildBeamOffset + Mathf.absin(Time.time, 3.0F, 0.6F);
                     float px = origin.getX();
                     float py = origin.getY();
-                    if(origin == this){
+                    if(origin == lastSafe){
                         px += Angles.trnsx(rotation, focusLen);
                         py += Angles.trnsy(rotation, focusLen);
                     }
 
                     drawBuildingBeam(px, py);
 
-                    if(origin != this){
+                    if(origin != lastSafe){
                         Draw.z(122);
                         Drawf.buildBeam(origin.getX(), origin.getY(), x, y, 4);
                         Lines.stroke(2);

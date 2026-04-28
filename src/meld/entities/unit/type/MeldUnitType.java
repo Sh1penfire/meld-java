@@ -12,6 +12,8 @@ import mindustry.gen.Unit;
 import mindustry.type.UnitType;
 
 public class MeldUnitType extends UnitType {
+
+
     public MeldUnitType(String name) {
         super(name);
         outlineColor = Color.clear;

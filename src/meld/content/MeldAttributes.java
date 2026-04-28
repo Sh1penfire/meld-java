@@ -4,6 +4,8 @@ import mindustry.world.meta.Attribute;
 
 public class MeldAttributes {
 
-    public static final Attribute aetherAttr = Attribute.add("aether");
+    public static final Attribute aetherAttr = Attribute.add("aether"),
+    soilAttr = Attribute.add("aether-soil"),
+    meld = Attribute.add("meld-floor");
 
 }

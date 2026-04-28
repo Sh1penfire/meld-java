@@ -15,6 +15,9 @@ import arc.math.geom.Vec2;
 import arc.util.Tmp;
 import meld.graphics.Draww;
 import meld.Meld;
+import meld.graphics.MeldLayers;
+import meld.graphics.MeldPal;
+import meld.math.MultiInterp;
 import mindustry.Vars;
 import mindustry.entities.Effect;
 import mindustry.gen.Healthc;
@@ -25,9 +28,91 @@ import static mindustry.content.Fx.rand;
 
 public class MeldFx {
 
+    public static MultiInterp
+            smokeFade = new MultiInterp(new float[]{0, 0.8f}, new Interp[]{Interp.pow2, Interp.pow2Out});
     private static float percent = 0;
 
+
     public static Effect
+
+        waterShear = new Effect(35, e -> {
+            Draw.color(Color.white, e.color, e.finpow());
+
+            e.scaled(15, e1 -> {
+
+                Draw.z(Layer.groundUnit - 1);
+                Draw.alpha(Mathf.clamp(e1.finpow() * 5));
+
+                for(int i = 0; i < 2; i++){
+                    Angles.randLenVectors(e1.id, 3, e1.fin() * Vars.tilesize * 8, e.rotation + 180 + 25 * Mathf.signs[i], 15, 4, (x, y) -> {
+                        Fill.circle(e.x + x, e.y + y, 1.5f * e1.foutpowdown());
+                    });
+                }
+            });
+
+            Draw.z(Layer.groundUnit - 1);
+
+            Draw.alpha(Mathf.clamp(e.finpow() * 5));
+            for(int i = 0; i < 2; i++){
+                Angles.randLenVectors(e.id, 3, e.fin() * Vars.tilesize * 6, e.rotation + 180 + 35 * Mathf.signs[i], 5, 4, (x, y) -> {
+                    Fill.circle(e.x + x, e.y + y, 3 * e.foutpowdown());
+                });
+            }
+    }){{
+        followParent = false;
+    }},
+
+    waterShearFollow = new Effect(35, e -> {
+        Draw.color(Color.white, e.color, Color.clear, e.finpowdown());
+
+        e.scaled(25, e1 -> {
+
+            Draw.z(Layer.groundUnit - 1);
+            Draw.alpha(Draw.getColorAlpha() * e1.finpow() * 5);
+
+            for(int i = 0; i < 2; i++){
+                Angles.randLenVectors(e1.id, 6, e1.fin() * Vars.tilesize * 3, e.rotation + 180 + 35 * Mathf.signs[i], 0, 4, (x, y) -> {
+                    Fill.circle(e.x + x, e.y + y, 1.5f * e1.foutpowdown());
+                });
+            }
+        });
+
+        Draw.z(Layer.groundUnit - 1);
+
+        Draw.color(Color.white, e.color, e.finpowdown());
+        Draw.alpha(e.finpow() * 5);
+
+        for(int i = 0; i < 2; i++){
+            Angles.randLenVectors(e.id, 3, e.fin() * Vars.tilesize * 3, e.rotation + 180 + 25 * Mathf.signs[i], 5, 4, (x, y) -> {
+                Fill.circle(e.x + x, e.y + y, 3 * e.foutpowdown());
+            });
+        }
+
+        e.scaled(15, e1 -> {;
+            Draw.z(Layer.groundUnit + 1);
+            Draw.alpha(Mathf.clamp(e1.finpow() * 5)/10);
+            for(int i = 0; i < 2; i++){
+                Angles.randLenVectors(e.id, 16, e1.fin() * Vars.tilesize * 3, e.rotation + 180 + 35 * Mathf.signs[i], 2, 3, (x, y) -> {
+                    Fill.circle(e.x + x, e.y + y, 1.5f * e1.foutpowdown());
+                });
+            }
+        });
+    }){{
+        rotWithParent = true;
+    }},
+
+    meldSmoke = new Effect(120, 100, e -> {
+
+        Draw.color(MeldPal.blobPink);
+        Draw.alpha(smokeFade.apply(e.fin()));
+        float size = Mathf.randomSeed(e.id, 2, 4);
+        Draw.z(MeldLayers.smokeHigh);
+
+        Angles.randLenVectors(e.id + 1, (int) (Mathf.randomSeed(e.id, 3) + 1), e.fin() * 12, e.rotation, 360, (x, y) -> {
+            Draww.speckOffset(e.x + x, e.y + y, e.fin(), e.time, Draww.smokeWeight, Tmp.v1);
+            Fill.circle(Tmp.v1.x, Tmp.v1.y, size * e.fout(Interp.pow4));
+        });
+    }),
 
     chainLightning = new Effect(15, 500 * 500/2 * Vars.tilesize, e -> {
         if(!(e.data instanceof VisualLightningHolder)) return;
@@ -119,9 +204,9 @@ public class MeldFx {
     });
 
     public interface VisualLightningHolder{
-        Vec2 start();
+        Position start();
 
-        Vec2 end();
+        Position end();
 
         float width();
 
