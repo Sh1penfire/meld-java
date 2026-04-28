@@ -39,10 +39,15 @@ public class Meld extends Mod{
     public static NativeJavaPackage p = null;
 
     public static Melting melting;
-
+    
     public Meld(){
         Events.on(EventType.ClientLoadEvent.class, e -> {
             MeldRegions.load();
+        });
+        
+        Events.on(FileTreeInitEvent.class, e -> {
+            // TODO: potentially run earlier?
+            Bundles.load();
         });
     }
 
