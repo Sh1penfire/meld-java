@@ -15,12 +15,14 @@ import meld.fluid.AspectGroup;
 import meld.meta.MeldStatUnit;
 import meld.meta.MeldStats;
 import meld.ui.MeldSettings;
+import meld.world.CustomExplosions;
 import mindustry.Vars;
 import mindustry.ctype.UnlockableContent;
 import mindustry.game.EventType;
 import mindustry.game.Team;
 import mindustry.graphics.Layer;
 import mindustry.mod.*;
+import mindustry.type.UnitType;
 import mindustry.world.meta.Stat;
 import rhino.ImporterTopLevel;
 import rhino.NativeJavaPackage;
@@ -36,7 +38,7 @@ public class Meld extends Mod{
     public Meld(){
         Events.on(EventType.ClientLoadEvent.class, e -> {
             MeldRegions.load();
-
+            MeldMappings.loadAfter();
         });
 
         Events.run(EventType.Trigger.draw, () -> {
@@ -51,12 +53,7 @@ public class Meld extends Mod{
             Core.app.post(MeldShaders::load);
         });
 
-        Events.on(EventType.UnitDestroyEvent.class, e -> {
-            //We do a lil aspect bombing
-            if(e.unit.item() == MeldItems.aspectBomb){
-                MeldBullets.aspectBombExplosion.create(e.unit, Team.derelict, e.unit.x, e.unit.y, e.unit.rotation);
-            }
-        });
+        CustomExplosions.load();
     }
 
     public static String prefix(String in){
@@ -128,12 +125,13 @@ public class Meld extends Mod{
         MeldUnits.load();
         MeldBlocks.load();
         MeldEnvironment.load();
-        MeldMappings.load();
         MeldPlanets.load();
 
         //Just loads localised names
         AspectGroup.loadAll();
 
+        //Loaded after all the content
+        MeldMappings.load();
         MeldStats.loadModifications();
 
         Vars.content.blocks().each(b -> {

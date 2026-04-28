@@ -468,6 +468,8 @@ public class MeldEnvironment {
 
         sandstonePillar = new SupportPillar("sandstone-pillar"){{
             requirements(Category.effect, ItemStack.with(MeldItems.debris, 500));
+            buildVisibility = BuildVisibility.sandboxOnly;
+
             mapColor = Color.black;
         }};
 
@@ -624,6 +626,8 @@ public class MeldEnvironment {
 
         vitricWeave = new Prop("vitric-weave"){{
             requirements(Category.effect, ItemStack.with(MeldItems.dissonitre, 5, MeldItems.vitricMesh, 24));
+            buildVisibility = BuildVisibility.sandboxOnly;
+
             solid = false;
             alwaysReplace = false;
 
@@ -658,6 +662,13 @@ public class MeldEnvironment {
             customShadow = true;
         }};
 
+        Seq<Block> meldProps = Seq.with(sandstonePillar, meldCluster, meldClusterLarge, meldMetalStick, meldProtrusion, meldPools, meldCrystal,
+                dissonitreCluster, vitricWeave,
+                mixedCarbonicBoulder,
+                pillowGlintCluster,
+                earthenResonarumCluster,
+                iampsiGemstone, quartzSpikes);
+        meldProps.each(f -> f.databaseTag = "environment");
         Seq<Floor> meldFloors = Seq.with(meldSwampland, meldTrenchland, meldHadaland,
                 meldCrystalScattered,
                 sandMeld, redsandMeld,

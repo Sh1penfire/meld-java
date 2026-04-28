@@ -9,6 +9,7 @@ import arc.math.Angles;
 import arc.math.Interp;
 import arc.math.Mathf;
 import arc.math.geom.Vec2;
+import arc.struct.Seq;
 import arc.util.Tmp;
 import meld.*;
 import meld.entities.bullet.OutflowBulletType;
@@ -85,6 +86,7 @@ import mindustry.world.consumers.ConsumeLiquid;
 import mindustry.world.consumers.ConsumePower;
 import mindustry.world.draw.*;
 import mindustry.world.meta.Attribute;
+import mindustry.world.meta.BuildVisibility;
 
 import static mindustry.type.ItemStack.with;
 
@@ -2116,6 +2118,22 @@ public class MeldBlocks {
             boostScale = 1f/9f;
             displayEfficiencyScale = 9;
 
+            drawer = new DrawMulti(
+                    new DrawRegion("-base"){{
+                        layer = Layer.blockUnder;
+                    }},
+                    new DrawLiquidTile(MeldLiquids.meld),
+                    new DrawCells(){{
+                        range = 10;
+                        color = Color.valueOf("9e2e7b");
+                        particleColorFrom = Color.valueOf("892a6b");
+                        particleColorTo = Color.valueOf("e5aed7");
+                        particles = 15;
+                    }},
+                    new DrawRegion("-gum"),
+                    new DrawRegion("-top")
+            );
+
             outputLiquid = new LiquidStack(MeldLiquids.meld, 3);
         }};
 
@@ -2406,48 +2424,59 @@ public class MeldBlocks {
             }};
 
             ammoTypes.put(
-                    MeldLiquids.meld,
-                    new BasicBulletType(){{
-                        sprite = Meld.prefix("clump");
+                MeldLiquids.meld,
+                new BasicBulletType(){{
+                    sprite = Meld.prefix("clump");
+                    speed = 4;
+                    lifetime = 55;
+                    width = 5;
+                    height = 14;
+
+                    pierce = true;
+                    pierceBuilding = true;
+                    pierceCap = 2;
+
+                    splashDamage = 25;
+                    splashDamageRadius = 25;
+
+                    knockback = 4f;
+
+                    hitEffect = despawnEffect = Fx.explosion;
+
+                    impact = true;
+
+                    fragBullets = 3;
+                    fragRandomSpread = 45;
+
+                    fragBullet = new BasicBulletType(4, 15, Meld.prefix("clump")){{
                         speed = 4;
-                        lifetime = 55;
-                        width = 5;
-                        height = 14;
+                        lifetime = 10;
+                        width = 3;
+                        height = 8;
 
                         pierce = true;
                         pierceBuilding = true;
                         pierceCap = 2;
 
-                        splashDamage = 25;
-                        splashDamageRadius = 25;
-
                         knockback = 4f;
-
-                        hitEffect = despawnEffect = Fx.explosion;
 
                         impact = true;
 
-                        fragBullets = 3;
-                        fragRandomSpread = 45;
-
-                        fragBullet = new BasicBulletType(4, 15, Meld.prefix("clump")){{
-                            speed = 4;
-                            lifetime = 10;
-                            width = 3;
-                            height = 8;
-
-                            pierce = true;
-                            pierceBuilding = true;
-                            pierceCap = 2;
-
-                            knockback = 4f;
-
-                            impact = true;
-
-                            hitEffect = despawnEffect = Fx.none;
-                        }};
-                    }}
+                        hitEffect = despawnEffect = Fx.none;
+                    }};
+                }}
             );
         }};
+
+        Seq<Block> meldBlocks = Seq.with(
+                meldCannon, meldMortar,
+                craigCoffer, jillaCoffer, braigCoffer, billaCoffer,
+                meldCultivator,
+                pipebox, pipelineBridge, pipelineCrossing, pipelineRouter,
+                carbonicBarrier, carbonicBarrierLarge, crystalBarrier, crystalBarrierLarge,
+                meldAmplifier, meldCapsule, meldNode, meldSuppressor
+        );
+
+        meldBlocks.each(b -> b.buildVisibility = BuildVisibility.sandboxOnly);
     }
 }

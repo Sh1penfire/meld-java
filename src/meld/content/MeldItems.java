@@ -103,7 +103,9 @@ public class MeldItems {
 
         likestoneSediments = new Item("likestone-sediments", Color.valueOf("5b704c")){{}};
 
-        gunpowder = new Item("gunpowder");
+        gunpowder = new Item("gunpowder"){{
+            hidden = true;
+        }};
 
         aspectPipe = new Item("aspect-pipe", Color.valueOf("716a56")){{
 
@@ -115,5 +117,9 @@ public class MeldItems {
 
         Seq<Item> heavyIndustry = Seq.with(tenbris, motis, shadesteel, elnarDust, annealedSilver, glassMallows, iampsi, quartzStrata, likestoneSediments, cruciblePlating, aspectPipe);
         heavyIndustry.each(i -> i.databaseTag = "heavy-industry");
+        Seq<Item> arsenal = Seq.with(aspectBomb, gunpowder);
+        arsenal.each(i -> i.databaseTag = "arsenal");
+        Seq<Item> meldological = Seq.with(meldShard, larvalPlating, stonyParticulate);
+        meldological.each(i -> i.databaseTag = "meldy");
     };
 }

@@ -2,6 +2,8 @@ package meld.content;
 
 import meld.world.blocks.production.GrindingQuary;
 import meld.world.blocks.production.GrindingQuary.GrinderEntry;
+import mindustry.content.Planets;
+import mindustry.content.UnitTypes;
 import mindustry.type.ItemStack;
 
 import static meld.content.MeldEnvironment.*;
@@ -31,5 +33,19 @@ public class MeldMappings {
         blood.canStayOn.addAll(nectar, ichor, ooze);
         ooze.canStayOn.addAll(meld, nectar, ichor, ooze);
         ichor.canStayOn.addAll(nectar, ichor);
+
+    }
+
+    public static void loadAfter(){
+        //SCREW YOU SHADOW THE HEDGE HOG
+        //IS THAT AR EFRENCE TO HEDGE HEHJEYSON MEWLD REAL- help
+        UnitTypes.alpha.shownPlanets.add(Planets.serpulo);
+        UnitTypes.alpha.shownPlanets.remove(MeldPlanets.ikaru);
+
+        //I CAST THEEEEEEEEEEEEEEEEEEEEEEEEEEE
+        //HAHAHAHAHAAAAAAAAAAAAAAAAAAAAAAHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        UnitTypes.alpha.databaseTabs.clear();
+        UnitTypes.alpha.postInit();
+
     }
 }
