@@ -19,7 +19,7 @@ subtitle: "[[]accent]What choice do I have...[[]]"
 version: gameplay test 5
 
 #the minimum game build required to run this mod
-minGameVersion: 154
+minGameVersion: 157
 
 #this is a java mod
 java: true
