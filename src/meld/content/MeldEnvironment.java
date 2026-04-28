@@ -3,6 +3,7 @@ package meld.content;
 import arc.graphics.Color;
 import arc.struct.Seq;
 import meld.graphics.MeldPal;
+import meld.graphics.ParticleFloor;
 import meld.world.blocks.AetherCluster;
 import meld.world.blocks.defense.TreeWall;
 import meld.world.blocks.env.ModdedOreBlock;
@@ -225,7 +226,9 @@ public class MeldEnvironment {
 
         metalWeaveHole.blendGroup = metalWeaveGlow.blendGroup = metalWeave;
 
-        meldHadaland = new Floor("meld-hadaland", 3){{
+        meldHadaland = new ParticleFloor("meld-hadaland", 3){{
+            effect = MeldFx.meldSmoke;
+            chance = 0.00036f;
             isLiquid = true;
             cacheLayer = CacheLayer.water;
             drownTime = 90;
@@ -241,7 +244,9 @@ public class MeldEnvironment {
             attributes.set(MeldAttributes.meld, 0.3f);
         }};
 
-        meldTrenchland = new Floor("meld-trenchland", 3){{
+        meldTrenchland = new ParticleFloor("meld-trenchland", 3){{
+            effect = MeldFx.meldSmoke;
+            chance = 0.00036f;
             isLiquid = true;
             drownTime = 120;
 
@@ -257,7 +262,9 @@ public class MeldEnvironment {
             attributes.set(MeldAttributes.meld, 0.2f);
         }};
 
-        meldSwampland = new Floor("meld-swampland", 3){{
+        meldSwampland = new ParticleFloor("meld-swampland", 3){{
+            effect = MeldFx.meldSmoke;
+            chance = 0.00036f;
             isLiquid = true;
 
             cacheLayer = CacheLayer.water;
@@ -269,14 +276,20 @@ public class MeldEnvironment {
             attributes.set(MeldAttributes.meld, 0.1f);
         }};
 
-        meldPlates = new Floor("meld-plates", 2){{
+        meldPlates = new ParticleFloor("meld-plates", 2){{
+            effect = MeldFx.meldSmoke;
+            chance = 0.00036f;
+
             isLiquid = true;
             cacheLayer = CacheLayer.water;
             supportsOverlay = true;
             attributes.set(MeldAttributes.meld, 0.08f);
         }};
 
-        meldCrystalScattered = new Floor("meld-crystal-scattered", 3){{
+        meldCrystalScattered = new ParticleFloor("meld-crystal-scattered", 3){{
+            effect = MeldFx.meldSmoke;
+            chance = 0.00036f;
+
             isLiquid = true;
             cacheLayer = CacheLayer.water;
             supportsOverlay = true;

@@ -15,6 +15,9 @@ import arc.math.geom.Vec2;
 import arc.util.Tmp;
 import meld.graphics.Draww;
 import meld.Meld;
+import meld.graphics.MeldLayers;
+import meld.graphics.MeldPal;
+import meld.math.MultiInterp;
 import mindustry.Vars;
 import mindustry.entities.Effect;
 import mindustry.gen.Healthc;
@@ -25,7 +28,10 @@ import static mindustry.content.Fx.rand;
 
 public class MeldFx {
 
+    public static MultiInterp
+            smokeFade = new MultiInterp(new float[]{0, 0.8f}, new Interp[]{Interp.pow2, Interp.pow2Out});
     private static float percent = 0;
+
 
     public static Effect
 
@@ -94,6 +100,19 @@ public class MeldFx {
     }){{
         rotWithParent = true;
     }},
+
+    meldSmoke = new Effect(120, 100, e -> {
+
+        Draw.color(MeldPal.blobPink);
+        Draw.alpha(smokeFade.apply(e.fin()));
+        float size = Mathf.randomSeed(e.id, 2, 4);
+        Draw.z(MeldLayers.smokeHigh);
+
+        Angles.randLenVectors(e.id + 1, (int) (Mathf.randomSeed(e.id, 3) + 1), e.fin() * 12, e.rotation, 360, (x, y) -> {
+            Draww.speckOffset(e.x + x, e.y + y, e.fin(), e.time, Draww.smokeWeight, Tmp.v1);
+            Fill.circle(Tmp.v1.x, Tmp.v1.y, size * e.fout(Interp.pow4));
+        });
+    }),
 
     chainLightning = new Effect(15, 500 * 500/2 * Vars.tilesize, e -> {
         if(!(e.data instanceof VisualLightningHolder)) return;

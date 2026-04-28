@@ -1,31 +1,41 @@
 package meld.world.blocks.production;
 
+import arc.graphics.Color;
+import arc.graphics.g2d.Draw;
+import arc.graphics.g2d.Fill;
+import arc.graphics.g2d.Lines;
 import arc.math.Mathf;
-import arc.struct.IntMap;
-import arc.struct.IntSeq;
 import arc.struct.ObjectFloatMap;
 import arc.struct.ObjectMap;
+import arc.struct.Seq;
+import arc.util.Log;
 import arc.util.Time;
 import arc.util.io.Reads;
 import arc.util.io.Writes;
+import meld.graphics.Draww;
+import meld.world.WorldUtil;
 import meld.world.blocks.io.BlockIO;
 import meld.world.util.ItemLogic;
 import mindustry.Vars;
-import mindustry.content.Blocks;
 import mindustry.gen.Building;
+import mindustry.graphics.Drawf;
+import mindustry.graphics.Pal;
 import mindustry.type.Item;
 import mindustry.type.ItemStack;
-import mindustry.type.weapons.BuildWeapon;
 import mindustry.world.Block;
 import mindustry.world.Tile;
 import mindustry.world.blocks.environment.Floor;
+import mindustry.world.blocks.storage.StorageBlock;
 import mindustry.world.consumers.Consume;
+import mindustry.world.modules.ItemModule;
 
 public class GrindingQuary extends Block {
 
     public static ObjectMap<Block, GrinderEntry> grinderMap = new ObjectMap<>();
 
     public static ObjectFloatMap<Item> drillMultipliers = new ObjectFloatMap<>();
+
+    public float drillSpeed = 0.25f;
 
     public int targetTimer = timers++;
 
@@ -37,6 +47,84 @@ public class GrindingQuary extends Block {
         solid = true;
         hasItems = true;
         itemCapacity = 50;
+    }
+
+    public Seq<Tile> valid = new Seq<>(), overlay = new Seq<>();
+
+    @Override
+    public void drawOverlay(float x, float y, int rotation) {
+        super.drawOverlay(x, y, rotation);
+
+        float drawx = x, drawy = y - (size * Vars.tilesize)/2f - 2;
+
+        Tile start = Vars.world.tileWorld(x, y);
+
+        if(start != null){
+            valid.clear();
+            overlay.clear();
+            start.getLinkedTilesAs(this, tile -> {
+                if(tile != null){
+                    if(tile.solid() && tile.block() != this){
+                        Draw.color(Pal.health);
+                        Draw.alpha(0.5f);
+                        Fill.square(tile.worldx(), tile.worldy(), Vars.tilesize/2f);
+                        return;
+                    }
+                    if(grinderMap.containsKey(tile.floor())){
+                        valid.add(tile);
+                    }
+                    if(tile.overlay().itemDrop != null){
+                        overlay.add(tile);
+                    }
+                }
+            });
+            //Draw this in stages
+            valid.each(tile -> {
+                Draw.color(Pal.accent);
+                Draw.alpha(0.5f);
+                Fill.square(tile.worldx(), tile.worldy(), Vars.tilesize/2f);
+
+            });
+
+            Lines.stroke(3.75f, Pal.gray);
+            Lines.square(x, y, size * Vars.tilesize/2f + 1.25f);
+            Lines.stroke(1.25f, Pal.accent);
+            Lines.square(x, y, size * Vars.tilesize/2f);
+
+            valid.each(tile -> {
+                Draw.color(Color.white);
+                float prog = Mathf.absin(Time.time/30 + (tile.x + tile.y) * Mathf.pi/3, 1, 1);
+                float prog2 = Time.time/240 + (tile.x + tile.y) * Mathf.pi % 1;
+                Draw.alpha(0.5f + 0.5f * prog);
+                Draw.rect(tile.floor().region, tile.worldx(), tile.worldy() -2 + prog * 4, 4 + 4 * prog, 4 + 4 * Mathf.sin(prog), -15 + 30 * prog + 360 * prog2);
+            });
+            overlay.each(tile -> {
+                if(tile.overlay().itemDrop != null){
+                    Draw.color(Color.white);
+                    Draw.rect(tile.overlay().itemDrop.fullIcon, tile.worldx(), tile.worldy());
+                }
+            });
+        }
+
+        Drawf.text();
+        ItemModule depositItems = WorldUtil.totalQuarry(x, y, this, true);
+        for (Item item : Vars.content.items()) {
+            float amount = depositItems.get(item);
+            if(amount == 0) continue;
+            Draww.itemText(item.localizedName + ": " + amount, drawx, drawy, item);
+
+            drawy -= 10;
+        }
+
+        drawy = y + (size * Vars.tilesize)/2f + 2;
+        ObjectFloatMap<Item> drillSpeeds = WorldUtil.quarrySpeed(x, y, this);
+        for (Item item : Vars.content.items()) {
+            float amount = drillSpeeds.get(item, 0);
+            if(amount == 0) continue;
+            Draww.itemText(item.localizedName + ": " + amount + "/s", drawx, drawy, item);
+
+            drawy += 10;
+        }
     }
 
     public static class GrinderEntry{
@@ -64,11 +152,11 @@ public class GrindingQuary extends Block {
     //Returned in items/seccond
     public float drillSpeedFloor(Tile tile){
         if(tile == null || tile.floor().itemDrop == null) return 0;
-        return 0.25f;
+        return drillMultipliers.get(tile.floor().itemDrop, 1) * drillSpeed;
     }
     public float drillSpeedOverlay(Tile tile){
         if(tile == null || tile.overlay().itemDrop == null) return 0;
-        return 0.25f;
+        return drillMultipliers.get(tile.overlay().itemDrop, 1) * drillSpeed;
     }
 
     public class GrindingQuaryBuild extends Building{
@@ -77,6 +165,13 @@ public class GrindingQuary extends Block {
         public GrinderEntry entry;
         public float boostAmount = 1;
 
+        public Seq<Building> nearbyDepots = new Seq<>();
+
+        @Override
+        public void onProximityAdded() {
+            super.onProximityAdded();
+        }
+
         //Timer used to determine when the current batch of items expires
         public float progress = 0;
 
@@ -84,7 +179,10 @@ public class GrindingQuary extends Block {
 
         @Override
         public boolean shouldConsume() {
-            return itemRates.size > 0 || target != null;
+            for (Item key : itemRates.keys()) {
+                if(itemRates.get(key, 0) * drillMultipliers.get(key, 1) > 0 && acceptItem(this, key)) return true;
+            }
+            return target != null;
         }
 
         @Override
@@ -107,6 +205,12 @@ public class GrindingQuary extends Block {
         @Override
         public void onProximityUpdate() {
             super.onProximityUpdate();
+
+            nearbyDepots.clear();
+            proximity.each(b -> {
+                if(b instanceof Depot.DepotBuild) nearbyDepots.add(b);
+            });
+
             itemRates.clear();
 
             tile.getLinkedTiles(t -> {
@@ -128,6 +232,24 @@ public class GrindingQuary extends Block {
             });
         }
 
+        @Override
+        public boolean acceptItem(Building source, Item item) {
+            if((source instanceof Depot.DepotBuild)) return false;
+            if(source == this){
+                return nearbyDepots.size > 0 ? nearbyDepots.find(b -> b.acceptItem(source, item)) != null : this.items.get(item) < this.getMaximumAccepted(item);
+            }
+            return this.block.consumesItem(item) && this.items.get(item) < this.getMaximumAccepted(item);
+        }
+
+        @Override
+        public void handleItem(Building source, Item item) {
+            if(source == this && nearbyDepots.size > 0){
+                nearbyDepots.find(b -> b.acceptItem(source, item)).handleItem(source, item);
+                return;
+            }
+            super.handleItem(source, item);
+        }
+
         public void updateDrilling(){
 
             for(Item item: itemRates.keys().toArray()){
@@ -135,7 +257,7 @@ public class GrindingQuary extends Block {
                 //Note that productionRates is in items/SECCOND, not tick, so we divide by 60
                 current = Mathf.clamp(current + itemRates.get(item, 0)/60f * drillMultipliers.get(item, 1) * edelta() * boostAmount, 0, 1);
 
-                if(current >= 1 && items.get(item) < itemCapacity){
+                if(current >= 1 && acceptItem(this, item)){
                     current = 0;
                     handleItem(this, item);
                 }

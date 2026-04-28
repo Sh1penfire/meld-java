@@ -1,25 +1,40 @@
 package meld.content;
 
 import arc.graphics.Color;
+import arc.graphics.g2d.Draw;
+import arc.graphics.g2d.Fill;
+import arc.graphics.g2d.Lines;
 import arc.math.Interp;
+import arc.util.Tmp;
 import meld.Meld;
 import meld.entities.bullet.RicochetBulletType;
 import meld.entities.bullet.TransitionBulletType;
 import meld.graphics.MeldPal;
+import meld.world.blocks.fluid.AspectBomb;
 import mindustry.content.Blocks;
 import mindustry.content.Fx;
+import mindustry.entities.Effect;
 import mindustry.entities.bullet.*;
 import mindustry.entities.effect.MultiEffect;
 import mindustry.entities.effect.ParticleEffect;
+import mindustry.graphics.Drawf;
 
 public class MeldBullets {
 
+    //Bullets from non weapon/turret sources
     public static BulletType
 
             pulsarBlast, pulsarShrapnel,
+            bombShrapnel, bombShrapnelAspect, aspectBombExplosion;
+
+    //Weapon bullets
+    public static BulletType
+
             sunderDebris, sunderGlass,
             shredDebris, shredSilver,
             vincaQuartz;
+
+
 
     public static void load(){
 
@@ -35,7 +50,7 @@ public class MeldBullets {
             drag = 0.02f;
 
             lifetime = 30;
-            damage = 10;
+            damage = 5;
             pierce = true;
             pierceBuilding = true;
             pierceDamageFactor = 0.5f;
@@ -53,7 +68,7 @@ public class MeldBullets {
         }};
 
         pulsarBlast = new ExplosionBulletType(){{
-            lightningDamage = 5;
+            lightningDamage = 2;
             lightning = 12;
             lightningLength = 48;
 
@@ -364,6 +379,89 @@ public class MeldBullets {
 
                 }};
             }};
+        }};
+
+        bombShrapnel = new BasicBulletType(8, 3, Meld.prefix("clump")){{
+            lifetime = 12;
+
+            width = 4;
+            height = 18;
+
+            hitEffect = despawnEffect = Fx.none;
+
+            lightRadius = 0;
+            fragBullets = 2;
+            fragBullet = new BasicBulletType(8, 7, Meld.prefix("clump")){{
+                lifetime = 12;
+
+                width = 2;
+                height = 12;
+
+                shrinkX = 1;
+                shrinkY = 0.2f;
+
+                hitEffect = despawnEffect = Fx.none;
+
+
+                sticky = true;
+
+                stickyExtraLifetime = 600;
+
+                lightRadius = 0;
+            }};
+        }};
+
+        bombShrapnelAspect = new BasicBulletType(3, 3, Meld.prefix("clump")){{
+            lifetime = 30;
+
+            width = 8;
+            height = 10;
+            shrinkX = 1;
+            shrinkY = 0.2f;
+
+            hitEffect = despawnEffect = Fx.none;
+
+            lightRadius = 0;
+            fragBullets = 2;
+
+            fragBullet = new LiquidBulletType(MeldLiquids.stormingAspect);
+        }};
+
+        aspectBombExplosion = new TransitionBulletType(){{
+            lifetime = 30;
+            spawnBullets.addAll(
+                    new TransitionBulletType(){{
+                        fragBullets = 12;
+                        fragLifeMin = 0.5f;
+                        fragBullet = bombShrapnelAspect;
+                    }},
+                    new TransitionBulletType(){{
+                        fragBullets = 24;
+                        fragBullet = bombShrapnel;
+                    }}
+            );
+            splashDamage = 500;
+            splashDamageRadius = 32;
+            incendAmount = 50;
+
+            hitEffect = new Effect(24, e -> {
+                Draw.color(MeldLiquids.stormingAspect.color);
+                Draw.alpha(e.foutpowdown() * 0.3f);
+                Fill.light(e.x, e.y, 100, e.finpow() * 32, Tmp.c1.set(Tmp.c2.set(MeldLiquids.stormingAspect.color)).a(e.fout()), Tmp.c2.a(0));
+                //Fill.circle(e.x, e.y, e.finpow() * 85);
+
+                Drawf.light(e.x, e.y, e.finpow() * 14, MeldLiquids.stormingAspect.color, e.fout());
+
+                e.scaled(8, e1 -> {
+                    Draw.color(Color.white);
+                    Draw.alpha(e1.foutpowdown() * 0.35f);
+                    Lines.stroke(e1.fin() * 12 + 2);
+                    Lines.circle(e1.x, e1.y, e1.fin() * 18 + 8);
+                });
+            });
+
+            fragBullets = 4;
+            fragBullet = new LiquidBulletType(MeldLiquids.stormingAspect);
         }};
     }
 }

@@ -345,6 +345,17 @@ public class MeldUnits {
                         parts.addAll(
                                 new ShapePart(){{
                                     circle = hollow = true;
+                                    radius = 120;
+                                    radiusTo = 0;
+                                    layer = Layer.effect;
+                                    stroke = 6;
+                                    strokeTo = 10;
+                                    color = MeldPal.accentClear;
+                                    colorTo = Pal.accent;
+                                    progress = mixedProg.compress(0.1f, 0.9f).curve(Interp.pow2In);
+                                }},
+                                new ShapePart(){{
+                                    circle = hollow = true;
                                     radius = 45;
                                     radiusTo = 0;
                                     layer = Layer.effect;

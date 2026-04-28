@@ -17,22 +17,4 @@ public class MeldItemTurret extends ItemTurret {
     public MeldItemTurret(String name) {
         super(name);
     }
-
-    @Override
-    public void drawOverlay(float x, float y, int rotation) {
-        super.drawOverlay(x, y, rotation);
-
-        Draw.draw(Layer.fogOfWar + 2, () -> {
-            Draw.z(Layer.fogOfWar + 2);
-            Drawf.dashCircle(x * tilesize + offset, y * tilesize + offset, range, Pal.placing);
-
-            if(fogRadiusMultiplier < 0.99f && state.rules.fog){
-                Drawf.dashCircle(x * tilesize + offset, y * tilesize + offset, range * fogRadiusMultiplier, Pal.lightishGray);
-            }
-
-            if(drawMinRange){
-                Drawf.dashCircle(x * tilesize + offset, y * tilesize + offset, minRange, Pal.placing);
-            }
-        });
-    }
 }

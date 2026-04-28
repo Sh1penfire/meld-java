@@ -17,16 +17,17 @@ public class ParticleFloor extends Floor {
 
     public boolean emitBlocked;
 
+
     public ParticleFloor(String name) {
-        super(name);
-        effect = Fx.smoke;
-        effectColor = Color.white;
-        chance = 1;
-        emitBlocked = false;
+        super(name, 3);
     }
 
     public ParticleFloor(String name, int variants) {
         super(name, variants);
+        effect = Fx.smoke;
+        effectColor = Color.white;
+        chance = 1;
+        emitBlocked = false;
     }
 
     @Override

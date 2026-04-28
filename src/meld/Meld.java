@@ -1,6 +1,7 @@
 package meld;
 
 import arc.*;
+import arc.graphics.Blending;
 import arc.graphics.Color;
 import arc.graphics.Colors;
 import arc.graphics.g2d.Draw;
@@ -9,15 +10,15 @@ import arc.util.Reflect;
 import arc.util.Tmp;
 import meld.content.*;
 import meld.core.*;
-import meld.graphics.AboveOverlayRenderer;
+import meld.graphics.*;
 import meld.fluid.AspectGroup;
-import meld.graphics.MeldLightRenderer;
-import meld.graphics.MeldRegions;
-import meld.graphics.MeldShaders;
 import meld.meta.MeldStatUnit;
+import meld.meta.MeldStats;
 import meld.ui.MeldSettings;
 import mindustry.Vars;
+import mindustry.ctype.UnlockableContent;
 import mindustry.game.EventType;
+import mindustry.game.Team;
 import mindustry.graphics.Layer;
 import mindustry.mod.*;
 import mindustry.world.meta.Stat;
@@ -41,10 +42,20 @@ public class Meld extends Mod{
         Events.run(EventType.Trigger.draw, () -> {
             if(!MeldSettings.overlayOverFog) return;
             Draw.draw(Layer.fogOfWar + 2, AboveOverlayRenderer::draw);
+
+            //Just additive blending the fuck out of this layer in particular cause like fuck yes
+            Draw.drawRange(MeldLayers.smokeHigh, 1, () -> Draw.blend(Blending.additive), () -> Draw.blend(Blending.normal));
         });
 
         Events.on(EventType.FileTreeInitEvent.class, e -> {
             Core.app.post(MeldShaders::load);
+        });
+
+        Events.on(EventType.UnitDestroyEvent.class, e -> {
+            //We do a lil aspect bombing
+            if(e.unit.item() == MeldItems.aspectBomb){
+                MeldBullets.aspectBombExplosion.create(e.unit, Team.derelict, e.unit.x, e.unit.y, e.unit.rotation);
+            }
         });
     }
 
@@ -111,29 +122,39 @@ public class Meld extends Mod{
     @Override
     public void loadContent(){
         MeldStatusEffects.load();
-        MeldBullets.load();
-        MeldUnits.load();
         MeldItems.load();
         MeldLiquids.load();
+        MeldBullets.load();
+        MeldUnits.load();
         MeldBlocks.load();
         MeldEnvironment.load();
         MeldMappings.load();
+        MeldPlanets.load();
 
         //Just loads localised names
         AspectGroup.loadAll();
 
-        Vars.content.items().each(c -> {
-                c.stats.add(Stat.buildCost, c.cost, MeldStatUnit.ticks);
-        });
-        
+        MeldStats.loadModifications();
+
         Vars.content.blocks().each(b -> {
-            if(b.minfo.mod != null && b.minfo.mod.name.equals("meld")){
+            if(b.minfo.mod != null && b.minfo.mod.name.equals("meld2")){
                 b.deconstructDropAllLiquid = true;
             }
         });
 
         Vars.content.liquids().each(l -> {
             Colors.put(l.name, l.color);
+        });
+        Vars.content.items().each(l -> {
+            Colors.put(l.name, l.color);
+        });
+
+        Vars.content.each(c -> {
+            if(!(c instanceof UnlockableContent content)) return;
+            if(content.minfo.mod != null && content.minfo.mod.name.equals("meld2")) {
+                content.shownPlanets.clear();
+                content.shownPlanets.addAll(MeldPlanets.ikaru);
+            }
         });
     }
 }

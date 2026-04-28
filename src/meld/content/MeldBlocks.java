@@ -17,6 +17,7 @@ import meld.fluid.AspectGroup;
 import meld.graphics.*;
 import meld.world.blocks.*;
 import meld.world.blocks.consumers.ConsumeItemsBoost;
+import meld.world.blocks.production.Depot;
 import meld.world.blocks.turrets.MeldItemTurret;
 import meld.world.blocks.consumers.ConsumePowerRecipe;
 import meld.world.blocks.consumers.StupidConsumeAspects;
@@ -37,6 +38,7 @@ import meld.world.blocks.producer.ProduceLiquid;
 import meld.world.blocks.production.GrindingQuary;
 import meld.world.blocks.production.SingleBeamDrill;
 import meld.world.blocks.units.LaunchStation;
+import meld.world.blocks.units.UnitLogisticsPad;
 import meld.world.meta.*;
 import mindustry.Vars;
 import mindustry.content.Fx;
@@ -101,16 +103,18 @@ public class MeldBlocks {
             lampPsi;
 
     //Core Blocks
-    public static Block coreRaft, buffer;
+    public static Block coreRaft, buffer, depot;
 
     //Core Incinerator does what core incinerator does... it core incinerator
 
     public static ItemIncinerator aspectIncinerator;
 
-    public static Block aetherAccumulator, crystalCracker, elementalBlaster, filtrativeFeeder, excavationQuarry, pneumaticPulsear,
+    public static Block aetherAccumulator, crystalCracker, elementalBlaster, filtrativeFeeder, grinderQuarry, pneumaticPulsear,
             earthboundInfuser, fumehood, sharkFactory;
 
     public static LaunchStation launchStation;
+
+    public static UnitLogisticsPad logiPad;
 
     //Crafters
     public static RecipeCrafter gasKiln, metalworks, rotaryKiln, pneumaticExtruder;
@@ -1183,10 +1187,20 @@ public class MeldBlocks {
         buffer = new StorageBlock("buffer"){{
             requirements(Category.effect, with(MeldItems.debris, 120, MeldItems.cruciblePlating, 200));
             size = 2;
-            health = 800;
+            health = 600;
             armor = 15;
 
             itemCapacity = 100;
+        }};
+
+        depot = new Depot("depot"){{
+            requirements(Category.effect, with(MeldItems.debris, 60));
+            buildTime = 240;
+
+            size = 2;
+            health = 800;
+
+            itemCapacity = 20;
         }};
 
         aspectIncinerator = new StorageIncinerator("aspect-incinerator"){{
@@ -1378,9 +1392,11 @@ public class MeldBlocks {
             );
         }};
 
-        excavationQuarry = new GrindingQuary("excavation-quarry"){{
+        grinderQuarry = new GrindingQuary("grinder-quarry"){{
             requirements(Category.production, with(MeldItems.debris, 250, MeldItems.quartzStrata, 120));
             size = 5;
+
+            drillMultipliers.put(MeldItems.clayMallows, 0);
 
             consume(new StupidConsumeAspects(outletRate * 4, AspectGroup.aspect));
             consume(new ConsumeItemList(){{
@@ -1705,7 +1721,7 @@ public class MeldBlocks {
         }};
 
         stormIris = new RecipeCrafter("storm-iris"){{
-            requirements(Category.crafting, with(MeldItems.debris, 350, MeldItems.annealedSilver, 300, MeldItems.electrumSheet, 300, MeldItems.quartzStrata, 250));
+            requirements(Category.crafting, with(MeldItems.annealedSilver, 450, MeldItems.electrumSheet, 300, MeldItems.quartzStrata, 250));
             size = 5;
             hasItems = hasLiquids = hasPower = true;
             liquidCapacity = 120;
@@ -1824,6 +1840,13 @@ public class MeldBlocks {
             consume(
                     new StupidConsumeAspects(outletRate * 2, AspectGroup.aspect)
             );
+        }};
+
+        logiPad = new UnitLogisticsPad("logistic-docks"){{
+            requirements(Category.units, with(MeldItems.debris, 80));
+            size = 5;
+            range = (size + 3) * Vars.tilesize * 2;
+            health = 600;
         }};
 
         sonarSpire = new SonarSpire("sonar-spire"){{
