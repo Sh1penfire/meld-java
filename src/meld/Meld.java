@@ -52,6 +52,11 @@ public class Meld extends Mod{
         Events.on(EventType.FileTreeInitEvent.class, e -> {
             Core.app.post(MeldShaders::load);
         });
+        
+        Events.on(FileTreeInitEvent.class, e -> {
+            // TODO: potentially run earlier?
+            Bundles.load();
+        });
 
         CustomExplosions.load();
     }
