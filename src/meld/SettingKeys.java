@@ -10,6 +10,7 @@ public class SettingKeys {
     connectedSonar = pref("connected-sonar"),
     unitLightScale = pref("unit-light-scale"),
     overlayOverFog = pref("highvis-overlay"),
+    shitpostBundles = pref("shitpost-bundles"),
 
     //Expirimental- doesn't sync in multiplayer and off by default
     bulbheadOmnimove = pref("bulbhead-omnimove"),
