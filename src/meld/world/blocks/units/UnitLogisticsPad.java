@@ -11,6 +11,7 @@ import arc.util.*;
 import arc.util.io.*;
 import arc.util.pooling.Pool.*;
 import meld.graphics.TileDrawers;
+import meld.io.ItemIO;
 import mindustry.Vars;
 import mindustry.entities.units.*;
 import mindustry.gen.*;
@@ -58,6 +59,10 @@ public class UnitLogisticsPad extends Block {
 
         config(Item.class, (UnloadingPadBuild tile, Item item) -> tile.sortItem = item);
         config(Float.class, (UnloadingPadBuild tile, Float value) -> tile.targetPercent = value);
+        config(Float[].class, (UnloadingPadBuild tile, Float[] value) -> {
+            tile.targetPercent = value[0];
+            tile.sortItem = content.item(value[1].intValue());
+        });
         configClear((UnloadingPadBuild tile) -> tile.sortItem = null);
     }
 
@@ -218,8 +223,8 @@ public class UnitLogisticsPad extends Block {
         }
 
         @Override
-        public Item config(){
-            return sortItem;
+        public Float[] config(){
+            return new Float[]{targetPercent, (float)sortItem.id};
         }
 
         @Override
@@ -230,7 +235,7 @@ public class UnitLogisticsPad extends Block {
         @Override
         public void write(Writes write){
             super.write(write);
-            write.i(sortItem == null ? -1 : sortItem.id);
+            ItemIO.writeItem(write, sortItem);
             write.f(targetPercent);
             write.f(unloadTimer);
         }
@@ -238,8 +243,7 @@ public class UnitLogisticsPad extends Block {
         @Override
         public void read(Reads read, byte revision){
             super.read(read, revision);
-            id = read.i();
-            sortItem = id == -1 ? null : content.item(id);
+            sortItem = ItemIO.readItem(read);
             targetPercent = read.f();
             unloadTimer = read.f();
         }

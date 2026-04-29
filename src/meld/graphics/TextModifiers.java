@@ -1,11 +1,15 @@
 package meld.graphics;
 
 import arc.Core;
+import arc.graphics.Color;
 import arc.math.Interp;
 import arc.math.Mathf;
 import arc.util.Time;
+import arc.util.Tmp;
 
 public class TextModifiers {
+
+    private static final StringBuilder b = new StringBuilder();
 
     public static char[] glitchChars = new char[]{'-', '=', ',', '&'};
 
@@ -38,5 +42,27 @@ public class TextModifiers {
     //Modifies the input string
     public static String glitchyEntry(String input, float edgeMultiplier, float baseChance, float speed){
         return glitchy(Core.bundle.get(input), edgeMultiplier, baseChance, speed);
+    }
+
+    //Thanks smolkey
+    public static String gradient(String in, Color... colors){
+        if(colors.length == 1) return "[#" + colors[0].toString().substring(0, 6) + "]" + in + "[]";
+
+        b.setLength(0);
+        b.trimToSize();
+        int length = in.length();
+        int spaces = 0;
+
+        for(int i = 0; i < length; i++){
+            char ind = in.charAt(i);
+            if(Character.isWhitespace(ind)){
+                spaces++;
+                b.append(' ');
+                continue;
+            }
+            b.append("[#").append(Tmp.c1.set(colors[0]).lerp(colors, (float) i / (length - spaces)).toString(), 0, 6).append("]").append(ind).append("[]");
+        }
+
+        return b.toString();
     }
 }
