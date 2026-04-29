@@ -1,10 +1,13 @@
 package meld.content;
 
+import arc.struct.Seq;
 import meld.world.blocks.production.GrindingQuary;
 import meld.world.blocks.production.GrindingQuary.GrinderEntry;
 import mindustry.content.Planets;
 import mindustry.content.UnitTypes;
 import mindustry.type.ItemStack;
+import mindustry.type.StatusEffect;
+import mindustry.type.UnitType;
 
 import static meld.content.MeldEnvironment.*;
 import static meld.content.MeldLiquids.*;
@@ -47,5 +50,25 @@ public class MeldMappings {
         UnitTypes.alpha.databaseTabs.clear();
         UnitTypes.alpha.postInit();
 
+        //TODO: Move to separate class?
+        Seq<StatusEffect> bioImmunities = Seq.with(MeldStatusEffects.aspectBurn);
+        Seq<StatusEffect> armorImmunities = Seq.with(MeldStatusEffects.lacerated, MeldStatusEffects.impaled);
+        Seq<StatusEffect> mechanicalImmunities = Seq.with(MeldStatusEffects.lacerated, MeldStatusEffects.impaled);
+
+        Seq<UnitType> bio = Seq.with(
+                MeldUnits.blob, MeldUnits.craig, MeldUnits.braig,
+                MeldUnits.jilla, MeldUnits.scorcher
+        );
+        Seq<UnitType> armor = Seq.with(
+                MeldUnits.afraig, MeldUnits.globkin,
+                MeldUnits.kathid
+        );
+        Seq<UnitType> mechanical = Seq.with(
+                MeldUnits.bulbhead, MeldUnits.shark
+        );
+
+        bio.each(b -> b.immunities.addAll(bioImmunities));
+        armor.each(b -> b.immunities.addAll(armorImmunities));
+        mechanical.each(b -> b.immunities.addAll(mechanicalImmunities));
     }
 }

@@ -10,6 +10,7 @@ import arc.math.Angles;
 import arc.math.Interp;
 import arc.math.Mathf;
 import arc.struct.ObjectIntMap;
+import arc.struct.Seq;
 import arc.util.Log;
 import arc.util.Tmp;
 import meld.*;
@@ -1000,8 +1001,6 @@ public class MeldUnits {
                     }}
             );
 
-            immunities.addAll(MeldStatusEffects.aspectBurn);
-
             weapons.addAll(craigWeapon(-3, 0));
 
             constructor = LegsUnit::create;
@@ -1130,8 +1129,6 @@ public class MeldUnits {
                     }}
             );
 
-            immunities.addAll(MeldStatusEffects.aspectBurn);
-
             constructor = LegsUnit::create;
         }};
 
@@ -1187,7 +1184,6 @@ public class MeldUnits {
                     }}
             );
 
-            immunities.addAll(MeldStatusEffects.aspectBurn);
             constructor = LegsUnit::create;
         }};
 
@@ -1353,7 +1349,6 @@ public class MeldUnits {
                     }}
             );
 
-            immunities.addAll(MeldStatusEffects.lacerated);
             constructor = LegsUnit::create;
         }};
 
@@ -1409,7 +1404,6 @@ public class MeldUnits {
                         }};
                     }}
             );
-            immunities.addAll(MeldStatusEffects.aspectBurn);
 
             constructor = CrawlUnit::create;
         }};
@@ -1696,7 +1690,6 @@ public class MeldUnits {
                         }};
                     }}
             );
-            immunities.addAll(MeldStatusEffects.lacerated);
 
             constructor = LegsUnit::create;
         }};

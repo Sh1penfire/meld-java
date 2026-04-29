@@ -260,6 +260,9 @@ public class MeldBullets {
 
                 bulletInterval = 2;
 
+                status = MeldStatusEffects.impaled;
+                statusDuration = 30;
+
                 fragBullet = new BasicBulletType(9, 4, Meld.prefix("clump")){{
                     speed = 9;
                     damage = 0.5f;

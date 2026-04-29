@@ -222,7 +222,7 @@ public class MeldStatusEffects {
                 unit.dragMultiplier *= Mathf.clamp(3 - entry.time/300, 1f, 3);
             }{
                 dragMultiplier = 3;
-            }};
+        }};
 
         //Only affects unarmored
         lacerated = new StatusEffect("lacerated"){{
@@ -247,7 +247,7 @@ public class MeldStatusEffects {
         };
 
         impaled = new StatusEffect("impaled"){{
-            damage = 0.2f;
+            damage = 1f;
             speedMultiplier = 0.45f;
             buildSpeedMultiplier = 0.5f;
         }};

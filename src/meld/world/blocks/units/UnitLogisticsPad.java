@@ -4,11 +4,13 @@ import arc.Core;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.Mathf;
+import arc.math.geom.Geometry;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
 import arc.util.io.*;
 import arc.util.pooling.Pool.*;
+import meld.graphics.TileDrawers;
 import mindustry.Vars;
 import mindustry.entities.units.*;
 import mindustry.gen.*;
@@ -83,6 +85,16 @@ public class UnitLogisticsPad extends Block {
         x += offset;
         y += offset;
 
+        int tx = (int)x/tilesize, ty = (int)y/tilesize;
+
+        int tileRange = (int)(range/tilesize/2f);
+        for(int dx = -tileRange; dx <= tileRange; dx++){
+            for(int dy = -tileRange; dy <= tileRange; dy++){
+                if(!fogControl.isDiscovered(player.team(), tx + dx, ty + dy)){
+                    TileDrawers.drawFog((tx + dx) * tilesize, (ty + dy) * tilesize, TileDrawers.tileRad);
+                }
+            }
+        }
         Drawf.dashSquare(Pal.accent, x, y, range);
     }
 

@@ -1158,7 +1158,7 @@ public class MeldBlocks {
         lakeRim = new LakeRim("lake-rim"){{
             requirements(Category.defense, with(MeldItems.debris, 4));
             size = 1;
-            health = 120;
+            health = 400;
         }};
 
         frictionPad = new FrictionPad("friction-pad"){{

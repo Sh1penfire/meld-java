@@ -52,12 +52,14 @@ public class WorldUtil {
         return module;
     }
 
-    public static ItemModule totalQuarry(float x, float y, Block block, boolean blockable){
+    public static ItemModule totalQuarry(float x, float y, Block block, boolean blockable, boolean respectFoW){
         module.clear();
 
         Tile startTile = world.tileWorld(x, y);
         if(startTile == null) return module;
         startTile.getLinkedTilesAs(block, (tile) -> {
+            if(respectFoW && !Vars.fogControl.isDiscovered(Vars.player.team(), tile.x, tile.y)) return;
+
             if(tile == null || tile.solid() && blockable && tile.block() != block) return;
 
             GrindingQuary.GrinderEntry entry = GrindingQuary.grinderMap.get(tile.floor());
@@ -72,13 +74,13 @@ public class WorldUtil {
 
         return module;
     }
-    public static ObjectFloatMap<Item> quarrySpeed(float x, float y, GrindingQuary block){
+    public static ObjectFloatMap<Item> quarrySpeed(float x, float y, GrindingQuary block, boolean respectFoW){
         speeds.clear();
 
         Tile startTile = world.tileWorld(x, y);
         if(startTile == null) return speeds;
         startTile.getLinkedTilesAs(block, (tile) -> {
-            if(tile == null) return;
+            if(tile == null || respectFoW && !Vars.fogControl.isDiscovered(Vars.player.team(), tile.x, tile.y)) return;
             Item item = tile.overlay().itemDrop;
             if(item != null) speeds.put(item, speeds.get(item, 0) + block.drillSpeedOverlay(tile));
 

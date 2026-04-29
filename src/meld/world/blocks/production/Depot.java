@@ -78,6 +78,7 @@ public class Depot extends StorageBlock {
             if(lastItem == null && items.any()){
                 //branching just for the sake of my sanity here
                 if(sortItem == null || sortItem == items.first()) lastItem = items.first();
+                else lastItem = sortItem;
             }
 
             if(lastItem != null){
