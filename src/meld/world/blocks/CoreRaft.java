@@ -8,6 +8,9 @@ import arc.struct.Seq;
 import arc.util.Nullable;
 import arc.util.Time;
 import meld.content.MeldStatusEffects;
+import meld.graphics.Draww;
+import meld.graphics.MeldLayers;
+import meld.graphics.MeldShaders;
 import meld.world.blocks.crafting.StorageIncinerator;
 import mindustry.Vars;
 import mindustry.content.Fx;
@@ -49,22 +52,27 @@ public class CoreRaft extends CoreBlock {
     public CoreRaft(String name) {
         super(name);
         fogRadius = 40;
+        lightRadius = 720;
+        clipSize = 720;
         Events.on(EventType.WorldLoadEvent.class, e -> {
             rafts.clear();
             Team.sharded.cores().each(c -> {
                 if(c instanceof CoreRaftBuild raft) rafts.add(raft);
             });
         });
+        emitLight = true;
     }
 
     @Override
     public void init() {
         //Yknow I wish we had like a set defaults for this but nvm
         int f = fogRadius;
+        float l = lightRadius;
 
         super.init();
 
         fogRadius = f;
+        lightRadius = l;
     }
 
     //Allow spawning at an offset
@@ -117,7 +125,7 @@ public class CoreRaft extends CoreBlock {
         @Override
         public void onProximityUpdate() {
             super.onProximityUpdate();
-            incinerator= null;
+            incinerator = null;
             proximity.each(b -> {
                 if(b instanceof Incinerator.IncineratorBuild ||
                         b instanceof ItemIncinerator.ItemIncineratorBuild ||
@@ -156,13 +164,12 @@ public class CoreRaft extends CoreBlock {
             super.handleStack(item, realAmount, source);
 
             if(team == state.rules.defaultTeam && state.isCampaign()){
-                if(!incinerate){
-                    state.rules.sector.info.handleCoreItem(item, amount);
-                }
-
-                if(realAmount == 0 && wasVisible && canIncinerate){
+                if(realAmount == 0 && incinerate){
                     incinerator.handleStack(item, amount, source);
                 }
+
+                state.rules.sector.info.handleCoreItem(item, amount);
+
             }
         }
 
@@ -214,6 +221,9 @@ public class CoreRaft extends CoreBlock {
             Draw.color(Pal.accent);
             float layer = Draw.z();
             Draw.z(Layer.buildBeam);
+
+            Draww.drawSonar(x, y, fogRadius * tilesize - 2, 4, MeldLayers.sonar, Pal.accent);
+
             Lines.circle(x, y, fogRadius * Vars.tilesize - 2);
             for (int i = 0; i < 1; i++) {
                 float prog = ((Time.time + 200 * i) % 600) / 600;

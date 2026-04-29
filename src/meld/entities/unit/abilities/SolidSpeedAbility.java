@@ -12,8 +12,8 @@ public class SolidSpeedAbility extends Ability {
 
     public SolidSpeedAbility(){
         super();
-
     }
+
     @Override
     public void update(Unit unit) {
         super.update(unit);

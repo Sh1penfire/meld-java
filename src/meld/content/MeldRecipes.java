@@ -52,6 +52,15 @@ public class MeldRecipes {
                     producers.addAll(
                             new ProduceItem(new ItemStack(MeldItems.cruciblePlating, 4))
                     );
+                }},
+                new TimedRecipe(240/speedMultiplier){{
+                    consumers.addAll(
+                            new ConsumeItems(with(MeldItems.debris, 4, MeldItems.shadesteel, 2)),
+                            new StupidConsumeAspects(outletRate * outlets, AspectGroup.aspect)
+                    );
+                    producers.addAll(
+                            new ProduceItem(new ItemStack(MeldItems.cruciblePlating, 4))
+                    );
                 }}
         );
     }

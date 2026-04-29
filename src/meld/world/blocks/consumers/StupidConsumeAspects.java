@@ -23,6 +23,8 @@ public class StupidConsumeAspects extends ConsumeLiquidFilter implements MeldGen
     //grab it from the group
     public AspectGroup group;
 
+    public float boostMultiplier = 1;
+
 
     public StupidConsumeAspects(float amount, AspectGroup group){
         super();
@@ -30,6 +32,10 @@ public class StupidConsumeAspects extends ConsumeLiquidFilter implements MeldGen
         this.group = group;
 
         filter = group.stats::containsKey;
+    }
+    public StupidConsumeAspects(float amount, AspectGroup group, float boostMultiplier){
+        this(amount, group);
+        this.boostMultiplier = boostMultiplier;
     }
 
     private static Liquid currentBest;
@@ -46,6 +52,7 @@ public class StupidConsumeAspects extends ConsumeLiquidFilter implements MeldGen
     @Override
     public void update(Building build) {
         Liquid consumed = getConsumed(build);
+        if(consumed == null) return;
         build.liquids.remove(consumed, this.amount * build.edelta()/group.getDensity(consumed));
     }
 
@@ -79,7 +86,7 @@ public class StupidConsumeAspects extends ConsumeLiquidFilter implements MeldGen
     @Override
     public float efficiencyMultiplier(Building build) {
         Liquid liq = this.getConsumed(build);
-        return liq == null ? 1 : group.getEfficiency(liq);
+        return liq == null ? 1 : group.getEfficiency(liq) * boostMultiplier;
     }
 
     @Override

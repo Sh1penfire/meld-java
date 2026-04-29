@@ -24,7 +24,7 @@ public class AspectGroup {
         groups.each(AspectGroup::load);
     }
 
-    //Kept separate since I want to test some things ingame and be able to reset a single group's name over calling a load function on everything
+    //Kept separate since I want to test some things ingame and be able to reset a single group's name over calling a init function on everything
     public void load(){
         localizedName = Core.bundle.get("aspect-group." + name, name);
     }
@@ -44,14 +44,17 @@ public class AspectGroup {
         aether = new AspectGroup("aether"),
         aspect = new AspectGroup("aspect"),
         outlet = new AspectGroup("outlet"),
-        fumes = new AspectGroup("fumes");
+        fumes = new AspectGroup("fumes"),
+        aqua = new AspectGroup("aqua");
 
     public float getDensity(Liquid liquid){
+        if(liquid == null) return 0;
         AspectStats stat = stats.get(liquid);
         return stat == null ? 1 : stat.density;
     }
 
     public float getEfficiency(Liquid liquid){
+        if(liquid == null) return 0;
         AspectStats stat = stats.get(liquid);
         return stat == null ? 1 : stat.efficiency;
     }

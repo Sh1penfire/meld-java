@@ -1,5 +1,7 @@
 package meld.world.blocks.fluid;
 
+import arc.Core;
+import arc.graphics.g2d.TextureRegion;
 import arc.math.Mathf;
 import arc.math.geom.Geometry;
 import arc.struct.Seq;
@@ -9,6 +11,7 @@ import meld.fluid.AspectGroup;
 import meld.world.blocks.crafting.ModularCrafter;
 import meld.world.blocks.crafting.RecipeCrafter;
 import mindustry.Vars;
+import mindustry.content.Fx;
 import mindustry.game.Team;
 import mindustry.gen.Building;
 import mindustry.type.Liquid;
@@ -32,6 +35,11 @@ public class AspectPipe extends Conduit {
     }
 
     @Override
+    public TextureRegion[] icons(){
+        return new TextureRegion[]{botRegions[0], topRegions[0]};
+    }
+
+    @Override
     public boolean blends(Tile tile, int rotation, int otherx, int othery, int otherrot, Block otherblock) {
         return super.blends(tile, rotation, otherx, othery, otherrot, otherblock) || (otherblock.hasLiquids && !(otherblock instanceof Conduit || otherblock instanceof LiquidRouter) && outletMapping.values().toSeq().find(l -> otherblock.consumesLiquid(l)) != null);
     }
@@ -47,11 +55,10 @@ public class AspectPipe extends Conduit {
                 lastMoved = moveLiquidForward(leaks, this.liquids.current());
                 this.noSleep();
 
-                //Attempt to push liquids to the sides
-                for(int i = 0; i < 2; i++){
-                    //get the tile above and below the current pipe, accounting for rotation
-                    Tile t = Vars.world.tile(tile.x + Geometry.d4(1 + i * 2 + rotation).x, tile.y + Geometry.d4(1 + i * 2 + rotation).y);
-
+                //Attempt to push liquids to the sides & back
+                for(int i = 0; i < 3; i++){
+                    //get the tile above, below and behind the current pipe, accounting for rotation
+                    Tile t = Vars.world.tile(tile.x + Geometry.d4(1 + i + rotation).x, tile.y + Geometry.d4(1 + i + rotation).y);
                     if(t == null || t.build == null || !t.build.block.hasLiquids || t.build.liquids == null || (!(t.build.block instanceof RecipeCrafter || t.build.block instanceof ModularCrafter) && t.build.block.consumers.length == 0)) continue;
                     moveLiquid(t.build, liquids.current());
                 }
@@ -106,7 +113,7 @@ public class AspectPipe extends Conduit {
                         float flow = Math.min(other.block.liquidCapacity - other.liquids.get(liquid), amount) * 10;
                         if (other.acceptLiquid(this, liquid)) {
                             other.handleLiquid(this, liquid, flow);
-                            this.liquids.remove(original, flow/AspectGroup.aether.getDensity(liquid)/10/AspectGroup.aether.getEfficiency(liquid));
+                            this.liquids.remove(original, flow/AspectGroup.aether.getDensity(liquid)/10);
                             total += amount;
                         }
 

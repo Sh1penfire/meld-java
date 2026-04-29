@@ -2,10 +2,14 @@ package meld.content;
 
 import arc.graphics.Blending;
 import arc.graphics.Color;
+import arc.graphics.g2d.Draw;
+import arc.graphics.g2d.Fill;
+import arc.graphics.g2d.Lines;
 import arc.math.Angles;
 import arc.math.Interp;
 import arc.math.Mathf;
 import arc.math.geom.Vec2;
+import arc.struct.Seq;
 import arc.util.Tmp;
 import meld.*;
 import meld.entities.bullet.OutflowBulletType;
@@ -13,6 +17,10 @@ import meld.entities.bullet.TransitionBulletType;
 import meld.fluid.AspectGroup;
 import meld.graphics.*;
 import meld.world.blocks.*;
+import meld.world.blocks.consumers.ConsumeItemsBoost;
+import meld.world.blocks.production.Depot;
+import meld.world.blocks.turrets.MeldItemTurret;
+import meld.world.blocks.consumers.ConsumePowerRecipe;
 import meld.world.blocks.consumers.StupidConsumeAspects;
 import meld.world.blocks.crafting.ModularCrafter;
 import meld.world.blocks.crafting.RecipeCrafter;
@@ -21,16 +29,24 @@ import meld.world.blocks.crafting.recipe.ItemRecipe;
 import meld.world.blocks.crafting.recipe.SpoolRecipe;
 import meld.world.blocks.crafting.modules.*;
 import meld.world.blocks.crafting.recipe.TimedRecipe;
+import meld.world.blocks.defense.FrictionPad;
+import meld.world.blocks.defense.LakeRim;
 import meld.world.blocks.fluid.*;
 import meld.world.blocks.items.PriorityInputSplitter;
+import meld.world.blocks.power.ConsumeThermal;
 import meld.world.blocks.producer.ProduceItem;
 import meld.world.blocks.producer.ProduceLiquid;
+import meld.world.blocks.production.GrindingQuary;
 import meld.world.blocks.production.SingleBeamDrill;
+import meld.world.blocks.units.LaunchStation;
+import meld.world.blocks.units.UnitLogisticsPad;
 import meld.world.meta.*;
 import mindustry.Vars;
 import mindustry.content.Fx;
 import mindustry.content.StatusEffects;
+import mindustry.entities.Effect;
 import mindustry.entities.bullet.*;
+import mindustry.entities.effect.MultiEffect;
 import mindustry.entities.effect.ParticleEffect;
 import mindustry.entities.part.DrawPart;
 import mindustry.entities.part.HaloPart;
@@ -42,33 +58,42 @@ import mindustry.entities.pattern.ShootSpread;
 import mindustry.gen.Bullet;
 import mindustry.gen.Sounds;
 import mindustry.gen.Statusc;
+import mindustry.graphics.Drawf;
 import mindustry.graphics.Layer;
 import mindustry.graphics.Pal;
 import mindustry.type.*;
 import mindustry.world.Block;
+import mindustry.world.blocks.defense.Door;
 import mindustry.world.blocks.defense.ForceProjector;
 import mindustry.world.blocks.defense.RegenProjector;
 import mindustry.world.blocks.defense.Wall;
-import mindustry.world.blocks.defense.turrets.ItemTurret;
 import mindustry.world.blocks.defense.turrets.LiquidTurret;
 import mindustry.world.blocks.distribution.*;
 import mindustry.world.blocks.liquid.Conduit;
 import mindustry.world.blocks.liquid.LiquidJunction;
 import mindustry.world.blocks.liquid.LiquidRouter;
+import mindustry.world.blocks.power.Battery;
+import mindustry.world.blocks.power.LightBlock;
+import mindustry.world.blocks.power.PowerNode;
+import mindustry.world.blocks.power.ThermalGenerator;
 import mindustry.world.blocks.production.*;
+import mindustry.world.blocks.storage.StorageBlock;
 import mindustry.world.blocks.storage.Unloader;
 import mindustry.world.blocks.units.UnitFactory;
+import mindustry.world.consumers.ConsumeItemList;
 import mindustry.world.consumers.ConsumeItems;
 import mindustry.world.consumers.ConsumeLiquid;
+import mindustry.world.consumers.ConsumePower;
 import mindustry.world.draw.*;
 import mindustry.world.meta.Attribute;
+import mindustry.world.meta.BuildVisibility;
 
 import static mindustry.type.ItemStack.with;
 
 public class MeldBlocks {
 
     //Strata blocks first
-    public static Block chute, chuteRouter, chuteBridge, chuteJunction, chuteOverflow, unloadingHub;
+    public static Block chute, chuteRouter, chuteBridge, chuteJunction, chuteOverflow, platedChute, unloadingHub;
 
     public static Block sonarSpire, movementAnchor, nullifier,
             //Bruisekit: Targets largest, highest hp blocks, functional blocks first, continuously heals
@@ -76,25 +101,37 @@ public class MeldBlocks {
             //Gauze chainheals smallest, lowest hp blocks, low target prio blocks first.
 
             //Suture shoots healing needles in a cone at the closest damaged block. Impales enemies, causing them to take constant chip damage and be sedated.
-            bruisekit, gauze, suture;
+            bruisekit, gauze, suture,
+            lampPsi;
 
     //Core Blocks
-    public static Block coreRaft;
+    public static Block coreRaft, buffer, depot;
 
     //Core Incinerator does what core incinerator does... it core incinerator
 
     public static ItemIncinerator aspectIncinerator;
 
-    public static Block aetherAccumulator, elementalBlaster, pneumaticPulsear,
+    public static Block aetherAccumulator, crystalCracker, elementalBlaster, filtrativeFeeder, grinderQuarry, pneumaticPulsear,
             earthboundInfuser, fumehood, sharkFactory;
 
-    public static Block gasKiln, metalworks, rotaryKiln, pneumaticExtruder;
+    public static LaunchStation launchStation;
 
-    public static Block channelNode, channelHub, channelFace, aspectOutlet, aspectChannel, channelDirector, channelVent, manualValve, intakeValve, valveController, pipebox;
+    public static UnitLogisticsPad logiPad;
 
-    public static Block sunder, shredstorm, molotov, vivisection;
+    //Crafters
+    public static RecipeCrafter gasKiln, metalworks, rotaryKiln, pneumaticExtruder;
 
-    public static Block silverHusk, shadesteelShingles;
+    public static AttributeCrafter crushWeaver, amalgamDecomposer;
+    public static RecipeCrafter stormIris;
+
+    //power blocks
+    public static Block conductivePile, substation, aspectDischarger;
+
+    public static Block channelNode, channelHub, channelFace, aspectOutlet, aspectChannel, aspectBomb, channelDirector, channelVent, manualValve, intakeValve, valveController, pipebox;
+
+    public static Block sunder, shredstorm, molotov, vivisection, vinca, vivalo;
+
+    public static Block silverHusk, shadesteelShingles, gateSpike, lakeRim, frictionPad;
 
     //Meld blocks
     public static Block pipeline, pipelineRouter, pipelineCrossing, pipelineBridge,
@@ -191,27 +228,28 @@ public class MeldBlocks {
                     new TimedRecipe(){{
                         float multi = AspectGroup.aether.getEfficiency(MeldLiquids.aether);
                         float density = AspectGroup.aether.getDensity(MeldLiquids.aether);
-                        consumers.add(new ConsumeLiquid(MeldLiquids.aether, outletRate/density/10));
-                        producers.add(new ProduceLiquid(MeldLiquids.aspect, outletRate * multi * density));
+                        consumers.add(new ConsumeLiquid(MeldLiquids.aether, outletRate/density/10 * multi));
+                        producers.add(new ProduceLiquid(MeldLiquids.aspect, outletRate * multi));
                     }},
                     new TimedRecipe(){{
                         float multi = AspectGroup.aether.getEfficiency(MeldLiquids.pollutantMixture);
                         float density = AspectGroup.aether.getDensity(MeldLiquids.pollutantMixture);
-                        consumers.add(new ConsumeLiquid(MeldLiquids.pollutantMixture, outletRate/density/10));
-                        producers.add(new ProduceLiquid(MeldLiquids.boundAspect, outletRate * multi * density));
+                        consumers.add(new ConsumeLiquid(MeldLiquids.pollutantMixture, outletRate/density/10 * multi));
+                        producers.add(new ProduceLiquid(MeldLiquids.boundAspect, outletRate * multi));
                     }},
                     new TimedRecipe(){{
                         float multi = AspectGroup.aether.getEfficiency(MeldLiquids.thunderingAether);
                         float density = AspectGroup.aether.getDensity(MeldLiquids.thunderingAether);
-                        consumers.add(new ConsumeLiquid(MeldLiquids.thunderingAether, outletRate/density/10));
-                        producers.add(new ProduceLiquid(MeldLiquids.stormingAspect, outletRate * multi * density));
+                        consumers.add(new ConsumeLiquid(MeldLiquids.thunderingAether, outletRate/density/10 * multi));
+                        producers.add(new ProduceLiquid(MeldLiquids.stormingAspect, outletRate * multi));
                     }}
             );
         }};
 
         aspectChannel = new VisualAspectPipe("aspect-channel"){{
             requirements(Category.liquid, with(
-                    MeldItems.aspectPipe, 4
+                    MeldItems.annealedSilver, 4,
+                    MeldItems.glassMallows, 4
             ));
             underBullets = false;
             leaks = false;
@@ -222,6 +260,24 @@ public class MeldBlocks {
             placeableLiquid = true;
 
             liquidCapacity = 80;
+            size = 1;
+            botColor = Color.white;
+            junctionReplacement = channelFace;
+        }};
+
+        aspectBomb = new AspectBomb("aspect-bomb"){{
+            requirements(Category.liquid, with(
+                    MeldItems.aspectBomb, 50
+            ));
+            underBullets = false;
+            leaks = false;
+            health = (int)(channelHealth * 2.5f);
+            armor = 2;
+            insulated = true;
+
+            placeableLiquid = true;
+
+            liquidCapacity = 20;
             size = 1;
             botColor = Color.white;
             junctionReplacement = channelFace;
@@ -317,7 +373,7 @@ public class MeldBlocks {
             placeableLiquid = true;
         }};
 
-        sunder = new ItemTurret("sunder"){{
+        sunder = new MeldItemTurret("sunder"){{
             requirements(Category.turret, with(
                     MeldItems.debris, 45,
                     MeldItems.carbolith, 60
@@ -381,7 +437,7 @@ public class MeldBlocks {
             );
         }};
 
-        shredstorm = new ItemTurret("shredstorm"){{
+        shredstorm = new MeldItemTurret("shredstorm"){{
             requirements(Category.turret, with(
                     MeldItems.debris, 35,
                     MeldItems.silver, 50
@@ -469,7 +525,7 @@ public class MeldBlocks {
             );
         }};
 
-        molotov = new ItemTurret("molotov"){{
+        molotov = new MeldItemTurret("molotov"){{
             requirements(Category.turret, with(
                     MeldItems.carbolith, 40,
                     MeldItems.silver, 70
@@ -644,7 +700,87 @@ public class MeldBlocks {
             );
         }};
 
-        vivisection = new ItemTurret("vivisection"){{
+        vinca = new MeldItemTurret("vinca"){{
+            requirements(Category.turret, with(MeldItems.debris, 25, MeldItems.silver, 25, MeldItems.quartzStrata, 30));
+            size = 2;
+            health = 850;
+            range = 120;
+
+            liquidCapacity = outletRate * 60 * 4;
+            fogRadiusMultiplier = 0.25f;
+            reload = 30;
+
+            shootEffect = Fx.shootBig;
+            shootWarmupSpeed = 0.09f;
+            minWarmup = 0.7f;
+
+            velocityRnd = 0.2f;
+            recoil = 1.5f;
+            inaccuracy = 2;
+            shootCone = 5;
+
+            ammoPerShot = 2;
+            shootY = 8;
+
+            rotate = quickRotate = false;
+
+            consume(new StupidConsumeAspects(outletRate * 1, AspectGroup.aspect));
+
+            ammo(
+                    MeldItems.quartzStrata, MeldBullets.vincaQuartz
+            );
+        }};
+
+        //TODO: Finish vivalo's... everything
+        /*
+        vivalo = new MeldItemTurret("vivalo"){{
+            requirements(Category.turret, with(MeldItems.debris, 20, MeldItems.electrumSheet, 45, MeldItems.vitricMesh, 12));
+            size = 3;
+            health = 520;
+            range = 160;
+            fogRadiusMultiplier = 0.25f;
+            reload = 240;
+
+            shootWarmupSpeed = 0.12f;
+            minWarmup = 0.7f;
+
+            recoil = 0;
+            shootCone = 5;
+
+            rotateSpeed = 12;
+
+            shootSound = Sounds.loopSpray;
+            moveWhileCharging = true;
+
+            rotate = quickRotate = false;
+            shoot = new ShootSpread(){{
+                spread = 0;
+                shots = 6;
+                shotDelay = 8;
+                firstShotDelay = 30;
+            }};
+
+            inaccuracy = 0;
+            shootY = 9;
+
+            ammoPerShot = 10;
+            drawer = new DrawTurret(){{
+                parts.addAll();
+            }};
+
+            ammo(
+                    MeldItems.resonarum, 1,
+                    MeldItems.dissonitre, 1,
+                    MeldItems.vitricMesh, 1,
+                    MeldItems.quartzStrata, 1,
+                    MeldItems.iampsi, 1,
+                    MeldItems.glassMallows, 1
+            );
+
+        }};
+        */
+
+        vivisection = new MeldItemTurret("vivisection"){{
             requirements(Category.turret, with(MeldItems.debris, 200, MeldItems.silver, 320, MeldItems.resonarum, 60));
             size = 4;
             health = 2640;
@@ -981,13 +1117,6 @@ public class MeldBlocks {
             );
         }};
 
-        shadesteelShingles = new Wall("shadesteel-shingles"){{
-            requirements(Category.defense, with(MeldItems.shadesteel, 64));
-            size = 2;
-            health = 2000;
-            buildCostMultiplier = 2f;
-        }};
-
         silverHusk = new RegenProjector("silver-husk"){{
             requirements(Category.defense, with(MeldItems.debris, 15, MeldItems.annealedSilver, 16));
             health = 450;
@@ -1006,11 +1135,38 @@ public class MeldBlocks {
                 }},
                     new DrawLiquidTile(MeldLiquids.aspect),
                     new DrawLiquidTile(MeldLiquids.boundAspect),
+                    new DrawLiquidTile(MeldLiquids.stormingAspect),
                 new DrawDefault()
             );
 
             consume(new StupidConsumeAspects(outletRate/2, AspectGroup.aspect));
         }};
+
+        shadesteelShingles = new Wall("shadesteel-shingles"){{
+            requirements(Category.defense, with(MeldItems.shadesteel, 64));
+            size = 2;
+            health = 2000;
+            buildCostMultiplier = 2f;
+        }};
+
+        gateSpike = new Door("gate-spike"){{
+            requirements(Category.defense, with(MeldItems.debris, 4));
+            size = 1;
+            health = 120;
+        }};
+
+        lakeRim = new LakeRim("lake-rim"){{
+            requirements(Category.defense, with(MeldItems.debris, 4));
+            size = 1;
+            health = 400;
+        }};
+
+        frictionPad = new FrictionPad("friction-pad"){{
+            requirements(Category.units, with(MeldItems.quartzStrata, 1));
+            size = 1;
+            health = 40;
+        }};
+
 
         coreRaft = new CoreRaft("core-raft"){{
             requirements(Category.effect, with(
@@ -1019,12 +1175,34 @@ public class MeldBlocks {
             size = 3;
             health = 4000;
 
+            lightRadius = 360;
+            fogRadius = 40;
+
             itemCapacity = 900;
 
             unitCapModifier = 6;
 
             unitType = MeldUnits.bulbhead;
             solid = false;
+        }};
+
+        buffer = new StorageBlock("buffer"){{
+            requirements(Category.effect, with(MeldItems.debris, 120, MeldItems.cruciblePlating, 200));
+            size = 2;
+            health = 600;
+            armor = 15;
+
+            itemCapacity = 100;
+        }};
+
+        depot = new Depot("depot"){{
+            requirements(Category.effect, with(MeldItems.debris, 60));
+            buildTime = 240;
+
+            size = 2;
+            health = 800;
+
+            itemCapacity = 20;
         }};
 
         aspectIncinerator = new StorageIncinerator("aspect-incinerator"){{
@@ -1044,6 +1222,8 @@ public class MeldBlocks {
 
             health = 300;
 
+            buildTime = 180;
+
             attribute = MeldAttributes.aetherAttr;
             baseEfficiency = 0;
             minEfficiency = 8.9f;
@@ -1052,6 +1232,126 @@ public class MeldBlocks {
             liquidCapacity = 300;
 
             outputLiquid = new LiquidStack(MeldLiquids.aether, 1);
+        }};
+
+        crystalCracker = new AttributeCrafter("crystal-cracker"){{
+            requirements(Category.production, with(
+                    MeldItems.debris, 40,
+                    MeldItems.dissonitre, 40
+            ));
+            size = 2;
+
+            health = 600;
+
+            attribute = MeldAttributes.soilAttr;
+            baseEfficiency = 0;
+
+            drawer = new DrawMulti(
+                    new DrawRegion("-bottom"),
+                    new DrawLiquidTile(MeldLiquids.thunderingAether),
+                    new DrawGlowRegion(),
+                    new DrawRegion()
+            );
+
+            craftTime = 60;
+            consumeItem(MeldItems.dissonitre, 1);
+            consume(new ConsumeLiquid(MeldLiquids.thunderingAether, 0){{
+                optional = true;
+            }});
+            outputLiquid = new LiquidStack(MeldLiquids.thunderingAether, 4/6f);
+        }};
+
+        elementalBlaster = new BeamDrill("elemental-blaster"){{
+            requirements(Category.production, with(
+                    MeldItems.debris, 40
+            ));
+            size = 3;
+            health = 420;
+            placeableLiquid = true;
+
+            drillTime = 90;
+            tier = 2;
+
+            buildTime = 90;
+
+            liquidCapacity = outletRate * 60 * 4;
+
+            optionalBoostIntensity = 2;
+
+            sparkColor = Color.valueOf("8cc7ee");
+            boostHeatColor = Color.valueOf("ecb6eb");
+
+            sparks = 24;
+            sparkLife = 15;
+            sparkSpread = 25;
+
+            drillMultipliers.put(
+                    MeldItems.clayMallows, 0.5f
+            );
+            drillMultipliers.put(
+                    MeldItems.resonarum, 0.5f
+            );
+            drillMultipliers.put(
+                    MeldItems.electrumSheet, 2
+            );
+            drillMultipliers.put(
+                    MeldItems.likestoneSediments, 0.5f
+            );
+
+            consume(new StupidConsumeAspects(
+                    outletRate, AspectGroup.aspect
+                    ){{
+                        optional = booster = false;
+                    }}
+            );
+
+            consume(new ConsumeLiquid(
+                    MeldLiquids.meld, 1
+            ){{
+                optional = true;
+                booster = true;
+            }});
+        }};
+
+        filtrativeFeeder = new AttributeCrafter("filtrative-feeder"){{
+            requirements(
+                    Category.production, with(
+                            MeldItems.debris, 80,
+                            MeldItems.annealedSilver, 60,
+                            MeldItems.vitricMesh, 240
+                    )
+            );
+            size = 5;
+
+            liquidCapacity = 300;
+            itemCapacity = 1;
+
+            hasLiquids = true;
+
+            health = 350;
+
+            baseEfficiency = 0;
+            boostScale = 2.49f/2.5f;
+            minEfficiency = 0.99f;
+            maxBoost = 10;
+
+            craftTime = 30;
+
+            attribute = MeldAttributes.meld;
+
+            drawer = new DrawMulti(
+                    new DrawLiquidTile(MeldLiquids.meld, 2),
+                    new DrawRegion(),
+                    new DrawLiquidRegion(MeldLiquids.ichor){{
+                        suffix = "-tanks-liquid";
+                    }}
+            );
+
+            consume(new ConsumeLiquid(MeldLiquids.ichor, 1));
+            outputItems = with(MeldItems.debris, 1);
+            outputLiquids = LiquidStack.with(MeldLiquids.meld, 2);
+
+            placeableLiquid = floating = true;
         }};
 
         fumehood = new ModularCrafter("fumehood"){{
@@ -1094,54 +1394,34 @@ public class MeldBlocks {
             );
         }};
 
-        elementalBlaster = new BeamDrill("elemental-blaster"){{
-            requirements(Category.production, with(
-                    MeldItems.debris, 40
-            ));
-            size = 3;
-            health = 420;
-            placeableLiquid = true;
+        grinderQuarry = new GrindingQuary("grinder-quarry"){{
+            requirements(Category.production, with(MeldItems.debris, 250, MeldItems.quartzStrata, 120));
+            size = 5;
 
-            drillTime = 90;
-            tier = 2;
+            drillMultipliers.put(MeldItems.clayMallows, 0);
 
-            liquidCapacity = outletRate * 60 * 4;
-
-            optionalBoostIntensity = 2;
-
-            sparkColor = Color.valueOf("8cc7ee");
-            boostHeatColor = Color.valueOf("ecb6eb");
-
-            sparks = 24;
-            sparkLife = 15;
-            sparkSpread = 25;
-
-            drillMultipliers.put(
-                    MeldItems.clayMallows, 0.5f
-            );
-            drillMultipliers.put(
-                    MeldItems.resonarum, 0.5f
-            );
-            drillMultipliers.put(
-                    MeldItems.electrumSheets, 2
-            );
-            drillMultipliers.put(
-                    MeldItems.likestoneSediments, 0.5f
-            );
-
-            consume(new StupidConsumeAspects(
-                    outletRate, AspectGroup.aspect
-                    ){{
-                        optional = booster = false;
+            consume(new StupidConsumeAspects(outletRate * 4, AspectGroup.aspect));
+            consume(new ConsumeItemList(){{
+                        optional = booster = true;
+                        setMultipliers(
+                                MeldItems.quartzStrata, 1.5f,
+                                MeldItems.iampsi, 3f
+                        );
                     }}
             );
-
-            consume(new ConsumeLiquid(
-                    MeldLiquids.meld, 1
-            ){{
-                optional = true;
-                booster = true;
-            }});
+            consume(new ConsumeItemList(){{
+                        optional = booster = true;
+                        setMultipliers(
+                                MeldItems.gunpowder, 3f,
+                                MeldItems.aspectBomb, 2f
+                        );
+                    }}
+            );
+            consume(
+                    new StupidConsumeAspects(outletRate, AspectGroup.aqua, 5){{
+                        optional = booster = true;
+                    }}
+            );
         }};
 
         pneumaticPulsear = new SingleBeamDrill("pneumatic-pulsar"){{
@@ -1228,7 +1508,7 @@ public class MeldBlocks {
             itemCapacity = 10;
 
             inputLiquids.addAll(MeldLiquids.aspect, MeldLiquids.boundAspect, MeldLiquids.stormingAspect);
-            inputItems.addAll(MeldItems.tenbris, MeldItems.clayMallows, MeldItems.carbolith, MeldItems.debris, MeldItems.shadesteel, MeldItems.glassMallows, MeldItems.silver, MeldItems.likestoneSediments, MeldItems.quartzStrata);
+            inputItems.addAll(MeldItems.tenbris, MeldItems.clayMallows, MeldItems.carbolith, MeldItems.debris, MeldItems.shadesteel, MeldItems.silver, MeldItems.likestoneSediments, MeldItems.quartzStrata);
             outputItems.addAll(MeldItems.cruciblePlating, MeldItems.shadesteel, MeldItems.glassMallows, MeldItems.annealedSilver);
             outputLiquids.addAll(MeldLiquids.fumes);
 
@@ -1273,8 +1553,8 @@ public class MeldBlocks {
             itemCapacity = 10;
 
             inputLiquids.addAll(MeldLiquids.aspect, MeldLiquids.boundAspect, MeldLiquids.stormingAspect);
-            inputItems.addAll(MeldItems.shadesteel, MeldItems.elnarDust, MeldItems.debris, MeldItems.silver, MeldItems.annealedSilver);
-            outputItems.addAll(MeldItems.aspectPipe);
+            inputItems.addAll(MeldItems.shadesteel, MeldItems.elnarDust, MeldItems.debris, MeldItems.silver, MeldItems.annealedSilver, MeldItems.glassMallows);
+            outputItems.addAll(MeldItems.aspectPipe, MeldItems.aspectBomb);
 
             inputLiquidSlots = 1;
 
@@ -1305,7 +1585,239 @@ public class MeldBlocks {
                         producers.addAll(
                                 new ProduceItem(new ItemStack(MeldItems.aspectPipe, 2))
                         );
+                    }},
+
+                    new TimedRecipe(30){{
+                        consumers.addAll(
+                                new ConsumeItems(with(MeldItems.glassMallows, 4, MeldItems.silver, 2)),
+                                new ConsumeLiquid(MeldLiquids.stormingAspect, outletRate * 4)
+                        );
+                        producers.addAll(
+                                new ProduceItem(new ItemStack(MeldItems.aspectBomb, 10))
+                        );
+                    }},
+                    new TimedRecipe(15){{
+                        consumers.addAll(
+                                new ConsumeItems(with(MeldItems.glassMallows, 4, MeldItems.annealedSilver, 2)),
+                                new ConsumeLiquid(MeldLiquids.stormingAspect, outletRate * 4)
+                        );
+                        producers.addAll(
+                                new ProduceItem(new ItemStack(MeldItems.aspectBomb, 10))
+                        );
                     }}
+            );
+        }};
+
+        crushWeaver = new AttributeCrafter("crush-weaver"){{
+            requirements(Category.crafting, with(
+                    MeldItems.debris, 40,
+                    MeldItems.annealedSilver, 40,
+                    MeldItems.dissonitre, 40
+            ));
+            size = 2;
+
+            health = 600;
+
+            attribute = MeldAttributes.soilAttr;
+            baseEfficiency = 0;
+            minEfficiency = 1;
+
+            drawer = new DrawMulti(
+                    new DrawRegion("-bottom"),
+                    new DrawRegion("-grinder"){{
+                        x = 2;
+                        y = -3;
+                        spinSprite = true;
+                        rotateSpeed = 30;
+                    }},
+                    new DrawRegion("-grinder"){{
+                        x = 2;
+                        y = 3;
+                        spinSprite = true;
+                        rotateSpeed = -30;
+                    }},
+                    new DrawRegion("-grinder"){{
+                        x = -2;
+                        y = 3;
+                        spinSprite = true;
+                        rotateSpeed = 30;
+                    }},
+                    new DrawRegion("-grinder"){{
+                        x = -2;
+                        y = -3;
+                        spinSprite = true;
+                        rotateSpeed = -30;
+                    }},
+                    new DrawGlowRegion(),
+                    new DrawRegion()
+            );
+
+            craftTime = 30;
+            consumeItem(MeldItems.dissonitre, 1);
+            consume(new StupidConsumeAspects(outletRate, AspectGroup.aspect));
+            outputItems = with(MeldItems.vitricMesh, 1);
+        }};
+
+        crushWeaver = new AttributeCrafter("aether-vitrifier"){{
+            requirements(Category.crafting, with(
+                    MeldItems.debris, 40,
+                    MeldItems.electrumSheet, 80,
+                    MeldItems.dissonitre, 40
+            ));
+            size = 2;
+
+            health = 600;
+
+            attribute = MeldAttributes.soilAttr;
+            baseEfficiency = 0;
+            minEfficiency = 1;
+
+            drawer = new DrawMulti(
+                    new DrawRegion("-bottom"),
+                    new DrawGlowRegion(),
+                    new DrawRegion()
+            );
+
+            craftTime = 60;
+            consume(new StupidConsumeAspects(outletRate/10f, AspectGroup.aether));
+            consumePower(2);
+            outputItems = with(MeldItems.dissonitre, 1);
+        }};
+
+        amalgamDecomposer = new AttributeCrafter("amalgam-decomposer"){{
+            requirements(Category.production, with(
+                    MeldItems.debris, 45,
+                    MeldItems.annealedSilver, 80,
+                    MeldItems.dissonitre, 80
+            ));
+            size = 3;
+            health = 800;
+
+            itemCapacity = 40;
+
+            attribute = MeldAttributes.soilAttr;
+            baseEfficiency = 0;
+            minEfficiency = 1;
+
+            craftTime = 60;
+            consumeItem(MeldItems.electrumSheet, 20);
+            consume(new StupidConsumeAspects(outletRate * 2, AspectGroup.aspect));
+
+            outputItems = with(MeldItems.debris, 5);
+            outputLiquids = LiquidStack.with(MeldLiquids.ichor, 2);
+
+
+            drawer = new DrawMulti(
+                    new DrawRegion("-bottom"),
+                    new DrawLiquidTile(){{
+                        drawLiquid = MeldLiquids.aspect;
+                        padTop = 14.25f;
+                    }},
+                    new DrawLiquidTile(){{
+                        drawLiquid = MeldLiquids.ichor;
+                        padBottom = 8.25f;
+                    }},
+                    new DrawRegion(),
+                    new DrawGlowRegion()
+            );
+        }};
+
+        stormIris = new RecipeCrafter("storm-iris"){{
+            requirements(Category.crafting, with(MeldItems.annealedSilver, 450, MeldItems.electrumSheet, 300, MeldItems.quartzStrata, 250));
+            size = 5;
+            hasItems = hasLiquids = hasPower = true;
+            liquidCapacity = 120;
+
+            inputLiquidSlots = 1;
+            outputLiquidSlots = 1;
+
+            inputLiquids.addAll(MeldLiquids.aether);
+            outputLiquids.addAll(MeldLiquids.thunderingAether);
+
+            consPower = new ConsumePowerRecipe();
+
+            recipes.addAll(
+                new TimedRecipe(){{
+                    consumers.addAll(
+                            new ConsumePower(10, 500, false),
+                            new ConsumeLiquid(MeldLiquids.aether, 1)
+                    );
+                    producers.addAll(
+                            new ProduceLiquid(MeldLiquids.thunderingAether, 2)
+                    );
+                }}
+            );
+        }};
+
+
+        //#Region Power
+
+        conductivePile = new Battery("conductive-pile"){{
+            requirements(Category.power, with(MeldItems.electrumSheet, 12));
+            size = 1;
+            health = 800;
+            armor = -80;
+            solid = false;
+
+            fogRadius = 0;
+            consumePowerBuffered(1);
+
+            drawer = new DrawMulti(
+                    new DrawDefault(),
+                    new DrawGlowRegion()
+            );
+        }};
+
+        substation = new PowerNode("substation"){{
+            requirements(Category.power, with(MeldItems.annealedSilver, 450, MeldItems.electrumSheet, 600, MeldItems.dissonitre, 150, MeldItems.vitricMesh, 300));
+            size = 5;
+            health = 2100;
+            armor = 15;
+
+            laserRange = 50;
+            maxNodes = 3;
+            fogRadius = 0;
+            laserColor1 = Color.white;
+            laserColor2 = Color.valueOf("646461");
+
+            consumesPower = outputsPower = true;
+            consumePowerBuffered(300);
+        }};
+
+        aspectDischarger = new ConsumeThermal("aspect-discharger"){{
+            requirements(Category.power, with(MeldItems.debris, 35, MeldItems.electrumSheet, 120));
+            size = 2;
+            health = 650;
+            solid = false;
+            underBullets = true;
+
+            minEfficiency = 1 - 0.00001f;
+            liquidCapacity = 100;
+
+            powerProduction = 1;
+
+            consumePowerBuffered(1);
+            consume(new StupidConsumeAspects(outletRate, AspectGroup.aspect));
+
+            attribute = MeldAttributes.soilAttr;
+
+            drawer = new DrawMulti(
+                new DrawRegion("-matting"){{
+                    layer = Layer.blockUnder;
+                }},
+                new DrawGlowRegion("-matting-glow"){{
+                    layer = Layer.blockUnder;
+                }},
+                new DrawRegion("-mid"){{
+                    layer = Layer.block;
+                }},
+                new DrawRegion("-mid-coils"){{
+                    layer = Layer.block;
+                }},
+                new DrawGlowRegion("-mid-coils-glow"),
+                new DrawRegion("-top"){{
+                    layer = Layer.block + 1;
+                }}
             );
         }};
 
@@ -1318,6 +1830,25 @@ public class MeldBlocks {
             plans.addAll(
                     new UnitPlan(MeldUnits.shark, 60 * 5, with(MeldItems.annealedSilver, 120, MeldItems.carbolith, 60))
             );
+        }};
+
+        launchStation = new LaunchStation("launch-station"){{
+            requirements(Category.units, with(MeldItems.debris, 45, MeldItems.quartzStrata, 60));
+            size = 3;
+            health = 750;
+
+            chargeRate = 1/60f/1.5f;
+
+            consume(
+                    new StupidConsumeAspects(outletRate * 2, AspectGroup.aspect)
+            );
+        }};
+
+        logiPad = new UnitLogisticsPad("logistic-docks"){{
+            requirements(Category.units, with(MeldItems.debris, 80));
+            size = 5;
+            range = (size + 3) * Vars.tilesize * 2;
+            health = 600;
         }};
 
         sonarSpire = new SonarSpire("sonar-spire"){{
@@ -1335,6 +1866,7 @@ public class MeldBlocks {
             shrinkSpeed = 16/60f;
 
             range = 220;
+            clipSize = 220;
 
             liquidCapacity = 1 * outletRate * 60;
             hasLiquids = true;
@@ -1397,6 +1929,14 @@ public class MeldBlocks {
             consumeItem(MeldItems.resonarum, 2);
         }};
 
+        lampPsi = new LightBlock("lamp-psi"){{
+            requirements(Category.effect, with(MeldItems.iampsi, 30));
+            configurable = false;
+            radius = 32;
+
+            consume(new StupidConsumeAspects(outletRate/5, AspectGroup.aspect));
+        }};
+
         chute = new Duct("chute"){{
             requirements(Category.distribution, with(MeldItems.debris, 1));
             health = 90;
@@ -1415,7 +1955,6 @@ public class MeldBlocks {
             health = 90;
             speed = 4f;
             solid = false;
-            ((Duct) chute).bridgeReplacement = this;
         }};
 
         chuteOverflow = new PriorityInputSplitter("chute-overflow"){{
@@ -1423,6 +1962,14 @@ public class MeldBlocks {
             health = 90;
             speed = 4f;
             solid = false;
+        }};
+
+        platedChute = new Duct("plated-chute"){{
+            requirements(Category.distribution, with(MeldItems.cruciblePlating, 2));
+            armored = true;
+            health = 45;
+            armor = 10;
+            speed = 4f;
         }};
 
         unloadingHub = new Unloader("unloading-hub"){{
@@ -1441,8 +1988,11 @@ public class MeldBlocks {
             health = 90;
             speed = 4f;
             solid = false;
-            ((Duct) chute).junctionReplacement = this;
         }};
+        ((Duct) chute).bridgeReplacement = chuteBridge;
+        ((Duct) platedChute).bridgeReplacement = chuteBridge;
+        ((Duct) chute).junctionReplacement = chuteJunction;
+        ((Duct) platedChute).junctionReplacement = chuteJunction;
 
         //Meld blocks
         meldNode = new MeldNode("meld-node"){{
@@ -1567,6 +2117,22 @@ public class MeldBlocks {
             minEfficiency = 9;
             boostScale = 1f/9f;
             displayEfficiencyScale = 9;
+
+            drawer = new DrawMulti(
+                    new DrawRegion("-base"){{
+                        layer = Layer.blockUnder;
+                    }},
+                    new DrawLiquidTile(MeldLiquids.meld),
+                    new DrawCells(){{
+                        range = 10;
+                        color = Color.valueOf("9e2e7b");
+                        particleColorFrom = Color.valueOf("892a6b");
+                        particleColorTo = Color.valueOf("e5aed7");
+                        particles = 15;
+                    }},
+                    new DrawRegion("-gum"),
+                    new DrawRegion("-top")
+            );
 
             outputLiquid = new LiquidStack(MeldLiquids.meld, 3);
         }};
@@ -1858,48 +2424,59 @@ public class MeldBlocks {
             }};
 
             ammoTypes.put(
-                    MeldLiquids.meld,
-                    new BasicBulletType(){{
-                        sprite = Meld.prefix("clump");
+                MeldLiquids.meld,
+                new BasicBulletType(){{
+                    sprite = Meld.prefix("clump");
+                    speed = 4;
+                    lifetime = 55;
+                    width = 5;
+                    height = 14;
+
+                    pierce = true;
+                    pierceBuilding = true;
+                    pierceCap = 2;
+
+                    splashDamage = 25;
+                    splashDamageRadius = 25;
+
+                    knockback = 4f;
+
+                    hitEffect = despawnEffect = Fx.explosion;
+
+                    impact = true;
+
+                    fragBullets = 3;
+                    fragRandomSpread = 45;
+
+                    fragBullet = new BasicBulletType(4, 15, Meld.prefix("clump")){{
                         speed = 4;
-                        lifetime = 55;
-                        width = 5;
-                        height = 14;
+                        lifetime = 10;
+                        width = 3;
+                        height = 8;
 
                         pierce = true;
                         pierceBuilding = true;
                         pierceCap = 2;
 
-                        splashDamage = 25;
-                        splashDamageRadius = 25;
-
                         knockback = 4f;
-
-                        hitEffect = despawnEffect = Fx.explosion;
 
                         impact = true;
 
-                        fragBullets = 3;
-                        fragRandomSpread = 45;
-
-                        fragBullet = new BasicBulletType(4, 15, Meld.prefix("clump")){{
-                            speed = 4;
-                            lifetime = 10;
-                            width = 3;
-                            height = 8;
-
-                            pierce = true;
-                            pierceBuilding = true;
-                            pierceCap = 2;
-
-                            knockback = 4f;
-
-                            impact = true;
-
-                            hitEffect = despawnEffect = Fx.none;
-                        }};
-                    }}
+                        hitEffect = despawnEffect = Fx.none;
+                    }};
+                }}
             );
         }};
+
+        Seq<Block> meldBlocks = Seq.with(
+                meldCannon, meldMortar,
+                craigCoffer, jillaCoffer, braigCoffer, billaCoffer,
+                meldCultivator,
+                pipebox, pipelineBridge, pipelineCrossing, pipelineRouter,
+                carbonicBarrier, carbonicBarrierLarge, crystalBarrier, crystalBarrierLarge,
+                meldAmplifier, meldCapsule, meldNode, meldSuppressor
+        );
+
+        meldBlocks.each(b -> b.buildVisibility = BuildVisibility.sandboxOnly);
     }
 }

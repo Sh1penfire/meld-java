@@ -1,9 +1,15 @@
 package meld.content;
 
 import arc.graphics.Color;
+import arc.struct.Seq;
+import meld.graphics.MeldPal;
+import meld.graphics.ParticleFloor;
 import meld.world.blocks.AetherCluster;
-import mindustry.content.Blocks;
+import meld.world.blocks.defense.TreeWall;
+import meld.world.blocks.env.ModdedOreBlock;
+import meld.world.blocks.env.SupportPillar;
 import mindustry.content.Fx;
+import mindustry.content.Liquids;
 import mindustry.graphics.CacheLayer;
 import mindustry.type.Category;
 import mindustry.type.ItemStack;
@@ -11,6 +17,8 @@ import mindustry.world.Block;
 import mindustry.world.blocks.environment.*;
 import mindustry.world.meta.Attribute;
 import mindustry.world.meta.BuildVisibility;
+
+import static meld.graphics.MeldPal.*;
 
 public class MeldEnvironment {
 
@@ -32,6 +40,7 @@ public class MeldEnvironment {
     metalMeshWall, metalMeshWallMeld, metalAetherWall,
     //Badlands
     pillowWall, sandstoneWall,
+    softDune, sandstonePillar,
     mallowWall, crackstoneWall,
     likesandWall, likestoneWall, likesaltWall,
 
@@ -58,15 +67,17 @@ public class MeldEnvironment {
         runicSlate, runicSlateMeld,
         literallyCarbonStoneFromMindustryButSlightlyDifferent, carbonicPlates, carbonicVent,
         earthenStone, mixtureStone,
+    //Storm Planes
+    dissonantShale, dissonantShaleStruck, dissonantShaleScorched, dissonantFragments,
         resonantStone,
     //Marsh
     meldPlates, meldHadaland, meldTrenchland, meldSwampland, meldCrystalScattered, meldCrystalFloor, meldCrystalHardFloor;
 
     public static SteamVent aetherGrowth, metalWeaveAether;
 
-    public static Prop meldCluster, meldPools, meldProtrusion, meldMetalStick, meldCrystal, iampsiGemstone, quartzSpikes;
+    public static Prop meldCluster, meldPools, meldProtrusion, meldMetalStick, meldCrystal, mixedCarbonicBoulder, iampsiGemstone, quartzSpikes, vitricWeave, mallowCluster, pillowGlintCluster, earthenResonarumCluster;
     public static TallBlock meldCrystalLarge, meldSupportFrame;
-    public static AetherCluster meldClusterLarge;
+    public static AetherCluster meldClusterLarge, dissonitreCluster;
 
     public static void load(){
 
@@ -83,9 +94,9 @@ public class MeldEnvironment {
             needsSurface = false;
         }};
 
-        debrisNodule = new OreBlock("debris-nodule"){{
+        debrisNodule = new ModdedOreBlock("debris-nodule", MeldItems.debris){{
             variants = 3;
-            itemDrop = MeldItems.debris;
+            mapColor = Color.valueOf("f4a462");
             needsSurface = false;
         }};
 
@@ -119,9 +130,10 @@ public class MeldEnvironment {
             itemDrop = MeldItems.elnarDust;
         }};
 
-        elnarSilt = new OreBlock("elnar-silt"){{
+        elnarSilt = new ModdedOreBlock("elnar-silt", MeldItems.elnarDust){{
             variants = 4;
-            itemDrop = MeldItems.elnarDust;
+            mapColor = Color.valueOf("96ed45");
+            setDefaults = false;
             needsSurface = false;
         }};
 
@@ -145,7 +157,7 @@ public class MeldEnvironment {
 
         electrumDeposit = new StaticWall("electrum-deposit"){{
             variants = 3;
-            itemDrop = MeldItems.electrumSheets;
+            itemDrop = MeldItems.electrumSheet;
         }};
 
         resonarumDeposit = new SeaBush("resonarum-deposit"){{
@@ -207,13 +219,16 @@ public class MeldEnvironment {
         metalWeave = new Floor("metal-weave", 3);
         metalWeaveHole= new Floor("metal-weave-hole", 0);
         metalWeaveGlow = new Floor("metal-weave-glow", 0){{
+            emitLight = true;
             lightRadius = 16;
             lightColor = Color.orange.cpy().a(0.35f);
         }};
 
         metalWeaveHole.blendGroup = metalWeaveGlow.blendGroup = metalWeave;
 
-        meldHadaland = new Floor("meld-hadaland", 3){{
+        meldHadaland = new ParticleFloor("meld-hadaland", 3){{
+            effect = MeldFx.meldSmoke;
+            chance = 0.00036f;
             isLiquid = true;
             cacheLayer = CacheLayer.water;
             drownTime = 90;
@@ -222,9 +237,16 @@ public class MeldEnvironment {
             statusDuration = 40;
 
             dragMultiplier = 2f;
+
+            emitLight = true;
+            lightColor = meldFloorGlowHadal;
+            lightRadius = 15;
+            attributes.set(MeldAttributes.meld, 0.3f);
         }};
 
-        meldTrenchland = new Floor("meld-trenchland", 3){{
+        meldTrenchland = new ParticleFloor("meld-trenchland", 3){{
+            effect = MeldFx.meldSmoke;
+            chance = 0.00036f;
             isLiquid = true;
             drownTime = 120;
 
@@ -233,41 +255,64 @@ public class MeldEnvironment {
 
             dragMultiplier = 1.5f;
             cacheLayer = CacheLayer.water;
+
+            emitLight = true;
+            lightColor = meldFloorGlowDeep;
+            lightRadius = 15;
+            attributes.set(MeldAttributes.meld, 0.2f);
         }};
 
-        meldSwampland = new Floor("meld-swampland", 3){{
+        meldSwampland = new ParticleFloor("meld-swampland", 3){{
+            effect = MeldFx.meldSmoke;
+            chance = 0.00036f;
             isLiquid = true;
 
             cacheLayer = CacheLayer.water;
             supportsOverlay = true;
+
+            emitLight = true;
+            lightColor = meldFloorGlow;
+            lightRadius = 20;
+            attributes.set(MeldAttributes.meld, 0.1f);
         }};
 
-        meldPlates = new Floor("meld-plates", 2){{
+        meldPlates = new ParticleFloor("meld-plates", 2){{
+            effect = MeldFx.meldSmoke;
+            chance = 0.00036f;
+
             isLiquid = true;
             cacheLayer = CacheLayer.water;
             supportsOverlay = true;
+            attributes.set(MeldAttributes.meld, 0.08f);
         }};
 
-        meldCrystalScattered = new Floor("meld-crystal-scattered", 3){{
+        meldCrystalScattered = new ParticleFloor("meld-crystal-scattered", 3){{
+            effect = MeldFx.meldSmoke;
+            chance = 0.00036f;
+
             isLiquid = true;
             cacheLayer = CacheLayer.water;
             supportsOverlay = true;
+            attributes.set(MeldAttributes.meld, 0.06f);
         }};
 
         sandMeld = new Floor("sand-meld", 3){{
             isLiquid = true;
             cacheLayer = CacheLayer.water;
             supportsOverlay = true;
+            attributes.set(MeldAttributes.meld, 0.05f);
         }};
         redsandMeld = new Floor("red-sand-meld", 3){{
             isLiquid = true;
             cacheLayer = CacheLayer.water;
             supportsOverlay = true;
+            attributes.set(MeldAttributes.meld, 0.08f);
         }};
         slateMeld = new Floor("slate-meld", 3){{
             isLiquid = true;
             cacheLayer = CacheLayer.water;
             supportsOverlay = true;
+            attributes.set(MeldAttributes.meld, 0.02f);
         }};
 
         bedrockMeld = new Floor("bedrock-meld", 3){{
@@ -277,6 +322,7 @@ public class MeldEnvironment {
             status = MeldStatusEffects.drenched;
             statusDuration = 25;
             supportsOverlay = true;
+            attributes.set(MeldAttributes.meld, 0.05f);
         }};
 
 
@@ -316,26 +362,38 @@ public class MeldEnvironment {
             variants = 2;
         }};
 
+        //Start storm stuff before badlands since badlands should blend onto storm
+        resonantStone = new Floor("resonant-stone", 3);
+        dissonantShale = new Floor("dissonant-shale", 3);
+        dissonantShaleStruck = new Floor("dissonant-shale-struck", 3);
+        dissonantShaleScorched = new Floor("dissonant-shale-scorched", 3);
+        dissonantFragments = new Floor("dissonant-fragments", 0);
+
         polishedSandstoneTile = new Floor("polished-sandstone-tile", 3);
 
+        //Storm stuff
         likesand = new Floor("likesand", 3);
         likestone = new Floor("likestone", 3);
         likesalt = new Floor("likesalt", 3);
 
-        likesand.itemDrop = likestone.itemDrop = MeldItems.likestoneSediments;
-        likesand.playerUnmineable = likestone.playerUnmineable = true;
-
         redSilt = new Floor("red-silt", 3);
-        aspectSoil = new Floor("aspect-soil", 3);
+        aspectSoil = new Floor("aspect-soil", 3){{
+            attributes.set(MeldAttributes.soilAttr, 0.25f);
+        }};
         softSand = new Floor("soft-sand", 3);
         sandstone = new Floor("hard-sand", 3);
-        redSand = new Floor("red-sand", 3);
+        redSand = new Floor("red-sand", 3){{
+            itemDrop = MeldItems.clayMallows;
+            playerUnmineable = true;
+        }};
         redSandWeave = new Floor("red-sand-weave", 3);
         crackstone = new Floor("cracked-sand", 4);
 
         goldSand = new Floor("gold-sand", 3){{
             isLiquid = true;
             cacheLayer = CacheLayer.water;
+
+            liquidDrop = MeldLiquids.ichor;
 
             status = MeldStatusEffects.drenched;
             statusDuration = 25;
@@ -345,20 +403,22 @@ public class MeldEnvironment {
             isLiquid = true;
             cacheLayer = CacheLayer.water;
 
+            liquidDrop = MeldLiquids.ichor;
+
             status = MeldStatusEffects.drenched;
             statusDuration = 45;
             supportsOverlay = true;
         }};
 
-        iampsiSpecks = new OreBlock("iampsi-specks"){{
+        iampsiSpecks = new ModdedOreBlock("iampsi-specks", MeldItems.iampsi){{
             variants = 4;
-            itemDrop = MeldItems.iampsi;
+            mapColor = Color.valueOf("a582f7");
             needsSurface = false;
         }};
 
-        quartzFlakes = new OreBlock("quartz-flakes"){{
+        quartzFlakes = new ModdedOreBlock("quartz-flakes", MeldItems.quartzStrata){{
             variants = 4;
-            itemDrop = MeldItems.quartzStrata;
+            mapColor = Color.valueOf("ef84fb");
             needsSurface = false;
         }};
 
@@ -380,6 +440,10 @@ public class MeldEnvironment {
 
         metalAetherWall = new StaticWall("metal-aether-wall"){{
             variants = 3;
+
+            emitLight = true;
+            lightRadius = 48;
+            lightColor = Color.valueOf("e5932e").a(0.45f);
         }};
 
 
@@ -393,6 +457,20 @@ public class MeldEnvironment {
 
         polishedSandstoneWall = new StaticWall("polished-sandstone-wall"){{
             variants = 2;
+        }};
+
+        softDune = new TreeWall("soft-dune"){{
+            variants = 2;
+            solid = false;
+            hasShadow = false;
+            mapColor = Color.valueOf("f3e1af");
+        }};
+
+        sandstonePillar = new SupportPillar("sandstone-pillar"){{
+            requirements(Category.effect, ItemStack.with(MeldItems.debris, 500));
+            buildVisibility = BuildVisibility.sandboxOnly;
+
+            mapColor = Color.black;
         }};
 
         mallowWall = new StaticWall("mallow-wall"){{
@@ -417,8 +495,6 @@ public class MeldEnvironment {
         likesaltWall= new StaticTree("likesalt-wall"){{
             variants = 2;
         }};
-
-        resonantStone = new Floor("resonant-stone", 3);
 
         aetherGrowth = new SteamVent("aether-growth"){{
             variants = 0;
@@ -461,7 +537,7 @@ public class MeldEnvironment {
             variants = 2;
         }};
         meldPools = new Prop("meld-pools"){{
-            requirements(Category.effect, ItemStack.with(MeldItems.debris, 25));
+            requirements(Category.effect, ItemStack.with(MeldItems.debris, 65));
 
             buildVisibility = BuildVisibility.sandboxOnly;
 
@@ -481,6 +557,15 @@ public class MeldEnvironment {
             buildTime = 120;
         }};
 
+        dissonitreCluster = new AetherCluster("dissonitre-cluster"){{
+            requirements(Category.effect, ItemStack.with(MeldItems.dissonitre, 300));
+            size = 1;
+
+            buildVisibility = BuildVisibility.sandboxOnly;
+            instantDeconstruct = false;
+            buildTime = 10;
+        }};
+
         meldCrystal = new WobbleProp("meld-crystal"){{
             requirements(Category.effect, ItemStack.with(MeldItems.meldShard, 25));
 
@@ -490,7 +575,29 @@ public class MeldEnvironment {
             buildTime = 10;
             variants = 3;
         }};
+        mixedCarbonicBoulder = new Prop("mixed-carbonic-boulder"){{
+            requirements(Category.effect, ItemStack.with(MeldItems.carbolith, 35, MeldItems.stonyParticulate, 45));
+            solid = true;
+            alwaysReplace = false;
 
+            buildVisibility = BuildVisibility.sandboxOnly;
+
+            instantDeconstruct = false;
+            buildTime = 60;
+            variants = 3;
+        }};
+
+        pillowGlintCluster = new Prop("pillow-glint-cluster"){{
+            requirements(Category.effect, ItemStack.with(MeldItems.silver, 25, MeldItems.annealedSilver, 40));
+            solid = true;
+            alwaysReplace = false;
+
+            buildVisibility = BuildVisibility.sandboxOnly;
+
+            instantDeconstruct = false;
+            buildTime = 45;
+            variants = 2;
+        }};
 
         iampsiGemstone = new Prop("iampsi-gemstone"){{
             requirements(Category.effect, ItemStack.with(MeldItems.silver, 25, MeldItems.iampsi, 45, MeldItems.quartzStrata, 25));
@@ -500,14 +607,14 @@ public class MeldEnvironment {
             buildVisibility = BuildVisibility.sandboxOnly;
 
             instantDeconstruct = false;
-            buildTime = 35;
+            buildTime = 40;
             variants = 4;
         }};
 
         quartzSpikes = new Prop("quartz-spikes"){{
             requirements(Category.effect, ItemStack.with(MeldItems.quartzStrata, 15));
             solid = false;
-            alwaysReplace = true;
+            alwaysReplace = false;
 
             buildVisibility = BuildVisibility.sandboxOnly;
 
@@ -517,6 +624,35 @@ public class MeldEnvironment {
             variants = 5;
         }};
 
+        vitricWeave = new Prop("vitric-weave"){{
+            requirements(Category.effect, ItemStack.with(MeldItems.dissonitre, 5, MeldItems.vitricMesh, 24));
+            buildVisibility = BuildVisibility.sandboxOnly;
+
+            solid = false;
+            alwaysReplace = false;
+
+            variants = 2;
+            buildTime = 5;
+            instantDeconstruct = false;
+        }};
+
+        mallowCluster = new Prop("mallow-cluster"){{
+
+        }};
+
+        earthenResonarumCluster = new Prop("earthen-resonarum-cluster"){{
+            requirements(Category.effect, ItemStack.with(MeldItems.resonarum, 40));
+            solid = true;
+            alwaysReplace = false;
+
+            buildVisibility = BuildVisibility.sandboxOnly;
+
+            instantDeconstruct = false;
+            buildTime = 40;
+            variants = 2;
+        }};
+
+
         meldCrystalLarge = new TallBlock("meld-crystal-large"){{
             variants = 1;
             customShadow = true;
@@ -525,5 +661,19 @@ public class MeldEnvironment {
             variants = 2;
             customShadow = true;
         }};
+
+        Seq<Block> meldProps = Seq.with(sandstonePillar, meldCluster, meldClusterLarge, meldMetalStick, meldProtrusion, meldPools, meldCrystal,
+                dissonitreCluster, vitricWeave,
+                mixedCarbonicBoulder,
+                pillowGlintCluster,
+                earthenResonarumCluster,
+                iampsiGemstone, quartzSpikes);
+        meldProps.each(f -> f.databaseTag = "environment");
+        Seq<Floor> meldFloors = Seq.with(meldSwampland, meldTrenchland, meldHadaland,
+                meldCrystalScattered,
+                sandMeld, redsandMeld,
+                slateMeld, bedrockMeld);
+
+        meldFloors.each(m -> m.liquidDrop = MeldLiquids.meld);
     }
 }

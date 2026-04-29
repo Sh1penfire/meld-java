@@ -3,6 +3,7 @@ package meld.meta;
 import arc.Core;
 import arc.util.Strings;
 import meld.fluid.AspectGroup;
+import mindustry.Vars;
 import mindustry.gen.Tex;
 import mindustry.type.Liquid;
 import mindustry.ui.Styles;
@@ -10,6 +11,12 @@ import mindustry.world.meta.Stat;
 import mindustry.world.meta.Stats;
 
 public class MeldStats {
+
+    public static void loadModifications(){
+        Vars.content.items().each(c -> {
+            c.stats.add(Stat.buildCost, c.cost, MeldStatUnit.ticks);
+        });
+    }
 
     public static Stat
         aspectStats = new Stat("aspect-stats");

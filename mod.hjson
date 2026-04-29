@@ -1,8 +1,8 @@
 #the mod name as displayed in-game
-displayName: "Meld (Java)"
+displayName: "[[]#ea9ad6]Meld: Sand and Sunder[[]]"
 
 #the internal name of your mod
-name: "meld"
+name: "meld2"
 
 #your name
 author: "Sh1p"
@@ -11,10 +11,12 @@ author: "Sh1p"
 main: "meld.Meld"
 
 #the mod description as seen in the mod dialog
-description: "Meld Java.\n\n[[]accent]Only has custom game content! (play the info map to understand)[[]]\n\nIncompatable with hjson meld"
+description: "[[]gray]Under scattered gloomy sunlight in the shimmering seas, within the shifting sanctuary, Strata awoke.\n\nNo mouth to scream with, no skin to feel with, yet one sense remained.\n\nA great longing of meaning.\n\n[[]accent]Only has custom game content! (play the info map to understand)[[]]"
+
+subtitle: "[[]accent]What choice do I have...[[]]"
 
 #the mod version
-version: gameplay test v3
+version: gameplay test 5.1
 
 #the minimum game build required to run this mod
 minGameVersion: 157

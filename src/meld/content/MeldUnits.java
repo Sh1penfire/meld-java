@@ -10,6 +10,7 @@ import arc.math.Angles;
 import arc.math.Interp;
 import arc.math.Mathf;
 import arc.struct.ObjectIntMap;
+import arc.struct.Seq;
 import arc.util.Log;
 import arc.util.Tmp;
 import meld.*;
@@ -23,12 +24,10 @@ import meld.entities.unit.type.*;
 import meld.graphics.*;
 import meld.entities.unit.weapons.DeathWeapon;
 import meld.entities.unit.weapons.ShadowVisualWeapon;
+import meld.ui.MeldSettings;
 import mindustry.Vars;
 import mindustry.ai.types.HugAI;
-import mindustry.content.Blocks;
-import mindustry.content.Fx;
-import mindustry.content.Items;
-import mindustry.content.StatusEffects;
+import mindustry.content.*;
 import mindustry.entities.Effect;
 import mindustry.entities.abilities.RegenAbility;
 import mindustry.entities.abilities.StatusFieldAbility;
@@ -93,6 +92,26 @@ public class MeldUnits {
         return idMap.get(type, -1);
     }
 
+    public static void bulbheadOmnimove(boolean omniMovement){
+        bulbhead.omniMovement = omniMovement;
+
+        //TODO: stat tweaks?
+        if(omniMovement){
+            return;
+        }
+    }
+
+
+    public static void lightRadiusMultiplier(float newRad){
+
+        float prevScale = MeldSettings.lightScale;
+
+        float multi = newRad/prevScale;
+        Vars.content.units().each(u -> {
+            u.lightRadius *= multi;
+        });
+    }
+
     //player units
     public static UnitType
     bulbhead, shark,
@@ -145,6 +164,7 @@ public class MeldUnits {
             shadowElevation = 0;
             drawCell = drawBody = false;
             drawSoftShadow = false;
+            fullOverride = "clear";
 
             weapons.addAll(
                     new RepairBeamWeapon(){{
@@ -211,19 +231,6 @@ public class MeldUnits {
                     //Sonar
                     new ShapePart(){{
                         x = y = 0;
-                        progress = PartProgress.life;
-                        circle = true;
-                        hollow = true;
-                        radius = 0;
-                        radiusTo = IR;
-                        stroke = 6;
-                        strokeTo = 0;
-                        layer = Layer.buildBeam;
-                        color = Pal.accent;
-                    }},
-
-                    new ShapePart(){{
-                        x = y = 0;
                         progress = PartProgress.life.curve(Interp.pow10Out);
                         circle = true;
                         hollow = true;
@@ -235,17 +242,19 @@ public class MeldUnits {
                         color = Pal.accent;
                     }},
 
-                    new ShapePart(){{
-                        x = y = 0;
-                        progress = PartProgress.life.curve(Interp.pow10In);
-                        circle = true;
-                        hollow = true;
+                    new SonarPart(){{
                         radius = IR;
+                    }},
+
+                    new SonarPart(){{
+                        x = y = 0;
+                        progress = PartProgress.life;
+                        radius = 0;
                         radiusTo = IR;
-                        stroke = 4;
+                        stroke = 6;
                         strokeTo = 0;
-                        layer = Layer.buildBeam;
                         color = Pal.accent;
+                        layer = MeldLayers.sonarInside;
                     }}
             );
 
@@ -260,7 +269,7 @@ public class MeldUnits {
             constructor = TimedKillUnit::create;
         }};
 
-        bulbhead = new UnitType("bulbhead"){{
+        bulbhead = new BulbheadUnitType("bulbhead"){{
             float IR = 120;
             outlineColor = Color.clear;
 
@@ -280,8 +289,8 @@ public class MeldUnits {
             range = 100;
 
 
-            lightRadius = IR;
-            lightOpacity = 1;
+            lightRadius = IR/2;
+            lightOpacity = 0.5f;
             buildSpeed = 1;
             mineTier = 2;
             mineSpeed = 8;
@@ -343,7 +352,6 @@ public class MeldUnits {
                                     colorTo = Pal.accent;
                                     progress = mixedProg.compress(0.1f, 0.9f).curve(Interp.pow2In);
                                 }},
-
                                 new ShapePart(){{
                                     circle = hollow = true;
                                     radius = 45;
@@ -414,26 +422,17 @@ public class MeldUnits {
             );
 
             parts.addAll(
-                    new HoverPart(){{
-                        x = y = 0;
-                        phase = 420;
-                        sides = 60;
-                        mirror = false;
+                    new SonarPart(){{
                         radius = IR;
-                        stroke = 3;
-                        circles = 2;
-                        minStroke = 0.5f;
-                        layer = Layer.buildBeam;
-                        color = Pal.accent;
-                    }},
-                    new ShapePart(){{
-                        x = y = 0;
-                        circle = true;
-                        hollow = true;
                         stroke = 4;
-                        radius = IR - 2;
-                        layer = Layer.buildBeam;
-                        color = Pal.accent;
+                    }},
+                    new SonarPart(){{
+                        radius = 0;
+                        radiusTo = IR;
+                        stroke = 0.5f;
+                        strokeTo = 2;
+                        layer = MeldLayers.sonarInside;
+                        progress = PartProgress.time.mul(1f/420).mod(1);
                     }}
             );
             constructor = BulbheadEntity::new;
@@ -446,7 +445,8 @@ public class MeldUnits {
                         activeEffect = Fx.none;
                     }},
                     new SlipstreamHullAbility(),
-                    new BeachedAbility()
+                    new BeachedAbility(),
+                    new FabricatorBatteryAbility()
             );
             //can't rally yourself goober >w<
             immunities.addAll(
@@ -473,8 +473,10 @@ public class MeldUnits {
             hitSize = 16;
             fogRadius = 24;
 
-            lightRadius = 85;
-            lightOpacity = 0.35f;
+            lightRadius = 35;
+            lightOpacity = 0.8f;
+            lightColor = Pal.sap;
+
             range = 145;
             rotateSpeed = 6;
 
@@ -500,6 +502,7 @@ public class MeldUnits {
                         shoot.shotDelay = 5;
 
                         bullet = new MissileBulletType(){{
+
                             sprite = "missile-large";
                             speed = 4.5f;
                             drag = -0.02f;
@@ -518,7 +521,7 @@ public class MeldUnits {
                             weaveScale = 5;
                             weaveMag = 1.5f;
 
-                            width = 3;
+                            width = 4.5f;
                             height = 8;
                             shrinkX = 0;
                             shrinkY = 0.2f;
@@ -527,6 +530,7 @@ public class MeldUnits {
                             backColor = trailColor = MeldPal.shark;
                             trailChance = 0.15f;
                             trailLength = 5;
+                            trailWidth = 1.5f;
 
                             despawnEffect = Fx.none;
                             hitEffect = new Effect(12, e -> {
@@ -548,7 +552,7 @@ public class MeldUnits {
                             fragSpread = 15;
                             fragRandomSpread = 0;
                             fragBullet = new SapBulletType(){{
-                                damage = 10;
+                                damage = 15;
                                 sapStrength = 1;
                                 length = 15;
                                 pierce = true;
@@ -667,6 +671,7 @@ public class MeldUnits {
             shadowElevation = 0;
             drawCell = drawBody = false;
             drawSoftShadow = false;
+            fullOverride = "clear";
 
             weapons.addAll(
                     new RepairBeamWeapon(){{
@@ -996,8 +1001,6 @@ public class MeldUnits {
                     }}
             );
 
-            immunities.addAll(MeldStatusEffects.aspectBurn);
-
             weapons.addAll(craigWeapon(-3, 0));
 
             constructor = LegsUnit::create;
@@ -1126,8 +1129,6 @@ public class MeldUnits {
                     }}
             );
 
-            immunities.addAll(MeldStatusEffects.aspectBurn);
-
             constructor = LegsUnit::create;
         }};
 
@@ -1183,7 +1184,6 @@ public class MeldUnits {
                     }}
             );
 
-            immunities.addAll(MeldStatusEffects.aspectBurn);
             constructor = LegsUnit::create;
         }};
 
@@ -1349,7 +1349,6 @@ public class MeldUnits {
                     }}
             );
 
-            immunities.addAll(MeldStatusEffects.lacerated);
             constructor = LegsUnit::create;
         }};
 
@@ -1405,7 +1404,6 @@ public class MeldUnits {
                         }};
                     }}
             );
-            immunities.addAll(MeldStatusEffects.aspectBurn);
 
             constructor = CrawlUnit::create;
         }};
@@ -1680,6 +1678,7 @@ public class MeldUnits {
                             width = 1.7f;
                             knockback = 1;
                             pierceCap = 2;
+                            pierceBuilding = true;
 
                             colors = new Color[]{
                                     Color.valueOf("f9e1f343"),
@@ -1691,7 +1690,6 @@ public class MeldUnits {
                         }};
                     }}
             );
-            immunities.addAll(MeldStatusEffects.lacerated);
 
             constructor = LegsUnit::create;
         }};
