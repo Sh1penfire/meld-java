@@ -30,6 +30,9 @@ public class MeldMappings {
                 meldCrystalFloor, new GrinderEntry(720, meldCrystalScattered, with(MeldItems.meldShard, 10))
         );
 
+        GrindingQuary.alwaysDump.addAll(
+                MeldItems.dissonitre, MeldItems.clayMallows, MeldItems.glassMallows, MeldItems.likestoneSediments, MeldItems.meldShard
+        );
 
         nectar.canStayOn.addAll(mercury, ichor, ooze);
         mercury.canStayOn.addAll(mercury, ichor, ooze, blood);

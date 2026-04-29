@@ -37,6 +37,7 @@ import static meld.graphics.TileDrawers.tileRad;
 public class GrindingQuary extends Block {
 
     public static ObjectMap<Block, GrinderEntry> grinderMap = new ObjectMap<>();
+    public static Seq<Item> alwaysDump = new Seq<>();
 
     public static ObjectFloatMap<Item> drillMultipliers = new ObjectFloatMap<>();
 
@@ -240,10 +241,21 @@ public class GrindingQuary extends Block {
                 dumpAccumulate(key);
             }
 
+            alwaysDump.each(this::dumpAccumulate);
+
             progress += Time.delta/itemDuration;
             if(progress >= 1){
                 progress %= 1;
+
+                //Get the speed boost from the non optional aspect consumer
                 boostAmount = 1;
+
+                for (Consume consumer : consumers) {
+                    if(!consumer.booster && consumer.efficiency(this) > 0) boostAmount = consumer.efficiencyMultiplier(this);
+                }
+
+                //Get the speed boost from the non optional aspect consumer
+
                 for (Consume consumer : consumers) {
                     if(consumer.booster && consumer.optional && consumer.efficiency(this) > 0) boostAmount *= consumer.efficiencyMultiplier(this);
                     consumer.trigger(this);
