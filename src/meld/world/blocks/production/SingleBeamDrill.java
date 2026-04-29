@@ -37,6 +37,7 @@ import mindustry.world.Block;
 import mindustry.world.Tile;
 import mindustry.world.blocks.production.BeamDrill;
 import mindustry.world.blocks.production.Drill;
+import mindustry.world.consumers.Consume;
 import mindustry.world.meta.BlockFlag;
 
 import static meld.graphics.TileDrawers.tileRad;
@@ -82,6 +83,15 @@ public class SingleBeamDrill extends Block {
 
     @Override
     public void drawOverlay(float x, float y, int rotation) {
+        float multiplier = 1;
+
+        Tile start = Vars.world.tileWorld(x, y);
+        if(start != null){
+            if(Vars.control.input.block == null && start.build instanceof SingleBeamBuild build && start== build.tile && start.block() == this){
+                multiplier = build.boostAmount;
+            }
+        }
+
         Item found = null;
         int unusedTiles = range + 1;
 
@@ -111,7 +121,7 @@ public class SingleBeamDrill extends Block {
 
                 if(found != null){
                     Item current = transformItems.get(found, found);
-                    Draww.itemText(mined/drillTime * 60 + " " + current.localizedName + "/s", x, drawy, current);
+                    Draww.itemText(mined/drillTime * 60 * multiplier+ " " + current.localizedName + "/s", x, drawy, current);
                     if(found != current){
                         drawy = y - Vars.tilesize * size/2f;
                         float s = iconSmall / 4f;
@@ -122,6 +132,13 @@ public class SingleBeamDrill extends Block {
                         Draw.mixcol();
                         Draw.rect(found.fullIcon, x - textWidth, drawy, s, s);
                         Draw.rect(current.fullIcon, x + textWidth, drawy, s, s);
+                    }
+
+                    float drawx = x - (size * Vars.tilesize)/2f - 2;
+                    drawy = y;
+
+                    if(multiplier > 1){
+                        Draww.drawTextUnderlined(multiplier + "x ", drawx, drawy, Pal.accent);
                     }
                 }
                 else if(other.build != null && other.build.team == Vars.player.team()){
@@ -150,6 +167,7 @@ public class SingleBeamDrill extends Block {
 
     public class SingleBeamBuild extends Building{
         public float time;
+        public float boostAmount = 1;
 
         @Override
         public boolean shouldConsume() {
@@ -157,8 +175,19 @@ public class SingleBeamDrill extends Block {
         }
 
         @Override
+        public float edelta() {
+            return super.edelta() * boostAmount;
+        }
+
+        @Override
         public void updateTile() {
             super.updateTile();
+
+            boostAmount = 1;
+            for (Consume consumer : consumers) {
+                if(consumer.efficiency(this) > 0) boostAmount *= consumer.efficiencyMultiplier(this);
+            }
+
             if(healthf() >= minHealthf) time += edelta();
             if(time >= drillTime){
                 drill();

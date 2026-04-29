@@ -253,7 +253,6 @@ public class GrindingQuary extends Block {
                 for (Consume consumer : consumers) {
                     if(!consumer.booster && consumer.efficiency(this) > 0) boostAmount = consumer.efficiencyMultiplier(this);
                 }
-
                 //Get the speed boost from the non optional aspect consumer
 
                 for (Consume consumer : consumers) {
