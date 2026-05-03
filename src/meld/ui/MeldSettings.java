@@ -7,6 +7,7 @@ import arc.util.Log;
 import meld.Meld;
 import meld.SettingKeys;
 import meld.content.MeldUnits;
+import meld.core.*;
 import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.ctype.UnlockableContent;
@@ -14,7 +15,7 @@ import mindustry.io.SaveFileReader;
 import mindustry.ui.dialogs.SettingsMenuDialog;
 
 public class MeldSettings {
-    public static boolean replaceLighting, invertAmbient, connectedSonar, overlayOverFog,
+    public static boolean replaceLighting, invertAmbient, connectedSonar, overlayOverFog, shitpostBundles,
 
     //The expirimental settings
     bulbheadOmnimove, portSaves;
@@ -33,6 +34,7 @@ public class MeldSettings {
         invertAmbient = Core.settings.getBool(SettingKeys.invertAmbient, false);
         connectedSonar = Core.settings.getBool(SettingKeys.connectedSonar, true);
         overlayOverFog = Core.settings.getBool(SettingKeys.overlayOverFog, true);
+        shitpostBundles = Core.settings.getBool(SettingKeys.shitpostBundles, false);
 
         float newLightScale = Core.settings.getInt(SettingKeys.unitLightScale, 100);
         MeldUnits.lightRadiusMultiplier(newLightScale);
@@ -62,6 +64,11 @@ public class MeldSettings {
             check(t, SettingKeys.invertAmbient, false, b -> invertAmbient = b);
             check(t, SettingKeys.connectedSonar, true, b -> connectedSonar = b);
             check(t, SettingKeys.overlayOverFog, true, b -> overlayOverFog = b);
+            check(t, SettingKeys.shitpostBundles, false, b -> {
+                Vars.ui.loadAnd(() -> {
+                    Bundles.shitpost(shitpostBundles = b);
+                });
+            });
 
             t.sliderPref(Core.bundle.get(SettingKeys.unitLightScale), 100, 1, 200, f -> {
                 MeldUnits.lightRadiusMultiplier(f);
