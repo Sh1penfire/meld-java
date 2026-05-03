@@ -129,6 +129,7 @@ public class MeldUnits {
         bulbheadOverseer = new UnitType("bulbhead-overseer"){{
             float IR = 80;
 
+            itemCapacity = 0;
             health = 240;
             armor = -40;
             lifetime = 360;
@@ -637,6 +638,7 @@ public class MeldUnits {
         cannonOverseer = new MeldUnitType("cannon-overseer"){{
             float IR = 120;
 
+            itemCapacity = 0;
             health = 800;
             lifetime = 360 * 6;
             speed = 0;

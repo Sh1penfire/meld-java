@@ -1535,7 +1535,7 @@ public class MeldBlocks {
             outputLiquidSlots = 1;
 
             inputLiquids.addAll(MeldLiquids.aspect, MeldLiquids.boundAspect, MeldLiquids.stormingAspect);
-            inputItems.addAll(MeldItems.tenbris, MeldItems.clayMallows, MeldItems.carbolith, MeldItems.debris, MeldItems.shadesteel, MeldItems.glassMallows, MeldItems.silver, MeldItems.likestoneSediments, MeldItems.quartzStrata);
+            inputItems.addAll(MeldItems.tenbris, MeldItems.clayMallows, MeldItems.carbolith, MeldItems.debris, MeldItems.shadesteel, MeldItems.silver, MeldItems.likestoneSediments, MeldItems.quartzStrata);
             outputItems.addAll(MeldItems.cruciblePlating, MeldItems.shadesteel, MeldItems.glassMallows, MeldItems.annealedSilver);
             outputLiquids.addAll(MeldLiquids.fumes);
 
@@ -1933,6 +1933,8 @@ public class MeldBlocks {
             requirements(Category.effect, with(MeldItems.iampsi, 30));
             configurable = false;
             radius = 32;
+            databaseCategory = "lamp-psi";
+            databaseTag = "lamp-psi";
 
             consume(new StupidConsumeAspects(outletRate/5, AspectGroup.aspect));
         }};
@@ -1967,7 +1969,7 @@ public class MeldBlocks {
         platedChute = new Duct("plated-chute"){{
             requirements(Category.distribution, with(MeldItems.cruciblePlating, 2));
             armored = true;
-            health = 45;
+            health = 70;
             armor = 10;
             speed = 4f;
         }};
@@ -2472,7 +2474,7 @@ public class MeldBlocks {
                 meldCannon, meldMortar,
                 craigCoffer, jillaCoffer, braigCoffer, billaCoffer,
                 meldCultivator,
-                pipebox, pipelineBridge, pipelineCrossing, pipelineRouter,
+                pipeline, pipelineBridge, pipelineCrossing, pipelineRouter,
                 carbonicBarrier, carbonicBarrierLarge, crystalBarrier, crystalBarrierLarge,
                 meldAmplifier, meldCapsule, meldNode, meldSuppressor
         );
