@@ -6,9 +6,9 @@ import mindustry.graphics.Pal;
 public class MeldPal {
     public static Color
 
-    meldFloorGlow = Color.valueOf("d26ab1").a(0.3f),
-    meldFloorGlowDeep = Color.valueOf("ca3fba").a(0.15f),
-    meldFloorGlowHadal = Color.valueOf("ca3fba").a(0.10f),
+    meldFloorGlow = Color.valueOf("d26ab1").a(0.1f),
+    meldFloorGlowDeep = Color.valueOf("ca3fba").a(0.05f),
+    meldFloorGlowHadal = Color.valueOf("ca3fba").a(0.02f),
 
     aspect = Color.valueOf("f0f5fe"),
 

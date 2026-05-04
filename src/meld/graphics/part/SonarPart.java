@@ -46,9 +46,7 @@ public class SonarPart extends DrawPart {
 
         Vec2 pos = new Vec2(Tmp.v1);
         Vars.renderer.lights.add(() -> {
-            Draw.blend(Blending.additive);
             Fill.light(pos.x, pos.y, 100, radius, Pal.accent, MeldPal.accentClear);
-            Draw.blend(Blending.normal);
         });
     }
 }

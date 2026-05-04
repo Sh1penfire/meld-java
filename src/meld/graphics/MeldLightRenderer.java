@@ -211,6 +211,7 @@ public class MeldLightRenderer extends LightRenderer {
     }
 
     public void draw(){
+        draw2();
     }
 
     public void draw2(){
@@ -229,7 +230,8 @@ public class MeldLightRenderer extends LightRenderer {
         Draw.color();
         buffer.begin(Color.clear);
         Draw.sort(false);
-        Blending.additive.apply();
+        Draw.blend(Blending.additive);
+
         for(Runnable run : lights){
             run.run();
         }
@@ -256,7 +258,7 @@ public class MeldLightRenderer extends LightRenderer {
         Draw.sort(true);
         Texture exclusionTex = shadowBuffer.getTexture();
         shadowBuffer.end();
-        Blending.normal.apply();
+        Draw.blend(Blending.normal);
         Draw.color();
 
 

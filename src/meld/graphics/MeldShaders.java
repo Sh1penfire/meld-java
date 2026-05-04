@@ -51,10 +51,13 @@ public class MeldShaders {
                 Draw.draw(Layer.background, () -> {
                     lightBuffer.begin();
                 });
+                /*
                 Draw.draw(Layer.light, () -> {
                     lightBuffer.end();
                     MeldLightRenderer.thingo.draw2();
                 });
+
+                 */
             }
 
             Draw.drawRange(MeldLayers.sonar, 0.1f, () -> {

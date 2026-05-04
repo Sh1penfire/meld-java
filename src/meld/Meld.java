@@ -44,9 +44,6 @@ public class Meld extends Mod{
         Events.run(EventType.Trigger.draw, () -> {
             if(!MeldSettings.overlayOverFog) return;
             Draw.draw(Layer.fogOfWar + 2, AboveOverlayRenderer::draw);
-
-            //Just additive blending the fuck out of this layer in particular cause like fuck yes
-            Draw.drawRange(MeldLayers.smokeHigh, 1, () -> Draw.blend(Blending.additive), () -> Draw.blend(Blending.normal));
         });
 
         Events.on(EventType.FileTreeInitEvent.class, e -> {
