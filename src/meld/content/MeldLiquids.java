@@ -6,6 +6,7 @@ import arc.struct.ObjectMap;
 import arc.struct.Seq;
 import meld.fluid.Aspect;
 import meld.fluid.AspectGroup;
+import meld.graphics.MeldPal;
 import mindustry.entities.effect.ParticleEffect;
 import mindustry.type.CellLiquid;
 import mindustry.type.Liquid;
@@ -31,37 +32,46 @@ public class MeldLiquids {
         aether = new Aspect("aether"){{
             gas = true;
             color = Color.valueOf("cb8650");
+            lightColor = Color.valueOf("412a0c").a(0.5f);
+            lightOpacity = 0.01f;
             temperature = 0.6f;
         }};
 
         pollutantMixture = new Aspect("pollutant-mixture"){{
             gas = true;
-            color = Color.valueOf("6a634d");
             temperature = 0.6f;
+
+            color = Color.valueOf("6a634d");
+            lightOpacity = 0.001f;
         }};
 
         thunderingAether = new Aspect("thundering-aether"){{
             gas = true;
-            color = Color.valueOf("f35430");
             temperature = 0.6f;
             explosiveness = 0.1f;
+
+            color = Color.valueOf("f35430");
+            lightOpacity = 0.02f;
         }};
 
         aspect = new Aspect("aspect"){{
             gas = true;
             flammability = 0.35f;
             explosiveness = 1;
-            color = Color.valueOf("cbdbfc");
             temperature = 0.6f;
+
+            color = Color.valueOf("cbdbfc");
+            lightOpacity = 0.02f;
         }};
 
         stormingAspect = new Aspect("storming-aspect"){{
             gas = true;
-            color = Color.valueOf("aaadfd");
             temperature = 0.6f;
             flammability = 1;
             explosiveness = 2;
 
+            color = Color.valueOf("aaadfd");
+            lightOpacity = 0.05f;
         }};
 
         boundAspect = new Aspect("bound-aspect"){{
@@ -73,6 +83,7 @@ public class MeldLiquids {
         meld = new Aspect("meld"){{
             gas = true;
             color = Color.valueOf("e4aad5");
+            lightColor = MeldPal.meldFloorGlow;
             temperature = 0.6f;
         }};
 

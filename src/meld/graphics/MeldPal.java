@@ -6,6 +6,7 @@ import mindustry.graphics.Pal;
 public class MeldPal {
     public static Color
 
+    //VERY low opacity since pools overlap with their light radius
     meldFloorGlow = Color.valueOf("d26ab1").a(0.1f),
     meldFloorGlowDeep = Color.valueOf("ca3fba").a(0.05f),
     meldFloorGlowHadal = Color.valueOf("ca3fba").a(0.02f),

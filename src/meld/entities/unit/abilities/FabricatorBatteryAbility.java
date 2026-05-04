@@ -174,7 +174,7 @@ public class FabricatorBatteryAbility extends Ability {
         Draw.rect(MeldRegions.chargeRegions[stage], dx - x * 2, dy);
 
         Vars.renderer.lights.add(() -> {
-            Fill.light(unit.x, unit.y, 4 + (int) lightRadius/4, lightRadius, Tmp.c1.set(unit.type.lightColor).a(1), Tmp.c2.set(unit.type.lightColor).a(0));
+            Fill.light(unit.x, unit.y, 4 + (int) lightRadius/4, lightRadius, Tmp.c1.set(unit.type.lightColor).a((float) stage/stageMax * 0.5f), Tmp.c2.set(unit.type.lightColor).a(0));
         });
     }
 }

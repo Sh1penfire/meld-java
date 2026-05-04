@@ -290,11 +290,13 @@ public class MeldUnits {
             range = 100;
 
 
-            lightRadius = IR/2;
+            lightRadius = IR * 2;
             lightOpacity = 0.5f;
+            lightColor = Color.orange;
             buildSpeed = 1;
             mineTier = 2;
             mineSpeed = 8;
+            itemCapacity = 100;
 
             buildBeamOffset = 9;
             rotateToBuilding = false;
@@ -870,7 +872,7 @@ public class MeldUnits {
             health = 200;
             armor = 45;
 
-            drownTimeMultiplier = 0.6f;
+            drownTimeMultiplier = 0.25f;
             drag = 0.14f;
             accel = 0.24f;
 

@@ -229,7 +229,7 @@ public class GrindingQuary extends Block {
             for (Item key : itemRates.keys()) {
                 if(itemRates.get(key, 0) * drillMultipliers.get(key, 1) > 0 && acceptItem(this, key)) return true;
             }
-            return target != null;
+            return target != null && ItemLogic.capacity(entry.output, this);
         }
 
         @Override

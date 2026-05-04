@@ -248,7 +248,7 @@ public class MeldStatusEffects {
 
         impaled = new StatusEffect("impaled"){{
             damage = 1f;
-            speedMultiplier = 0.45f;
+            speedMultiplier = 0.65f;
             buildSpeedMultiplier = 0.5f;
         }};
 

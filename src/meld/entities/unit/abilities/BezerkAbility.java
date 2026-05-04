@@ -56,7 +56,7 @@ public class BezerkAbility extends Ability {
     public Seq<StatusEffect> sedated = new Seq<>();
 
     public BezerkAbility(){
-        clear.add(MeldStatusEffects.sentry);
+        clear.add(MeldStatusEffects.sentry, MeldStatusEffects.impaled);
         sedated.addAll(MeldStatusEffects.lacerated);
     }
 

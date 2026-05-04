@@ -1202,7 +1202,7 @@ public class MeldBlocks {
             size = 2;
             health = 800;
 
-            itemCapacity = 20;
+            itemCapacity = 50;
         }};
 
         aspectIncinerator = new StorageIncinerator("aspect-incinerator"){{
@@ -1269,7 +1269,7 @@ public class MeldBlocks {
             health = 420;
             placeableLiquid = true;
 
-            drillTime = 90;
+            drillTime = 180;
             tier = 2;
 
             buildTime = 90;
@@ -1553,8 +1553,8 @@ public class MeldBlocks {
             itemCapacity = 10;
 
             inputLiquids.addAll(MeldLiquids.aspect, MeldLiquids.boundAspect, MeldLiquids.stormingAspect);
-            inputItems.addAll(MeldItems.shadesteel, MeldItems.elnarDust, MeldItems.debris, MeldItems.silver, MeldItems.annealedSilver, MeldItems.glassMallows);
-            outputItems.addAll(MeldItems.aspectPipe, MeldItems.aspectBomb);
+            inputItems.addAll(MeldItems.shadesteel, MeldItems.elnarDust, MeldItems.debris, MeldItems.silver, MeldItems.annealedSilver, MeldItems.glassMallows, MeldItems.iampsi);
+            outputItems.addAll(MeldItems.aspectPipe, MeldItems.aspectBomb, MeldItems.quartzStrata);
 
             inputLiquidSlots = 1;
 
@@ -1605,6 +1605,9 @@ public class MeldBlocks {
                                 new ProduceItem(new ItemStack(MeldItems.aspectBomb, 10))
                         );
                     }}
+            );
+            recipes.addAll(
+                    MeldRecipes.crusherRecipies(2, 0.25f)
             );
         }};
 

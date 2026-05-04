@@ -64,4 +64,19 @@ public class MeldRecipes {
                 }}
         );
     }
+
+    //All crushing recipies
+    public static Seq<TimedRecipe> crusherRecipies(float outlets, float speedMultiplier){
+        return Seq.with(
+                new TimedRecipe(15/speedMultiplier){{
+                    consumers.addAll(
+                            new ConsumeItems(with(MeldItems.iampsi, 1)),
+                            new StupidConsumeAspects(outletRate * outlets, AspectGroup.aspect)
+                    );
+                    producers.addAll(
+                            new ProduceItem(new ItemStack(MeldItems.quartzStrata, 3))
+                    );
+                }}
+        );
+    }
 }

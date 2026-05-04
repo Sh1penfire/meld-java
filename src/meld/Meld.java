@@ -43,7 +43,7 @@ public class Meld extends Mod{
 
         Events.run(EventType.Trigger.draw, () -> {
             if(!MeldSettings.overlayOverFog) return;
-            Draw.draw(Layer.fogOfWar + 2, AboveOverlayRenderer::draw);
+            Draw.draw(MeldLayers.overlayOver, AboveOverlayRenderer::draw);
         });
 
         Events.on(EventType.FileTreeInitEvent.class, e -> {
