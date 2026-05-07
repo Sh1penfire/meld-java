@@ -21,5 +21,15 @@ public class LakeRim extends Door {
             if(nearby.floor().isLiquid) return true;
         }
         return false;
+
+
+    }
+
+    public class LakeRimBuild extends DoorBuild{
+
+        @Override
+        public boolean checkSolid(){
+            return !open;
+        }
     }
 }

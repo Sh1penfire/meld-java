@@ -10,6 +10,7 @@ import arc.math.Angles;
 import arc.math.Interp;
 import arc.math.Mathf;
 import arc.struct.ObjectIntMap;
+import arc.struct.Seq;
 import arc.util.Log;
 import arc.util.Tmp;
 import meld.*;
@@ -128,6 +129,7 @@ public class MeldUnits {
         bulbheadOverseer = new UnitType("bulbhead-overseer"){{
             float IR = 80;
 
+            itemCapacity = 0;
             health = 240;
             armor = -40;
             lifetime = 360;
@@ -288,11 +290,13 @@ public class MeldUnits {
             range = 100;
 
 
-            lightRadius = IR/2;
+            lightRadius = IR * 2;
             lightOpacity = 0.5f;
+            lightColor = Color.orange;
             buildSpeed = 1;
             mineTier = 2;
             mineSpeed = 8;
+            itemCapacity = 100;
 
             buildBeamOffset = 9;
             rotateToBuilding = false;
@@ -636,6 +640,7 @@ public class MeldUnits {
         cannonOverseer = new MeldUnitType("cannon-overseer"){{
             float IR = 120;
 
+            itemCapacity = 0;
             health = 800;
             lifetime = 360 * 6;
             speed = 0;
@@ -867,7 +872,7 @@ public class MeldUnits {
             health = 200;
             armor = 45;
 
-            drownTimeMultiplier = 0.6f;
+            drownTimeMultiplier = 0.25f;
             drag = 0.14f;
             accel = 0.24f;
 
@@ -1000,8 +1005,6 @@ public class MeldUnits {
                     }}
             );
 
-            immunities.addAll(MeldStatusEffects.aspectBurn);
-
             weapons.addAll(craigWeapon(-3, 0));
 
             constructor = LegsUnit::create;
@@ -1130,8 +1133,6 @@ public class MeldUnits {
                     }}
             );
 
-            immunities.addAll(MeldStatusEffects.aspectBurn);
-
             constructor = LegsUnit::create;
         }};
 
@@ -1187,7 +1188,6 @@ public class MeldUnits {
                     }}
             );
 
-            immunities.addAll(MeldStatusEffects.aspectBurn);
             constructor = LegsUnit::create;
         }};
 
@@ -1353,7 +1353,6 @@ public class MeldUnits {
                     }}
             );
 
-            immunities.addAll(MeldStatusEffects.lacerated);
             constructor = LegsUnit::create;
         }};
 
@@ -1409,7 +1408,6 @@ public class MeldUnits {
                         }};
                     }}
             );
-            immunities.addAll(MeldStatusEffects.aspectBurn);
 
             constructor = CrawlUnit::create;
         }};
@@ -1696,7 +1694,6 @@ public class MeldUnits {
                         }};
                     }}
             );
-            immunities.addAll(MeldStatusEffects.lacerated);
 
             constructor = LegsUnit::create;
         }};

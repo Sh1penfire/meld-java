@@ -1,6 +1,7 @@
 package meld.world.blocks.producer;
 
 import arc.math.Mathf;
+import arc.util.Time;
 import mindustry.gen.Building;
 import mindustry.type.ItemStack;
 import mindustry.type.Liquid;
@@ -28,6 +29,6 @@ public class ProduceLiquid extends Produce{
     @Override
     public void update(Building build) {
         super.update(build);
-        build.handleLiquid(build, output.liquid, output.amount);
+        build.handleLiquid(build, output.liquid, output.amount * Time.delta);
     }
 }

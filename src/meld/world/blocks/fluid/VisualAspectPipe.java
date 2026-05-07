@@ -1,6 +1,7 @@
 package meld.world.blocks.fluid;
 
 import arc.graphics.Blending;
+import arc.graphics.Color;
 import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.Fill;
 import arc.graphics.g2d.TextureRegion;
@@ -250,9 +251,20 @@ public class VisualAspectPipe extends AspectPipe {
                         );
                     }
                 }
+            }
+            Draw.blend();
+            Draw.reset();
+        }
 
-                Draw.blend();
-                Draw.reset();
+        @Override
+        public void drawLiquidLight(Liquid liquid, float amount) {
+            if (amount > 0.01F) {
+                Color color = liquid.lightColor;
+                float fract = 1.0f;
+                float opacity = color.a * fract;
+                if (opacity > 0.001F) {
+                    Drawf.light(this.x, this.y, (float)this.block.size * 30.0F * fract, color, opacity * amount);
+                }
             }
         }
     }

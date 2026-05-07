@@ -211,6 +211,7 @@ public class MeldLightRenderer extends LightRenderer {
     }
 
     public void draw(){
+        draw2();
     }
 
     public void draw2(){
@@ -229,8 +230,8 @@ public class MeldLightRenderer extends LightRenderer {
         Draw.color();
         buffer.begin(Color.clear);
         Draw.sort(false);
-        Gl.blendEquationSeparate(Gl.funcAdd, Gl.max);
-        Blending.additive.apply();
+        Draw.blend(Blending.additive);
+
         for(Runnable run : lights){
             run.run();
         }
@@ -240,8 +241,6 @@ public class MeldLightRenderer extends LightRenderer {
             Draw.rect(circleRegion, cir.x, cir.y, cir.radius * 2, cir.radius * 2);
         }
         Draw.reset();
-        Blending.normal.apply();
-        Draw.sort(true);
         Texture lightTex = buffer.getTexture();
         buffer.end();
         Draw.color();
@@ -249,9 +248,6 @@ public class MeldLightRenderer extends LightRenderer {
         //TODO: potential memory leak
         Draw.color();
         shadowBuffer.begin(Color.clear);
-        Draw.sort(false);
-        Blending.additive.apply();
-        Gl.blendEquationSeparate(Gl.funcAdd, Gl.funcAdd);
         shadowBuffer.resize(Core.graphics.getWidth()/scaling, Core.graphics.getHeight()/scaling);
 
         for(Runnable run : shadows){
@@ -259,10 +255,10 @@ public class MeldLightRenderer extends LightRenderer {
         }
 
         Draw.reset();
-        Blending.normal.apply();
         Draw.sort(true);
         Texture exclusionTex = shadowBuffer.getTexture();
         shadowBuffer.end();
+        Draw.blend(Blending.normal);
         Draw.color();
 
 

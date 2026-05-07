@@ -16,10 +16,10 @@ description: "[[]gray]Under scattered gloomy sunlight in the shimmering seas, wi
 subtitle: "[[]accent]What choice do I have...[[]]"
 
 #the mod version
-version: gameplay test 5
+version: gameplay test 6
 
 #the minimum game build required to run this mod
-minGameVersion: 154
+minGameVersion: 157
 
 #this is a java mod
 java: true

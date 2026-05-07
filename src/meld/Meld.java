@@ -34,7 +34,7 @@ public class Meld extends Mod{
     public static NativeJavaPackage p = null;
 
     public static Melting melting;
-
+    
     public Meld(){
         Events.on(EventType.ClientLoadEvent.class, e -> {
             MeldRegions.load();
@@ -43,14 +43,16 @@ public class Meld extends Mod{
 
         Events.run(EventType.Trigger.draw, () -> {
             if(!MeldSettings.overlayOverFog) return;
-            Draw.draw(Layer.fogOfWar + 2, AboveOverlayRenderer::draw);
-
-            //Just additive blending the fuck out of this layer in particular cause like fuck yes
-            Draw.drawRange(MeldLayers.smokeHigh, 1, () -> Draw.blend(Blending.additive), () -> Draw.blend(Blending.normal));
+            Draw.draw(MeldLayers.overlayOver, AboveOverlayRenderer::draw);
         });
 
         Events.on(EventType.FileTreeInitEvent.class, e -> {
             Core.app.post(MeldShaders::load);
+        });
+        
+        Events.on(EventType.FileTreeInitEvent.class, e -> {
+            // TODO: potentially run earlier?
+            Bundles.load();
         });
 
         CustomExplosions.load();
@@ -58,29 +60,6 @@ public class Meld extends Mod{
 
     public static String prefix(String in){
         return name + "-" + in;
-    }
-    private static final StringBuilder b = new StringBuilder();
-
-    //Thanks smolkey
-    public static String gradient(String in, Color... colors){
-        if(colors.length == 1) return "[#" + colors[0].toString().substring(0, 6) + "]" + in + "[]";
-
-        b.setLength(0);
-        b.trimToSize();
-        int length = in.length();
-        int spaces = 0;
-
-        for(int i = 0; i < length; i++){
-            char ind = in.charAt(i);
-            if(Character.isWhitespace(ind)){
-                spaces++;
-                b.append(' ');
-                continue;
-            }
-            b.append("[#").append(Tmp.c1.set(colors[0]).lerp(colors, (float) i / (length - spaces)).toString(), 0, 6).append("]").append(ind).append("[]");
-        }
-
-        return b.toString();
     }
 
     @Override

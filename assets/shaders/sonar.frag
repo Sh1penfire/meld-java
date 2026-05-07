@@ -14,7 +14,7 @@ void main() {
     vec4 color = texture2D(u_texture, v_texCoords);
     gl_FragColor = color;
 
-    if(color.r == 1 && color.g + color.b > 0){
+    if(color.r == 1.0 && color.g + color.b > 0.0){
 
         color.a *= 0.5 * abs(sin((v_texCoords.x + v_texCoords.y) * 20.0 + u_time/20.0));
 

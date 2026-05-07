@@ -1,5 +1,6 @@
 package meld.world.blocks.production;
 
+import arc.Core;
 import arc.graphics.Color;
 import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.Fill;
@@ -13,6 +14,8 @@ import arc.util.Time;
 import arc.util.io.Reads;
 import arc.util.io.Writes;
 import meld.graphics.Draww;
+import meld.graphics.TextModifiers;
+import meld.graphics.TileDrawers;
 import meld.world.WorldUtil;
 import meld.world.blocks.io.BlockIO;
 import meld.world.util.ItemLogic;
@@ -29,9 +32,12 @@ import mindustry.world.blocks.storage.StorageBlock;
 import mindustry.world.consumers.Consume;
 import mindustry.world.modules.ItemModule;
 
+import static meld.graphics.TileDrawers.tileRad;
+
 public class GrindingQuary extends Block {
 
     public static ObjectMap<Block, GrinderEntry> grinderMap = new ObjectMap<>();
+    public static Seq<Item> alwaysDump = new Seq<>();
 
     public static ObjectFloatMap<Item> drillMultipliers = new ObjectFloatMap<>();
 
@@ -50,24 +56,34 @@ public class GrindingQuary extends Block {
     }
 
     public Seq<Tile> valid = new Seq<>(), overlay = new Seq<>();
+    float fogTiles = 0;
 
     @Override
     public void drawOverlay(float x, float y, int rotation) {
         super.drawOverlay(x, y, rotation);
 
-        float drawx = x, drawy = y - (size * Vars.tilesize)/2f - 2;
 
         Tile start = Vars.world.tileWorld(x, y);
+        fogTiles = 0;
+        float multiplier = 1;
 
         if(start != null){
             valid.clear();
             overlay.clear();
+
+            if(Vars.control.input.block == null && start.build instanceof GrindingQuaryBuild build && start== build.tile && start.block() == this){
+                multiplier = build.boostAmount;
+            }
+
             start.getLinkedTilesAs(this, tile -> {
                 if(tile != null){
+                    if(!Vars.fogControl.isDiscovered(Vars.player.team(), tile.x, tile.y)){
+                        fogTiles++;
+                        TileDrawers.drawFog(tile.worldx(), tile.worldy(), tileRad);
+                        return;
+                    }
                     if(tile.solid() && tile.block() != this){
-                        Draw.color(Pal.health);
-                        Draw.alpha(0.5f);
-                        Fill.square(tile.worldx(), tile.worldy(), Vars.tilesize/2f);
+                        TileDrawers.drawInvalid(tile.worldx(), tile.worldy(), tileRad);
                         return;
                     }
                     if(grinderMap.containsKey(tile.floor())){
@@ -78,6 +94,7 @@ public class GrindingQuary extends Block {
                     }
                 }
             });
+
             //Draw this in stages
             valid.each(tile -> {
                 Draw.color(Pal.accent);
@@ -93,8 +110,8 @@ public class GrindingQuary extends Block {
 
             valid.each(tile -> {
                 Draw.color(Color.white);
-                float prog = Mathf.absin(Time.time/30 + (tile.x + tile.y) * Mathf.pi/3, 1, 1);
-                float prog2 = Time.time/240 + (tile.x + tile.y) * Mathf.pi % 1;
+                float prog = Mathf.absin(Time.globalTime/30 + (tile.x + tile.y) * Mathf.pi/3, 1, 1);
+                float prog2 = Time.globalTime/240 + (tile.x + tile.y) * Mathf.pi % 1;
                 Draw.alpha(0.5f + 0.5f * prog);
                 Draw.rect(tile.floor().region, tile.worldx(), tile.worldy() -2 + prog * 4, 4 + 4 * prog, 4 + 4 * Mathf.sin(prog), -15 + 30 * prog + 360 * prog2);
             });
@@ -107,23 +124,53 @@ public class GrindingQuary extends Block {
         }
 
         Drawf.text();
-        ItemModule depositItems = WorldUtil.totalQuarry(x, y, this, true);
+
+        boolean found = false;
+
+        float fogPercent = fogTiles/size/size;
+        float fin = fogPercent * fogPercent;
+        float glitchChance = fin, glitchSpeed = 2 + fin * 8;
+
+        float drawx = x, drawy = y - (size * Vars.tilesize)/2f - 2;
+        ItemModule depositItems = WorldUtil.totalQuarry(x, y, this, true, true);
         for (Item item : Vars.content.items()) {
             float amount = depositItems.get(item);
             if(amount == 0) continue;
-            Draww.itemText(item.localizedName + ": " + amount, drawx, drawy, item);
+            found = true;
+            Draww.itemText(TextModifiers.glitchy(item.localizedName + ": " + TextModifiers.glitchyNumb(amount, glitchChance * 4, glitchSpeed * 4), 2, glitchChance, glitchSpeed),
+                    drawx, drawy, item);
 
             drawy -= 10;
         }
+        if(!found){
+            Draww.drawTextUnderlined(TextModifiers.glitchyEntry("overlay.deposit-missing", 2, glitchChance, glitchSpeed),
+                    drawx, drawy, Pal.lightishGray);
+        }
+
+        found = false;
 
         drawy = y + (size * Vars.tilesize)/2f + 2;
-        ObjectFloatMap<Item> drillSpeeds = WorldUtil.quarrySpeed(x, y, this);
+        ObjectFloatMap<Item> drillSpeeds = WorldUtil.quarrySpeed(x, y, this, true);
         for (Item item : Vars.content.items()) {
             float amount = drillSpeeds.get(item, 0);
             if(amount == 0) continue;
-            Draww.itemText(item.localizedName + ": " + amount + "/s", drawx, drawy, item);
+            found = true;
+            Draww.itemText(TextModifiers.glitchy(item.localizedName + ": " + TextModifiers.glitchyNumb(amount * multiplier, glitchChance * 4, glitchSpeed * 4) + "/s", 2, glitchChance, glitchSpeed),
+                    drawx, drawy, item);
 
             drawy += 10;
+        }
+
+        if(!found){
+            Draww.drawTextUnderlined(TextModifiers.glitchyEntry("overlay.ore-missing", 2, glitchChance, glitchSpeed),
+                    drawx, drawy, Pal.lightishGray);
+        }
+
+        drawx = x - (size * Vars.tilesize)/2f - 2;
+        drawy = y;
+
+        if(multiplier > 1){
+            Draww.drawTextUnderlined(multiplier + "x ", drawx, drawy, Pal.accent);
         }
     }
 
@@ -182,19 +229,32 @@ public class GrindingQuary extends Block {
             for (Item key : itemRates.keys()) {
                 if(itemRates.get(key, 0) * drillMultipliers.get(key, 1) > 0 && acceptItem(this, key)) return true;
             }
-            return target != null;
+            return target != null && ItemLogic.capacity(entry.output, this);
         }
 
         @Override
         public void update(){
             super.update();
             updateDrilling();
-            dump();
+
+            for (Item key : drillTimers.keys()) {
+                dumpAccumulate(key);
+            }
+
+            alwaysDump.each(this::dumpAccumulate);
 
             progress += Time.delta/itemDuration;
             if(progress >= 1){
                 progress %= 1;
+
+                //Get the speed boost from the non optional aspect consumer
                 boostAmount = 1;
+
+                for (Consume consumer : consumers) {
+                    if(!consumer.booster && consumer.efficiency(this) > 0) boostAmount = consumer.efficiencyMultiplier(this);
+                }
+                //Get the speed boost from the non optional aspect consumer
+
                 for (Consume consumer : consumers) {
                     if(consumer.booster && consumer.optional && consumer.efficiency(this) > 0) boostAmount *= consumer.efficiencyMultiplier(this);
                     consumer.trigger(this);

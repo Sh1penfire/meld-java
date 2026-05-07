@@ -13,7 +13,8 @@ public class SlipstreamHullAbility extends Ability {
         super.update(unit);
         if(unit.tileOn() != null) {
             Tile tile = unit.tileOn();
-            unit.dragMultiplier /= Math.max(unit.tileOn().floor().dragMultiplier, 1);
+            unit.dragMultiplier /= Math.max(tile.floor().dragMultiplier, 1);
+            unit.speedMultiplier /= Math.max(tile.floor().speedMultiplier, 1);
 
             //TODO: Better wakes for naval units
             /*

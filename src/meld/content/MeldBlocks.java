@@ -1158,7 +1158,7 @@ public class MeldBlocks {
         lakeRim = new LakeRim("lake-rim"){{
             requirements(Category.defense, with(MeldItems.debris, 4));
             size = 1;
-            health = 120;
+            health = 400;
         }};
 
         frictionPad = new FrictionPad("friction-pad"){{
@@ -1202,7 +1202,7 @@ public class MeldBlocks {
             size = 2;
             health = 800;
 
-            itemCapacity = 20;
+            itemCapacity = 50;
         }};
 
         aspectIncinerator = new StorageIncinerator("aspect-incinerator"){{
@@ -1269,7 +1269,7 @@ public class MeldBlocks {
             health = 420;
             placeableLiquid = true;
 
-            drillTime = 90;
+            drillTime = 180;
             tier = 2;
 
             buildTime = 90;
@@ -1535,7 +1535,7 @@ public class MeldBlocks {
             outputLiquidSlots = 1;
 
             inputLiquids.addAll(MeldLiquids.aspect, MeldLiquids.boundAspect, MeldLiquids.stormingAspect);
-            inputItems.addAll(MeldItems.tenbris, MeldItems.clayMallows, MeldItems.carbolith, MeldItems.debris, MeldItems.shadesteel, MeldItems.glassMallows, MeldItems.silver, MeldItems.likestoneSediments, MeldItems.quartzStrata);
+            inputItems.addAll(MeldItems.tenbris, MeldItems.clayMallows, MeldItems.carbolith, MeldItems.debris, MeldItems.shadesteel, MeldItems.silver, MeldItems.likestoneSediments, MeldItems.quartzStrata);
             outputItems.addAll(MeldItems.cruciblePlating, MeldItems.shadesteel, MeldItems.glassMallows, MeldItems.annealedSilver);
             outputLiquids.addAll(MeldLiquids.fumes);
 
@@ -1553,8 +1553,8 @@ public class MeldBlocks {
             itemCapacity = 10;
 
             inputLiquids.addAll(MeldLiquids.aspect, MeldLiquids.boundAspect, MeldLiquids.stormingAspect);
-            inputItems.addAll(MeldItems.shadesteel, MeldItems.elnarDust, MeldItems.debris, MeldItems.silver, MeldItems.annealedSilver, MeldItems.glassMallows);
-            outputItems.addAll(MeldItems.aspectPipe, MeldItems.aspectBomb);
+            inputItems.addAll(MeldItems.shadesteel, MeldItems.elnarDust, MeldItems.debris, MeldItems.silver, MeldItems.annealedSilver, MeldItems.glassMallows, MeldItems.iampsi);
+            outputItems.addAll(MeldItems.aspectPipe, MeldItems.aspectBomb, MeldItems.quartzStrata);
 
             inputLiquidSlots = 1;
 
@@ -1605,6 +1605,9 @@ public class MeldBlocks {
                                 new ProduceItem(new ItemStack(MeldItems.aspectBomb, 10))
                         );
                     }}
+            );
+            recipes.addAll(
+                    MeldRecipes.crusherRecipies(2, 0.25f)
             );
         }};
 
@@ -1933,6 +1936,8 @@ public class MeldBlocks {
             requirements(Category.effect, with(MeldItems.iampsi, 30));
             configurable = false;
             radius = 32;
+            databaseCategory = "lamp-psi";
+            databaseTag = "lamp-psi";
 
             consume(new StupidConsumeAspects(outletRate/5, AspectGroup.aspect));
         }};
@@ -1967,7 +1972,7 @@ public class MeldBlocks {
         platedChute = new Duct("plated-chute"){{
             requirements(Category.distribution, with(MeldItems.cruciblePlating, 2));
             armored = true;
-            health = 45;
+            health = 70;
             armor = 10;
             speed = 4f;
         }};
@@ -2472,7 +2477,7 @@ public class MeldBlocks {
                 meldCannon, meldMortar,
                 craigCoffer, jillaCoffer, braigCoffer, billaCoffer,
                 meldCultivator,
-                pipebox, pipelineBridge, pipelineCrossing, pipelineRouter,
+                pipeline, pipelineBridge, pipelineCrossing, pipelineRouter,
                 carbonicBarrier, carbonicBarrierLarge, crystalBarrier, crystalBarrierLarge,
                 meldAmplifier, meldCapsule, meldNode, meldSuppressor
         );

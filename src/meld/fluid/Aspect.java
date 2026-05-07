@@ -12,6 +12,7 @@ import mindustry.type.Liquid;
 public class Aspect extends Liquid {
 
     public boolean setDefaults = true;
+    //Opacity per liquid unit in a block
     public float lightOpacity = 0.5f;
 
     public Aspect(String name) {

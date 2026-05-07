@@ -9,9 +9,10 @@ uniform vec4 u_ambient;
 
 varying vec2 v_texCoords;
 
-void main(){
+#define banding 8.0
+#define banding2 3.0
 
-    float banding = 8.0;
+void main(){
 
     //Exclusion
     vec4 exclusion = texture2D(u_exclusion, v_texCoords);
@@ -24,9 +25,9 @@ void main(){
     float alpha = color.a;
 
     //Get the scaling right here...
-    alpha = clamp(floor((alpha) * 8.0)/8.0, 0.0, 1.0) * 0.3 + clamp(floor(alpha * 3.0)/3.0, 0.0, 1.0) * 0.3 + alpha * 0.4;
+    alpha = clamp(floor((alpha) * banding)/banding, 0.0, 1.0) * 0.3 + clamp(floor(alpha * banding2)/banding2, 0.0, 1.0) * 0.3 + alpha * 0.4;
 
-    vec4 totalColor = clamp(vec4(color.rgb * alpha, 1) + vec4(positionAmbient.rgb * positionAmbient.a, 1), 0.0, 1.0);
+    vec4 totalColor = clamp(vec4(color.rgb * alpha, 1.0) + vec4(positionAmbient.rgb * positionAmbient.a, 1.0), 0.0, 1.0);
 
     vec4 background = clamp(texture2D(u_texture, v_texCoords), 0.0, 1.0);
 

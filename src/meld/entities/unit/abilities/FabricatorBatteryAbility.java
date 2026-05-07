@@ -78,20 +78,14 @@ public class FabricatorBatteryAbility extends Ability {
         }
 
         if(active){
-            if(enabled){
+            if(enabled && unit.buildPlan().build() != null){
                 charge -= Time.delta * drainSpeed;
                 unit.buildSpeedMultiplier *= speedMulti;
                 zapTimer += Time.delta;
                 if(zapTimer > 12){
                     zapTimer %= 12;
                     Vec2 targ = new Vec2();
-                    if(unit.buildPlan().build() != null) {
-                        targ.set(unit.buildPlan().build().x, unit.buildPlan().build().y);
-                    }
-                    else {
-                        Tmp.v1.trns(Mathf.random(360), unit.type.hitSize + Mathf.random(0, 12)).add(unit);
-                        targ.set(Tmp.v1);
-                    }
+                    targ.set(unit.buildPlan().build().x, unit.buildPlan().build().y);
 
                     MeldFx.chainLightning.at(unit.x, unit.y, 0, Pal.accent, new MeldFx.VisualLightningHolder() {
                         @Override
@@ -180,7 +174,7 @@ public class FabricatorBatteryAbility extends Ability {
         Draw.rect(MeldRegions.chargeRegions[stage], dx - x * 2, dy);
 
         Vars.renderer.lights.add(() -> {
-            Fill.light(unit.x, unit.y, 4 + (int) lightRadius/4, lightRadius, Tmp.c1.set(unit.type.lightColor).a(1), Tmp.c2.set(unit.type.lightColor).a(0));
+            Fill.light(unit.x, unit.y, 4 + (int) lightRadius/4, lightRadius, Tmp.c1.set(unit.type.lightColor).a((float) stage/stageMax * 0.5f), Tmp.c2.set(unit.type.lightColor).a(0));
         });
     }
 }

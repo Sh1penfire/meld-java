@@ -59,7 +59,7 @@ public class MeldSettings {
 
         Vars.ui.settings.addCategory(Core.bundle.get("settings.meld-title"), Meld.prefix("icon"), t -> {
             check(t, SettingKeys.lighting, true, b -> replaceLighting = b);
-            check(t, SettingKeys.invertAmbient, true, b -> invertAmbient = b);
+            check(t, SettingKeys.invertAmbient, false, b -> invertAmbient = b);
             check(t, SettingKeys.connectedSonar, true, b -> connectedSonar = b);
             check(t, SettingKeys.overlayOverFog, true, b -> overlayOverFog = b);
 
@@ -75,34 +75,6 @@ public class MeldSettings {
             check(t, SettingKeys.bulbheadOmnimove, false, MeldUnits::bulbheadOmnimove);
             check(t, SettingKeys.portSaves, false, b -> portSaves = b);
         });
-
-        /*
-        photosensitiveMode = Core.settings.getBool("settings.frostscape-flashing-lights-safety", false);
-        heatOverlay.enabled = Core.settings.getBool("settings.frostscape-heat-overlay", false);
-        simplifiedLightning = Core.settings.getBool("settings.frostscape-simple-lightning");
-        parallax = Core.settings.getInt("settings.frostscape-parallax");
-
-        heatOverlay.enabled = Core.settings.getBool("settings.frostscape-heat-overlay", false);
-        ui.settings.addCategory(Core.bundle.get("settings.frostscape-title"), NAME + "-hunter", t -> {
-            t.sliderPref(Core.bundle.get("settings.frostscape-parallax"), 100, 1, 100, 1, s -> {
-                parallax = s/100;
-                return s + "%";
-            });
-            t.sliderPref(Core.bundle.get("settings.frostscape-wind-visual-force"), 1, 0, 8, 1, s -> s * 100 + "%");
-            t.checkPref(Core.bundle.get("settings.frostscape-flashing-lights-safety"), false, b -> {
-                photosensitiveMode = b;
-            });
-            t.checkPref(Core.bundle.get("settings.frostscape-heat-overlay"), false, b -> {
-                heatOverlay.enabled = b;
-            });
-            t.checkPref(Core.bundle.get("settings.frostscape-simple-lightning"), false, b -> {
-                simplifiedLightning = b;
-            });
-            t.row();
-            t.add(Core.bundle.get("settings.frostscape.flashingwarning")).wrap().left().growX().padTop(3);
-        });
-
-         */
     }
 
 }
