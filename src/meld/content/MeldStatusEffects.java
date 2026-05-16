@@ -118,6 +118,7 @@ public class MeldStatusEffects {
         @Override
         public void update(Unit unit, StatusEntry entry) {
 
+            unit.unapply(spurting);
             unit.speedMultiplier /= speedMultiplier;
             //Start the falloff at 150 ticks remaining
             unit.speedMultiplier *= Mathf.lerp(
@@ -150,14 +151,14 @@ public class MeldStatusEffects {
                         1, speedMultiplier,
 
                         Interp.pow2.apply(
-                                Mathf.clamp(Math.min(entry.time, 30)/(30))
+                                Mathf.clamp(Math.min(entry.time, 60)/(60))
                         )
                 );
             }{
+
             damage = 0.2f;
-            speedMultiplier = 0.01f;
+            speedMultiplier = 0.05f;
             dragMultiplier = 0.3f;
-            disarm = true;
         }};
 
         newborn = new StatusEffect("newborn"){

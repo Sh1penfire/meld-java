@@ -103,11 +103,13 @@ public class MeldEnvironment {
         debrisDeposit = new StaticWall("debris-deposit"){{
             variants = 0;
             itemDrop = MeldItems.debris;
+            playerUnmineable = true;
         }};
 
         debrisDepositLarge = new TallBlock("large-debris-deposit"){{
             variants = 2;
             itemDrop = MeldItems.debris;
+            playerUnmineable = true;
         }};
 
         carbolithDeposit = new StaticWall("carbolith-deposit"){{

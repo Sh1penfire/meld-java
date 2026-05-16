@@ -24,7 +24,7 @@ public class PointagoWeapon extends BaseWeapon {
         rotate = true;
         mirror = alternate = false;
         shootStatus = MeldStatusEffects.sentry;
-        shootStatusDuration = 200;
+        shootStatusDuration = 180;
 
         shoot = new ShootSpread(){{
             shots = 3;
@@ -32,10 +32,10 @@ public class PointagoWeapon extends BaseWeapon {
             spread = 1;
         }};
 
-        bullet = new BasicBulletType(5, 65, Meld.prefix("clump")){{
+        bullet = new BasicBulletType(3.5f, 65, Meld.prefix("clump")){{
             layer = Layer.fogOfWar + 1;
             drag = -0.02f;
-            lifetime = 55;
+            lifetime = 72;
             rangeOverride = 300;
 
             pierce = true;

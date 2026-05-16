@@ -471,12 +471,12 @@ public class MeldBlocks {
                 float[] spreadCone = new float[]{0, 3, 12, 25};
                 barrels = new float[]{
                         0, 0, spreadCone[0],
-                        0, 0, -spreadCone[2],
-                        0, 0, spreadCone[1],
-                        0, 0, -spreadCone[1],
-                        0, 0, spreadCone[3],
-                        0, 0, spreadCone[2],
-                        0, 0, -spreadCone[3]
+                        -2, 0, -spreadCone[2],
+                        1, 0, spreadCone[1],
+                        -1, 0, -spreadCone[1],
+                        3, 0, spreadCone[3],
+                        2, 0, spreadCone[2],
+                        -3, 0, -spreadCone[3]
                 };
             }};
 
@@ -484,8 +484,8 @@ public class MeldBlocks {
 
             shootY = 7;
 
-            ammoPerShot = 4;
-            maxAmmo = 16;
+            ammoPerShot = 10;
+            maxAmmo = 20;
 
             drawer = new DrawTurret(){{
                 parts.addAll(
@@ -708,21 +708,25 @@ public class MeldBlocks {
 
             liquidCapacity = outletRate * 60 * 4;
             fogRadiusMultiplier = 0.25f;
-            reload = 30;
+            reload = 20;
 
             shootEffect = Fx.shootBig;
-            shootWarmupSpeed = 0.09f;
-            minWarmup = 0.7f;
 
             velocityRnd = 0.2f;
             recoil = 1.5f;
-            inaccuracy = 2;
+            inaccuracy = 1.2f;
             shootCone = 5;
 
-            ammoPerShot = 2;
+            ammoPerShot = 4;
             shootY = 8;
 
             rotate = quickRotate = false;
+
+            shoot = new ShootSpread(){{
+                shots = 3;
+                shotDelay = 3;
+                spread = 0;
+            }};
 
             consume(new StupidConsumeAspects(outletRate * 1, AspectGroup.aspect));
 
@@ -1268,6 +1272,7 @@ public class MeldBlocks {
             size = 3;
             health = 420;
             placeableLiquid = true;
+            squareSprite = false;
 
             drillTime = 180;
             tier = 2;
@@ -1523,7 +1528,7 @@ public class MeldBlocks {
 
          */
         rotaryKiln = new RecipeCrafter("rotary-kiln"){{
-            requirements(Category.crafting, with(MeldItems.debris, 350, MeldItems.cruciblePlating, 150));
+            requirements(Category.crafting, with(MeldItems.debris, 350, MeldItems.cruciblePlating, 450));
             size = 5;
 
             hasItems = true;
@@ -1852,6 +1857,7 @@ public class MeldBlocks {
             size = 5;
             range = (size + 3) * Vars.tilesize * 2;
             health = 600;
+            placeableLiquid = true;
         }};
 
         sonarSpire = new SonarSpire("sonar-spire"){{
@@ -2327,6 +2333,7 @@ public class MeldBlocks {
 
         jillaCoffer = new Wall("jilla-coffer"){{
             requirements(Category.defense, with(MeldItems.larvalPlating, 50, MeldItems.meldShard, 35));
+            targetable = false;
             size = 2;
             health = 400;
             destroyBulletSameTeam = true;
@@ -2341,6 +2348,7 @@ public class MeldBlocks {
 
         billaCoffer = new Wall("billa-coffer"){{
             requirements(Category.defense, with(MeldItems.larvalPlating, 50, MeldItems.meldShard, 35));
+            targetable = false;
             size = 2;
             health = 400;
             armor = 80;

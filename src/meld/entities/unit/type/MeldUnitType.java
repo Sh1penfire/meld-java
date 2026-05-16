@@ -8,6 +8,7 @@ import arc.math.Mathf;
 import arc.util.Time;
 import arc.util.Tmp;
 import meld.graphics.MeldPal;
+import mindustry.content.Fx;
 import mindustry.gen.Unit;
 import mindustry.type.UnitType;
 
@@ -18,6 +19,7 @@ public class MeldUnitType extends UnitType {
         super(name);
         outlineColor = Color.clear;
         healColor = MeldPal.flamePinkDark;
+        deathExplosionEffect = Fx.explosion;
     }
 
     //Ported from Frostscape
@@ -84,4 +86,4 @@ public class MeldUnitType extends UnitType {
         }
 
     }
-        }
+}

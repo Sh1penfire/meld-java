@@ -29,6 +29,6 @@ public class ProduceLiquid extends Produce{
     @Override
     public void update(Building build) {
         super.update(build);
-        build.handleLiquid(build, output.liquid, output.amount * Time.delta);
+        build.handleLiquid(build, output.liquid, build.efficiency * output.amount * Time.delta);
     }
 }

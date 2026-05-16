@@ -37,12 +37,29 @@ public class BraigWeapon extends BaseWeapon {
             width = 10;
             height = 12;
             damage = 10;
-            splashDamage = 25;
-            splashDamageRadius = 25;
             knockback = 6;
             shootEffect = Fx.shootBig;
             hitEffect = Fx.explosion;
             impact = true;
+
+            fragBullets = 3;
+            fragRandomSpread = 45;
+
+            fragBullet = new BasicBulletType(4, 15, Meld.prefix("clump")){{
+                speed = 4;
+                lifetime = 10;
+                width = 3;
+                height = 8;
+
+                pierce = true;
+                pierceCap = 2;
+
+                knockback = 4f;
+
+                impact = true;
+
+                hitEffect = despawnEffect = Fx.none;
+            }};
         }};
     }
 }

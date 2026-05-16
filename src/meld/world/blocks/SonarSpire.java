@@ -57,12 +57,12 @@ public class SonarSpire extends FieldPulsar {
             //Draww.drawChain(chain, x, y, Core.input.mouseWorldX(), Core.input.mouseWorldY(), 0);
 
             Draww.drawSonar(x, y, smoothRadius, 2, MeldLayers.sonar, ringColor);
-            Drawf.light(x, y, smoothRadius, Pal.accent, 1);
+            Drawf.light(x, y, smoothRadius, ringColor, 1);
 
             //Charge visuals, not sure if im keeping them or not
             Lines.arc(x, y, range, uptime/pulseDuration);
 
-            Draw.color(Pal.accent);
+            Draw.color(ringColor);
             float charge = duration/pulseDuration;
             float chargeInv = 1 - charge;
 

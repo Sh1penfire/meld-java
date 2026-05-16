@@ -79,22 +79,20 @@ public class Depot extends StorageBlock {
 
         @Override
         public void updateTile(){
-            if(lastItem == null && items.any()){
-                //branching just for the sake of my sanity here
-                if(sortItem == null || sortItem == items.first()) lastItem = items.first();
-                else if(items.has(sortItem)) lastItem = sortItem;
+            if(sortItem != null && items.any()){
+                distributeItem(sortItem);
             }
+            else items.each((item, amount) -> distributeItem(item));
+        }
 
-            if(lastItem != null){
-                time += 1f / speed * delta();
-                Building target = getTileTarget(lastItem, lastInput, false);
+        public void distributeItem(Item item){
+            time += 1f / speed * delta();
+            Building target = getTileTarget(item, lastInput, false);
 
-                if(target != null && (time >= 1f || !(target.block instanceof Depot || target.block.instantTransfer))){
-                    getTileTarget(lastItem, lastInput, true);
-                    target.handleItem(this, lastItem);
-                    items.remove(lastItem, 1);
-                    lastItem = null;
-                }
+            if(target != null && (time >= 1f || !(target.block instanceof Depot || target.block.instantTransfer))){
+                getTileTarget(item, lastInput, true);
+                target.handleItem(this, item);
+                items.remove(item, 1);
             }
         }
 

@@ -47,7 +47,7 @@ public class FabricatorBatteryAbility extends Ability {
     public float chargeCap = 60 * 60;
 
     public float speedMulti = 5;
-    public float drainSpeed = 8;
+    public float drainSpeed = 6;
 
     public float minCharge = 60;
 
@@ -56,7 +56,8 @@ public class FabricatorBatteryAbility extends Ability {
     @Override
     public void update(Unit unit) {
         super.update(unit);
-        boolean active = unit.activelyBuilding();
+        boolean active = unit.activelyBuilding() && !(unit.buildPlan() == null || unit.buildPlan().stuck);
+
         boolean visualActive = unit.vel.len() > 1f && !active && lingerTime <= 0;
 
         lightRadius = Mathf.lerp(lightRadius, lightRadai[Mathf.clamp(stage, 0, lightRadai.length)], 0.02f);

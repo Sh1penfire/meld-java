@@ -11,4 +11,9 @@ public class MeldLayers {
     overlayOver = Layer.fogOfWar + 2 + funnyNumber,
     sonar = Layer.fogOfWar + 1 + funnyNumber,
     sonarInside = Layer.fogOfWar + 3 + funnyNumber;
+
+    //Standardised effect layering
+    public static float
+            //should be under bloom
+            smokeUnder = Layer.bullet - funnyNumber - 0.1f;
 }

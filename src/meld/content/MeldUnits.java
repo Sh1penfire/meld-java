@@ -302,6 +302,7 @@ public class MeldUnits {
             rotateToBuilding = false;
             buildRange = IR;
             mineRange = IR;
+            mineWalls = true;
             fogRadius = IR/ Vars.tilesize;
 
             canBoost = false;
@@ -341,7 +342,7 @@ public class MeldUnits {
                         shootSound = Sounds.none;
                         minWarmup = 1;
                         linearWarmup = true;
-                        shootWarmupSpeed = 5/90f;
+                        shootWarmupSpeed = 2/60f;
                         DrawPart.PartProgress mixedProg = DrawPart.PartProgress.reload.curve(Interp.reverse).mul(DrawPart.PartProgress.warmup);
                         parts.addAll(
                                 new ShapePart(){{
@@ -551,6 +552,7 @@ public class MeldUnits {
                             });
                             setDefaults = false;
                             despawnHit = false;
+                            fragOnAbsorb = false;
                             fragBullets = 1;
                             fragSpread = 15;
                             fragRandomSpread = 0;
@@ -1256,7 +1258,7 @@ public class MeldUnits {
                         bullet = new TransitionBulletType() {{
                             fragBullets = 6;
                             fragRandomSpread = 45;
-                            recoil = 4.5f;
+                            recoil = 8.5f;
                             rangeOverride = 160;
                             spawnBullets.addAll(
                                     new TransitionBulletType(){{
@@ -1264,7 +1266,7 @@ public class MeldUnits {
                                         recoil = 4.5f;
                                         fragBullets = 12;
 
-                                        fragBullet = new BasicBulletType(8.5f, 1.5f, "meld-clump"){{
+                                        fragBullet = new BasicBulletType(8.5f, 1.5f, Meld.prefix("clump")){{
                                             width = 5;
                                             height = 9;
                                             shrinkX = shrinkY = 1;
@@ -1295,8 +1297,9 @@ public class MeldUnits {
 
                                 damage = 0;
                                 collides = true;
-                                speed = 4.7f;
-                                lifetime = 52;
+                                speed = 8.7f;
+                                drag = 0.05f;
+                                lifetime = 80;
                                 knockback = 12;
 
                                 fragBullets = 1;
@@ -1353,6 +1356,12 @@ public class MeldUnits {
                     }}
             );
 
+            abilities.addAll(
+                    new DeathBirthAbility(afraig, 3),
+                    new DeathBirthAbility(braig, 1),
+                    new DeathBirthAbility(blob, 4)
+            );
+
             constructor = LegsUnit::create;
         }};
 
@@ -1366,7 +1375,7 @@ public class MeldUnits {
             accel = 0.2f;
             range = 40;
 
-            hitSize = 16;
+            hitSize = 12;
             rotateSpeed = 6;
             faceTarget = true;
 
@@ -1375,6 +1384,8 @@ public class MeldUnits {
             segments = 3;
             segmentMag = 0.5f;
             drawCell = drawBody = false;
+
+            crawlSlowdownFrac = 0.2f;
 
             aiController = HugAI::new;
 
@@ -1434,6 +1445,7 @@ public class MeldUnits {
             legForwardScl = 3;
             legBaseOffset = 8;
             drawCell = false;
+            groundLayer = Layer.legUnit;
             legPhysicsLayer = true;
 
             deathExplosionEffect = Fx.none;
@@ -1739,15 +1751,15 @@ public class MeldUnits {
             rotate = true;
 
             shootStatus = MeldStatusEffects.spurting;
-            shootStatusDuration = 120;
+            shootStatusDuration = 150;
 
             mirror = false;
             alternate = false;
             parentizeEffects = false;
 
             shoot = new ShootSpread(){{
-                shots = 18;
-                shotDelay = 5;
+                shots = 36;
+                shotDelay = 2;
                 spread = 0;
             }};
 
@@ -1759,11 +1771,30 @@ public class MeldUnits {
                 lifetime = 15;
                 knockback = 1.5f;
                 impact = true;
-                pierce = true;
                 smokeEffect = Fx.none;
                 recoil = 0.5f;
+                lightColor = MeldPal.flamePink.cpy().a(0.12f);
 
                 despawnEffect = Fx.none;
+                fragBullets = 2;
+                fragOnAbsorb = false;
+                fragOnDespawn = false;
+                setDefaults = false;
+                despawnHit = false;
+                hitUnder = true;
+                fragRandomSpread = 0;
+                fragBullet = new BulletType(){{
+                    hitUnder = true;
+                    lightRadius = 0;
+                    keepVelocity = false;
+                    splashDamage = 0.5f;
+                    splashDamageRadius = 5;
+                    speed = 5;
+                    lifetime = 4;
+                    pierce = pierceBuilding = true;
+                    despawnEffect = hitEffect = Fx.none;
+                }};
+
                 hitEffect = new ParticleEffect(){{
                     lifetime = 24;
                     particles = 3;
@@ -1780,7 +1811,7 @@ public class MeldUnits {
 
                 shootEffect = new MultiEffect(
                         new ParticleEffect(){{
-                            cone = 25;
+                            cone = 55;
                             lifetime = 8;
                             line = true;
 
@@ -1788,53 +1819,74 @@ public class MeldUnits {
                             particles = 8;
 
                             lenFrom = 2;
-                            lenTo = 3.5f;
+                            lenTo = 4.5f;
                             strokeFrom = 3;
                             strokeTo = 1.2f;
 
-                            length = 35;
+                            length = 45;
 
                             colorFrom = MeldPal.flamePink;
                             colorTo = MeldPal.flamePinkDark;
                             interp = Interp.pow5In;
                             sizeInterp = Interp.pow2In;
                             followParent = false;
+                            lightColor = Color.clear;
                         }},
                         new ParticleEffect(){{
-                            cone = 4;
+                            cone = 15;
                             lifetime = 15;
                             baseLength = 0;
                             particles = 14;
                             length = 65;
                             sizeFrom = 0;
-                            sizeTo = 4.2f;
+                            sizeTo = 2.2f;
                             colorFrom = MeldPal.flamePink;
                             colorTo = MeldPal.flamePinkDark.cpy().a(0);
                             interp = Interp.pow3Out;
                             sizeInterp = Interp.pow2In;
                             followParent = false;
+                            lightColor = MeldPal.flamePinkDark;
                         }},
 
                         new ParticleEffect(){{
-                            cone = 5;
+                            cone = 2;
                             lifetime = 24;
                             baseLength = 0;
                             particles = 12;
                             length = 85;
-                            sizeFrom = 3.3f;
+                            sizeFrom = 5.3f;
                             sizeTo = 0;
-                            colorFrom = MeldPal.flamePink;
+                            colorFrom = MeldPal.flamePink.cpy().a(0);
+                            colorTo = MeldPal.flamePinkDark;
+                            interp = Interp.pow3Out;
+                            sizeInterp = Interp.pow2Out;
+                            followParent = false;
+                            lightColor = MeldPal.flamePinkDark;
+                            lightScl = 1;
+                        }},
+
+                        new ParticleEffect(){{
+                            layer = MeldLayers.smokeUnder;
+                            region = "particle";
+                            cone = 12;
+                            lifetime = 180;
+                            baseLength = 0;
+                            particles = 4;
+                            length = 85;
+                            sizeFrom = 5.3f;
+                            sizeTo = 9.3f;
+                            colorFrom = MeldPal.flamePinkDark.cpy().a(0.45f);
                             colorTo = MeldPal.flamePinkDark.cpy().a(0);
                             interp = Interp.pow3Out;
-                            sizeInterp = Interp.pow2In;
+                            sizeInterp = Interp.pow3Out;
+
                             followParent = false;
+                            lightColor = MeldPal.flamePinkDark;
+                            lightOpacity = 0.25f;
+                            lightScl = 1;
                         }}
                 );
             }};
         }};
-    }
-
-    public static Weapon braigWeapon(float wx, float wy){
-        return new BraigWeapon(wx, wy);
     }
 }

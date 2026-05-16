@@ -146,7 +146,6 @@ public class MeldBullets {
                 width = 3;
                 height = 8;
 
-                collidesGround = true;
                 hitEffect = despawnEffect = Fx.none;
             }};
         }};
@@ -213,7 +212,6 @@ public class MeldBullets {
                 width = 8;
                 height = 12;
 
-                collidesGround = true;
                 hitEffect = despawnEffect = Fx.none;
             }};
         }};
@@ -229,7 +227,8 @@ public class MeldBullets {
 
             despawnHit = true;
 
-            fragLifeMin = 0.6f;
+            fragLifeMin = 0.2f;
+            fragVelocityMin = 0.3f;
             ammoMultiplier = 2;
 
             fragRandomSpread = 5;
@@ -237,11 +236,13 @@ public class MeldBullets {
 
             fragBullet = new BasicBulletType(12, 6, Meld.prefix("clump")){{
                 lifetime = 21;
-                drag = 0.01f;
                 width = 6;
                 height = 12;
                 shrinkX = 0.7f;
                 shrinkY = 0.2f;
+
+                lightColor = MeldPal.accentTranslucent;
+                lightRadius = 0;
 
                 knockback = 0.25f;
                 impact = true;
@@ -263,27 +264,51 @@ public class MeldBullets {
                 status = MeldStatusEffects.impaled;
                 statusDuration = 30;
 
-                fragBullet = new BasicBulletType(9, 4, Meld.prefix("clump")){{
-                    speed = 9;
+                fragBullet = new BasicBulletType(12, 4, Meld.prefix("clump")){{
                     damage = 0.5f;
                     lifetime = 8;
                     drag = 0.002f;
-                    width = 1;
+                    width = 2;
                     height = 6;
                     shrinkY = 0.2f;
                     shrinkX = 1;
 
                     lightRadius = 0;
+                    pierce = true;
+                    pierceCap = 2;
 
                     hitEffect = Fx.none;
                     despawnEffect = Fx.none;
+                    setDefaults = false;
                     despawnHit = false;
-
-                    sticky = true;
-                    stickyExtraLifetime = 120;
+                    fragOnDespawn = false;
 
                     status = MeldStatusEffects.impaled;
                     statusDuration = 5;
+
+                    fragRandomSpread = 0;
+                    fragBullets = 1;
+                    fragBullet = new BasicBulletType(12, 4, Meld.prefix("clump")){{
+                        damage = 0.5f;
+                        lifetime = 8;
+                        drag = 0.002f;
+                        width = 1;
+                        height = 4;
+                        shrinkY = 0.2f;
+                        shrinkX = 1;
+
+                        lightRadius = 0;
+
+                        hitEffect = Fx.none;
+                        despawnEffect = Fx.none;
+                        despawnHit = false;
+
+                        sticky = true;
+                        stickyExtraLifetime = 120;
+
+                        status = MeldStatusEffects.impaled;
+                        statusDuration = 5;
+                    }};
                 }};
             }};
         }};
@@ -324,63 +349,63 @@ public class MeldBullets {
             }};
         }};
 
-        vincaQuartz = new RailBulletType(){{
-            hitShake = 0.5f;
-            length = 120;
+        vincaQuartz = new TransitionBulletType(){{
 
-            lifetime = 10;
-            damage = 12;
-            pierceArmor = true;
-            pierceDamageFactor = 1;
+            fragRandomSpread = 4;
+            fragLifeMin = 0.75f;
+            fragVelocityMin = 0.75f;
 
-            setDefaults = false;
-            despawnHit = false;
-            hittable = absorbable = false;
-            pointEffectSpace = 8;
-            hitEffect = Fx.none;
-            pierceEffect = Fx.none;
-
-            status = MeldStatusEffects.impaled;
-            statusDuration = 5;
-
-            fragBullets = 2;
-            fragRandomSpread = 35;
-            fragVelocityMin = 0.9f;
-
+            fragBullets = 4;
             fragBullet = new BasicBulletType(){{
-                speed = 8;
+                lifetime = 20;
+                speed = 16;
+                drag = 0.1f;
 
                 shrinkX = shrinkY = 1;
                 lightRadius = 0;
                 damage = 5;
-                splashDamage = 8;
-                splashDamageRadius = 8;
+                pierceArmor = true;
 
                 sprite = Meld.prefix("diamond");
-                sticky = true;
 
-                knockback = 2;
+                knockback = 0.5f;
                 impact = true;
                 hitEffect = despawnEffect = Fx.none;
 
-                fragBullets = 3;
-                fragBullet = new BasicBulletType(){{
-                    pierce = true;
-                    pierceCap = 2;
-                    speed = 8;
-                    lifetime = 10;
+                setDefaults = false;
+                despawnHit = false;
+                fragOnDespawn = false;
 
-                    shrinkX = shrinkY = 1;
-                    lightRadius = 0;
-                    damage = 5;
+                fragBullets = 1;
+                fragRandomSpread = 35;
+                fragOffsetMax = 0;
+                fragBullet = new BasicBulletType(8, 3){{
+                            speed = 12;
+                            drag = 0.1f;
+                            damage = 5;
 
-                    sprite = Meld.prefix("diamond");
+                            sprite = Meld.prefix("diamond");
+                            knockback = 2;
+                            impact = true;
+                            lightRadius = 0;
+                            lifetime = 20;
 
-                    knockback = 2;
-                    impact = true;
-                    hitEffect = despawnEffect = Fx.none;
+                            shrinkY = 1;
+                            shrinkX = 1;
+                            shrinkInterp = Interp.pow5In;
 
-                }};
+                            sticky = true;
+                            stickyExtraLifetime = 60;
+                            pierce = true;
+                            pierceCap = 2;
+                            splashDamage = 1;
+                            splashDamageRadius = 2;
+
+                            width = 3;
+                            height = 8;
+
+                            hitEffect = despawnEffect = Fx.none;
+                        }};
             }};
         }};
 
